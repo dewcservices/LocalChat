@@ -22,3 +22,8 @@ web_app/*.local
 *.njsproj
 *.sln
 *.sw?
+
+# Other
+fileserver
+fileserver.exe
+dist/
