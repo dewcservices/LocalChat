@@ -152,7 +152,7 @@
             for (const file of allFiles) {
 
                 if (!file.name.endsWith(".txt")) {
-                    return;
+                    continue;
                 }
 
                 // Create the file reader for this file
