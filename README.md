@@ -31,7 +31,7 @@ Cd into the web_app folder, `cd LocalChat/web_app`.
 
 Run `npm install` to install the npm dependencies.
 
-Run `npm run build-local-chat` to build the distribution. This distribution should be found in the root directory 
+Run `npm run build-local-chat {linux|windows}` to build the distribution. This distribution should be found in the root directory 
 of the project, `LocalChat/dist`.
 
 Run the fileserver executable, on Windows `LocalChat/dist/fileserver.exe`, on Linux `LocalChat/dist/fileserver`.
