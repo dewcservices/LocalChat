@@ -1,5 +1,5 @@
 {
-  "name": "web_app_js",
+  "name": "web_app_2",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,11 +9,7 @@
     "preview": "vite preview",
     "build-local-chat": "node build/build_local_chat.js"
   },
-  "dependencies": {
-    "solid-js": "^1.9.5"
-  },
   "devDependencies": {
-    "vite": "^6.2.0",
-    "vite-plugin-solid": "^2.11.2"
+    "vite": "^6.2.0"
   }
 }
