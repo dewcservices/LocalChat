@@ -1,13 +1,42 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Chat</title>
+</head>
+
+<body>
+  <div id="app">
+
+    <div class="container">
+      <div class="sidebarContainer">
+        <h1>LocalChat</h1>
+      </div>
+      <div class="messageContainer" id="messageContainer">
+        <div class="userMessage">example user message</div>
+        <div class="chatbotMessage">example AI message</div>
+      </div>
+      <div class="inputContainer">
+        <textarea id="inputTextArea"></textarea>
+        <div class="fileUploadContainer">
+          <label for="fileInput" class="fileUploadLabel" title="Select one or more files to upload">Upload
+            File/s</label>
+          <input type="file" id="fileInput" multiple accept=".txt">
+          <label for="folderInput" class="fileUploadLabel"
+            title="Select a folder to upload all files (not supported on older browsers)">Upload Folder</label>
+          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt">
+          <label class="fileCount" id="fileCount">0 Files Selected</label>
+        </div>
+
+        <button id="submitUserQuery">Send</button>
+      </div>
+    </div>
+
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>

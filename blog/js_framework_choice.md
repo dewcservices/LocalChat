@@ -4,13 +4,12 @@ Hence, all the required files (HTML, JS, CSS, WASM, etc.) should all be included
 downloadable directory). The smaller this distribution the better. Therefore, using either vanilla JS or a lightweight
 framework is important.
 
-This project chose to use SolidJS. This was due to SolidJS's light distributution size. 
-
 Three web-apps were created using `npm create vite@latest`, one in VanillaJS, one in ReactJS, and one in SolidJS.
 Using the default apps, they were bundled using vite: `npm run build`. Producing the following `dist` sizes on disk:
 - VanillaJS - 16KB
 - SolidJS - 24KB
 - ReactJS - 204KB
 
-SolidJS was chosen due to its small size whilst providing the benefits of a declarative JS framework.
-Additionally, SolidJS provides a developer experience close to that of ReactJS, making it easy for onboarding developers.
+For now the team chose to just use VanillaJS as the project scope is fairly small in terms of the front-end.
+
+However, in future, if it does become difficult to maintain the codebase in VanillaJS, we may move to SolidJS.

@@ -1,96 +1,97 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  color: white;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.container {
+  display: grid;
+  grid-template-areas:
+    "sidebar messages"
+    "sidebar input";
+  grid-template-columns: 20% auto;
+  grid-template-rows: 70% auto;
+  height: 100vh;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.sidebarContainer {
+  grid-area: sidebar;
+  background-color: #292929;
+  border-right: 1px solid black;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #f7df1eaa);
+.messageContainer {
+  grid-area: messages;
+  background-color: #191919;
+  overflow-y: scroll;
+  scrollbar-color: black #292929;
+  padding: 3vh 15vw;
+  align-content: start;
+  display: flex;
+  flex-direction: column;
 }
 
-.card {
-  padding: 2em;
+.inputContainer {
+  grid-area: input;
+  background-color: #191919;
+  padding: 3vh 5vw;
+  border-top: 1px solid black;
+  position: relative;
 }
 
-.read-the-docs {
-  color: #888;
+.fileUploadContainer {
+  position: relative;
+  bottom: -2.5vh;
+  left: 1vw;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.fileUploadContainer input[type=file] {
+  display: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.fileUploadLabel {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  margin-right: 1vw;
+  padding: 1vh;
+}
+
+.messageContainer div,
+.inputContainer button {
+  border: 2px solid #474747;
+  color: white;
+  border-radius: 5px;
+  padding: 1vh;
+  display: block;
+  margin: 2vh 0;
+  width: fit-content;
+}
+
+.inputContainer textarea {
+  width: 100%;
+  height: 17vh;
+  font-size: 16px;
+  padding: 1vh;
+  box-sizing: border-box;
+  resize: none;
+}
+
+.inputContainer button {
+  background-color: #292929;
+  position: absolute;
+  bottom: 0vh;
+  right: 6vw;
+}
+
+.userMessage {
+  background-color: #225bb5;
+  align-self: flex-end;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.chatbotMessage {
+  background-color: #292929;
 }
