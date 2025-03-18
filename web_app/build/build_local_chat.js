@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 
 
 // Function to recursively copy a directory
-async function copyDirectory(src: string, dest: string) {
+async function copyDirectory(src, dest) {
     try {
         // Check if the source directory exists
         const stats = await fs.stat(src);
@@ -42,8 +42,8 @@ async function copyDirectory(src: string, dest: string) {
 
 const args = process.argv.slice(2);
 
-let target_operating_system: string = args[0];
-let fileserver_exe_name: string = "";
+let target_operating_system = args[0];
+let fileserver_exe_name = "";
 
 if (target_operating_system === "windows") {
     fileserver_exe_name = "fileserver.exe"
