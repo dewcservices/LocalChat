@@ -21,6 +21,11 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 
 # Index
 
-- [2025/03/24 Project Motivations](project_motivations.md)
+## Project Information
 
+- [2025/03/10 Project Motivations](project_motivations.md)
+
+## Miscellaneous
+
+- [2025/04/10 Bundling & ONNX Runtime Web Testing](onnx_and_bundling_test.md)
 
