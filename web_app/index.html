@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="stylesheet" href="src/style.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Local Chat</title>
 </head>
@@ -24,10 +25,10 @@
         <div class="fileUploadContainer">
           <label for="fileInput" class="fileUploadLabel" title="Select one or more files to upload">Upload
             File/s</label>
-          <input type="file" id="fileInput" multiple accept=".txt">
+          <input type="file" id="fileInput" multiple accept=".txt, .html">
           <label for="folderInput" class="fileUploadLabel"
             title="Select a folder to upload all files (not supported on older browsers)">Upload Folder</label>
-          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt">
+          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt, .html">
           <label class="fileCount" id="fileCount">0 Files Selected</label>
         </div>
 

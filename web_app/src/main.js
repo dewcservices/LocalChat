@@ -1,4 +1,8 @@
-import './style.css';
+//import './style.css';
+// I don't think this is needed and can be included in the html file
+// I'm mainly commenting this out because it makes testing easier for me.
+
+const allowedFileTypes = [".txt", ".html"];
 
 function getUserInput() {
 
@@ -15,7 +19,7 @@ function getUserInput() {
 
     for (const file of allFiles) {
 
-      if (!file.name.endsWith(".txt")) {
+      if (!checkFileType(file.name)) {
         continue;
       }
 
@@ -23,7 +27,7 @@ function getUserInput() {
       const fileReader = new FileReader();
       fileReader.onload = () => {
         console.log(fileReader.result);
-        addMessageToHistory("Added File " + file.name, true);
+        addMessageToHistory("📄 " + file.name, true);
       };
       fileReader.readAsText(file);
     }
@@ -71,7 +75,7 @@ function updateFileCount() {
   for (const file of folderInput) {
 
     // Check if the file is a valid selectable target.
-    if (file.name.endsWith(".txt")) {
+    if (checkFileType(file.name)) {
       fileCount++;
     }
   }
@@ -79,6 +83,17 @@ function updateFileCount() {
   console.log(fileCount)
 
   document.getElementById("fileCount").innerText = fileCount + " Files Selected";
+}
+
+function checkFileType(fileName) {
+  const fileExtension = fileName.slice(fileName.lastIndexOf("."));
+
+  for (let extension of allowedFileTypes) {
+    if (extension === fileExtension) {
+      return true;
+    }
+  }
+  return false;
 }
 
 document.querySelector("#submitUserQuery").addEventListener("click", getUserInput)

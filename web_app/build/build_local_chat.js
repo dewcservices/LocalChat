@@ -48,7 +48,7 @@ let go_build_command = "";
 
 if (target_operating_system === "windows") {
     fileserver_exe_name = "fileserver.exe"
-    go_build_command = `set GOOS=${target_operating_system} && set GOARCH=amd64 && go build -C ..`;
+    go_build_command = `set GOOS=${target_operating_system}&& set GOARCH=amd64&& go build -C ..`;
 
 } else if (target_operating_system === "linux") {
     fileserver_exe_name = "fileserver"
