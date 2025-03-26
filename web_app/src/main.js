@@ -109,3 +109,12 @@ document.querySelector("#submitUserQuery").addEventListener("click", getUserInpu
 document.getElementById("fileInput").addEventListener("change", updateFileCount)
 document.getElementById("folderInput").addEventListener("change", updateFileCount)
 
+window.onload = function() {
+  const webkitdirectoryEnabled = 'webkitdirectory' in document.createElement('input')
+  if (!webkitdirectoryEnabled) {
+    document.getElementById("folderInput").disabled = true;
+    document.getElementById("folderInputLabel").classList.add("disabledButton");
+    document.getElementById("folderInputLabel").title = "Disabled due to outdated browser."
+  }
+}
+
