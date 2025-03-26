@@ -27,6 +27,11 @@ function getUserInput() {
       const fileReader = new FileReader();
       fileReader.onload = () => {
         console.log(fileReader.result);
+
+        if (file.name.endsWith(".html")) {
+          processHTMLFile();
+        }
+
         addMessageToHistory("📄 " + file.name, true);
       };
       fileReader.readAsText(file);
@@ -83,6 +88,10 @@ function updateFileCount() {
   console.log(fileCount)
 
   document.getElementById("fileCount").innerText = fileCount + " Files Selected";
+}
+
+function processHTMLFile(fileContent) {
+  return "";
 }
 
 function checkFileType(fileName) {
