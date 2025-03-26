@@ -54,8 +54,15 @@ if (target_operating_system === "windows") {
 }
 
 // compile the go fileserver
-// TODO support non linux executable builds
-let output = execSync(`GOOS=${target_operating_system} GOARCH=amd64 go build -C ..`, { encoding: "utf8" });
+let command;
+
+if (target_operating_system === "windows") {
+    command = `set GOOS=${target_operating_system}&& set GOARCH=amd64&& go build -C ..`;
+} else {
+    command = `GOOS=${target_operating_system} GOARCH=amd64 go build -C ..`;
+}
+
+let output = execSync(command, { encoding: "utf8" });
 console.log(output);
 
 // bundle the web app
