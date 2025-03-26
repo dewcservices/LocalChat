@@ -23,7 +23,7 @@ Secondly, this architecture requires that a server is acquired, setup, and maint
 infeasible for smaller teams that require this setup over a local-secured network. Furthermore, this requires that 
 various software/system-dependencies are installed onto the server, in which may not be possible.
 
-Due to this, LLMs have yet to make their way into the workflow of many various organisations/industries. Hence, the 
+Due to this, LLMs have yet to make their way into the workflow of various organisations/industries. Hence, the 
 need arises for a self-contained application that can run on any device directly from the filesystem, without modifying 
 any system-dependencies. It can be assumed that all users have access to a Windows machine with a web browser, hence, 
 the app should run entirely within this browser (which also servers to sandbox the execution environment).

@@ -44,25 +44,22 @@ const args = process.argv.slice(2);
 
 let target_operating_system = args[0];
 let fileserver_exe_name = "";
+let go_build_command = "";
 
 if (target_operating_system === "windows") {
     fileserver_exe_name = "fileserver.exe"
+    go_build_command = `set GOOS=${target_operating_system} && set GOARCH=amd64 && go build -C ..`;
+
 } else if (target_operating_system === "linux") {
     fileserver_exe_name = "fileserver"
+    go_build_command = `GOOS=${target_operating_system} GOARCH=amd64 go build -C ..`;
+
 } else {
     throw new Error(`${args[0]} is not a supported operating system build target.`);
 }
 
 // compile the go fileserver
-let command;
-
-if (target_operating_system === "windows") {
-    command = `set GOOS=${target_operating_system}&& set GOARCH=amd64&& go build -C ..`;
-} else {
-    command = `GOOS=${target_operating_system} GOARCH=amd64 go build -C ..`;
-}
-
-let output = execSync(command, { encoding: "utf8" });
+let output = execSync(go_build_command, { encoding: "utf8" });
 console.log(output);
 
 // bundle the web app
