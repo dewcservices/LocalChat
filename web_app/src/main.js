@@ -29,7 +29,7 @@ function getUserInput() {
         console.log(fileReader.result);
 
         if (file.name.endsWith(".html")) {
-          processHTMLFile();
+          console.log(processHTMLFile(fileReader.result));
         }
 
         addMessageToHistory("📄 " + file.name, true);
@@ -91,7 +91,9 @@ function updateFileCount() {
 }
 
 function processHTMLFile(fileContent) {
-  return "";
+
+  fileContent = fileContent.replace(/<script[\s\S]*?<\/script>/gi, '');
+  return fileContent;
 }
 
 function checkFileType(fileName) {
