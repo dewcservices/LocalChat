@@ -106,6 +106,30 @@ function processHTMLFile(fileContent) {
   fileContent = fileContent.replace(/<head[^>]*>/gi, '');
   fileContent = fileContent.replace("</head>", '');
   fileContent = fileContent.replace(/<!doctype[^>]*>/gi, '');
+
+  // Remove tab characters.
+  fileContent = fileContent.replace(/\t/g, "");
+  fileContent = fileContent.replace(/    /g, "");
+
+
+  console.log(fileContent)
+
+  // Remove newline characters.
+  let unCleanedContent = fileContent.split("\r\n");
+  let cleanedContent = [];
+
+  for (let line of unCleanedContent) {
+    // if line === "/r" remove line
+    if (line !== "") {
+      cleanedContent.push(line)
+    }
+  }
+
+  console.log(cleanedContent);
+
+  
+
+
   return fileContent;
 }
 
