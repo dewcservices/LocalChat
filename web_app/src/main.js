@@ -92,7 +92,20 @@ function updateFileCount() {
 
 function processHTMLFile(fileContent) {
 
+  // Remove JS from the parsed html file content.
   fileContent = fileContent.replace(/<script[\s\S]*?<\/script>/gi, '');
+  
+  // Remove CSS from the parsed html file content.
+  fileContent = fileContent.replace(/<style[\s\S]*?<\/style>/gi, '');
+  
+  // Remove other design or meta tags from the parsed html file content.
+  fileContent = fileContent.replace(/<meta[^>]*>/gi, '');
+  fileContent = fileContent.replace(/<link[^>]*>/gi, '');
+  fileContent = fileContent.replace(/<html[^>]*>/gi, '');
+  fileContent = fileContent.replace("</html>", '');
+  fileContent = fileContent.replace(/<head[^>]*>/gi, '');
+  fileContent = fileContent.replace("</head>", '');
+  fileContent = fileContent.replace(/<!doctype[^>]*>/gi, '');
   return fileContent;
 }
 
