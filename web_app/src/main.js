@@ -3,8 +3,13 @@
 // I'm mainly commenting this out because it makes testing easier for me.
 
 const allowedFileTypes = [".txt", ".html"];
+let canSendMessage = true;
 
 function getUserInput() {
+
+  if (!canSendMessage) {
+    return;
+  }
 
   // Check if any files were uploaded.
   const fileInput = document.getElementById("fileInput");
@@ -33,7 +38,7 @@ function getUserInput() {
           console.log(fileReader.result);
         }
 
-        addMessageToHistory("📄 " + file.name, true);
+        addMessageToHistory("Uploading 📄 " + file.name, true);
       };
       fileReader.readAsText(file);
     }
@@ -42,6 +47,8 @@ function getUserInput() {
     folderInput.value = null;
 
     document.getElementById("fileCount").innerText = "0 Files Selected";
+
+    canSendMessage = false;
   }
 
   // Check if a message was sent
@@ -50,11 +57,18 @@ function getUserInput() {
 
   // Add the user message to the history
   if (userMessage != "") {
+
+    canSendMessage = false;
     addMessageToHistory(userMessage, true);
-    inputTextArea.value = "";
   }
 
-  addMessageToHistory("", false);
+  // Send AI response message if the user just sent a message.
+  if (!canSendMessage) {
+    addMessageToHistory("", false);
+  }
+
+  // Clear the message input
+  inputTextArea.value = "";
 
 }
 
@@ -84,6 +98,7 @@ function addMessageToHistory(message, fromUser) {
 
       newUserMessageElement.innerText = "Sample Message";
       newUserMessageElement.classList.remove("thinkingMessage");
+      canSendMessage = true;
 
     }, 3000);
   }
@@ -164,5 +179,37 @@ window.onload = function() {
     document.getElementById("folderInputLabel").classList.add("disabledButton");
     document.getElementById("folderInputLabel").title = "Disabled due to outdated browser."
   }
+}
+
+let shiftKeyBeingPressed = false;
+
+window.onload = function() {
+
+  // Add a listener for detecting shift and enter key presses to send message.
+  document.getElementById("inputTextArea").addEventListener("keydown", function (event) {
+    
+    if (event.key == "Shift") {
+      shiftKeyBeingPressed = true;
+    }
+    
+    // Prevent the enter key lone from moving to a new line.
+    if (event.key == "Enter" && !shiftKeyBeingPressed) {
+      event.preventDefault();
+
+      // If the user can send a message, send one.
+      if (canSendMessage) {
+        getUserInput();
+      }
+      
+    }
+
+  });
+
+  document.getElementById("inputTextArea").addEventListener("keyup", function (event) {
+    
+    if (event.key == "Shift") {
+      shiftKeyBeingPressed = false;
+    }
+  });
 }
 
