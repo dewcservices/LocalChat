@@ -21,6 +21,16 @@ body {
   text-align: center;
 }
 
+.sidebarContainer h1 {
+  margin: 2vh 0vw;
+  padding-bottom: 10px;
+  border-bottom: 1px solid black;
+}
+
+.sidebarContainer h4 {
+  margin: 0 0 1vh 0;
+}
+
 .messageContainer {
   grid-area: messages;
   background-color: #191919;

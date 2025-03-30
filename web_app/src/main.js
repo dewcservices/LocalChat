@@ -26,10 +26,11 @@ function getUserInput() {
       // Create the file reader for this file
       const fileReader = new FileReader();
       fileReader.onload = () => {
-        console.log(fileReader.result);
 
-        if (file.name.endsWith(".html")) {
+        if (file.name.endsWith(".html") && document.getElementById("parseHTML").checked) {
           console.log(processHTMLFile(fileReader.result));
+        } else {
+          console.log(fileReader.result);
         }
 
         addMessageToHistory("📄 " + file.name, true);
@@ -85,8 +86,6 @@ function updateFileCount() {
     }
   }
 
-  console.log(fileCount)
-
   document.getElementById("fileCount").innerText = fileCount + " Files Selected";
 }
 
@@ -106,31 +105,24 @@ function processHTMLFile(fileContent) {
   fileContent = fileContent.replace(/<head[^>]*>/gi, '');
   fileContent = fileContent.replace("</head>", '');
   fileContent = fileContent.replace(/<!doctype[^>]*>/gi, '');
+  fileContent = fileContent.replace(/<body[^>]*>/gi, '');
+  fileContent = fileContent.replace("</body>", '');
 
   // Remove tab characters.
   fileContent = fileContent.replace(/\t/g, "");
   fileContent = fileContent.replace(/    /g, "");
 
-
-  console.log(fileContent)
-
   // Remove newline characters.
   let unCleanedContent = fileContent.split("\r\n");
-  let cleanedContent = [];
+  let parsedString = ""
 
   for (let line of unCleanedContent) {
-    // if line === "/r" remove line
     if (line !== "") {
-      cleanedContent.push(line)
+      parsedString += line + "\n";
     }
   }
 
-  console.log(cleanedContent);
-
-  
-
-
-  return fileContent;
+  return parsedString;
 }
 
 function checkFileType(fileName) {
