@@ -53,6 +53,9 @@ function getUserInput() {
     addMessageToHistory(userMessage, true);
     inputTextArea.value = "";
   }
+
+  addMessageToHistory("", false);
+
 }
 
 function addMessageToHistory(message, fromUser) {
@@ -67,11 +70,23 @@ function addMessageToHistory(message, fromUser) {
     newUserMessageElement.classList.add("userMessage");
   } else {
     newUserMessageElement.classList.add("chatbotMessage");
+    newUserMessageElement.classList.add("thinkingMessage");
   }
 
   messageContainer.appendChild(newUserMessageElement);
 
   newUserMessageElement.scrollIntoView({ behavior: "smooth"});
+
+  if (!fromUser) {
+
+    // Wait 3 seconds and then send a sample AI message.
+    setTimeout(() => {
+
+      newUserMessageElement.innerText = "Sample Message";
+      newUserMessageElement.classList.remove("thinkingMessage");
+
+    }, 3000);
+  }
 
 }
 
