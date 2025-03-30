@@ -71,6 +71,8 @@ function addMessageToHistory(message, fromUser) {
 
   messageContainer.appendChild(newUserMessageElement);
 
+  newUserMessageElement.scrollIntoView({ behavior: "smooth"});
+
 }
 
 function updateFileCount() {
