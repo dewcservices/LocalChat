@@ -64,7 +64,10 @@ function getUserInput() {
 
   // Send AI response message if the user just sent a message.
   if (!canSendMessage) {
-    addMessageToHistory("", false);
+    setTimeout(() => {
+      addMessageToHistory("", false);
+    }, 300);
+    
   }
 
   // Clear the message input
