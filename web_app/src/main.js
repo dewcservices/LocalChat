@@ -160,8 +160,44 @@ function processHTMLFile(fileContent) {
   return parsedString;
 }
 
+function saveChatHistoryToBrowser(id) {
+
+  // First, read the existing local storage to check if there is a chat history for this chat ID.
+  let existingHistoryKeys = localStorage.getItem(id);
+  console.log("Old History String: " + existingHistoryKeys);
+
+  // Convert the chat history into a single string.
+  const messageHistory = document.getElementById("messageContainer");
+  let messageString = "";
+  
+  for (let message of messageHistory.children) {
+    if (message.classList.contains("userMessage")) {
+      messageString += "U";
+    } else if (message.classList.contains("chatbotMessage")) {
+      messageString += "C";
+    }
+
+    // Add a value representing the total length of the messages content.
+    messageString += message.innerHTML.length + ":";
+
+    // Add the message text to the string.
+    messageString += message.innerHTML + ",";
+
+    // The final string for this message would be something like the following:
+    // "U20:example user message,"
+    // indicating that the message is from the User, has a message length of 20, and then the message.
+  }
+
+  console.log("New History String: " + messageString);
+
+  localStorage.setItem(id, messageString);
+
+  
+}
+
 window.swapChatHistory = function(historyID) {
   console.log("swapping to the chat history with an ID of " + historyID);
+  saveChatHistoryToBrowser(historyID);
 }
 
 function checkFileType(fileName) {
