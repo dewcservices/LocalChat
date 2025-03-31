@@ -27,5 +27,8 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 
 ## Miscellaneous
 
-- [2025/04/10 Bundling & ONNX Runtime Web Testing](onnx_and_bundling_test.md)
+- [2025/03/11 Bundling & ONNX Runtime Web Testing](onnx_and_bundling_test.md)
+- [2025/03/11 JavaScript Framework Choice](js_framework_choice.md)
+- [2025/03/17 Running ONNX Models](running_onnx_models.md)
+- [2025/03/21 Attempting to run T5 using ONNX Runtime Web](running_t5.md)
 

@@ -10,6 +10,10 @@ Using the default apps, they were bundled using vite: `npm run build`. Producing
 - SolidJS - 24KB
 - ReactJS - 204KB
 
+Whilst this does not a measure of how each of these frameworks' disk sizes scale with the project size, it provides a
+rough estimate of disk size usage.
+
 For now the team chose to just use VanillaJS as the project scope is fairly small in terms of the front-end.
 
-However, in future, if it does become difficult to maintain the codebase in VanillaJS, we may move to SolidJS.
+However, in future, if it does become difficult to maintain the codebase in VanillaJS, we may move to SolidJS upon 
+further investigation.
