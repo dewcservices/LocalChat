@@ -17,9 +17,10 @@ Hence, the team aimed to get this working to reach the MVP.
 ## Running the Model
 
 T5 consists of an encoder and decoder. However, when downloaded off of the model zoo, it was noticed that the 
-input/output layer names of the encoder and decoder did not match with the T5 documentation.
+input and output layer names of the encoder and decoder did not match with the T5 documentation.
 
-Hence, the models were then sourced from HuggingFace https://huggingface.co/onnx-community/t5-base-ONNX/tree/main/onnx
+Hence, the models were then sourced [here](https://huggingface.co/onnx-community/t5-base-ONNX/tree/main/onnx) on 
+HuggingFace.
 
 The team attempted to run the encoder and decoder models, however, unfortunately were not able to get it working by 
 the end of the first sprint review. The code can be seen below:

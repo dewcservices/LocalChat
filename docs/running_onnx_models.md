@@ -13,7 +13,7 @@ In our case, we would like to use [ONNX Runtime Web](https://onnxruntime.ai/docs
 This is ideal for this project as we'll be able to run various models regardless of the framework used to create them.
 We'll be able to use PyTorch and TensorFlow models without needing to install their relevant JS libraries. 
 
-Additionally, ONNX Runtime Web support [GPU acceleration](https://onnxruntime.ai/docs/tutorials/web/#:~:text=With%20onnxruntime-web,WebGPU%20and%20WebNN.).
+Additionally, ONNX Runtime Web supports [GPU acceleration](https://onnxruntime.ai/docs/tutorials/web/#:~:text=With%20onnxruntime-web,WebGPU%20and%20WebNN.).
 
 ## Getting Started
 
