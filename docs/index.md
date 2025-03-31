@@ -30,5 +30,5 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 - [2025/03/11 Bundling & ONNX Runtime Web Testing](onnx_and_bundling_test.md)
 - [2025/03/11 JavaScript Framework Choice](js_framework_choice.md)
 - [2025/03/17 Running ONNX Models](running_onnx_models.md)
-- [2025/03/21 Attempting to run T5 using ONNX Runtime Web](running_t5.md)
-
+- [2025/03/21 Attempting to run T5 using ONNX Runtime Web](running_t5_onnxruntime_web.md)
+- [2025/03/31 Transformers JS](xenova_transformers.md)
