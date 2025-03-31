@@ -22,13 +22,37 @@ body {
 }
 
 .sidebarContainer h1 {
-  margin: 2vh 0vw;
+  margin: 2vh 0 0 0;
   padding-bottom: 10px;
-  border-bottom: 1px solid black;
 }
 
-.sidebarContainer h4 {
-  margin: 0 0 1vh 0;
+.sidebarContainer h2 {
+  border-top: 1px solid black;
+}
+
+.sidebarContainer h2 {
+  margin: 1vh 0 1vh 0;
+  padding: 2vh 0;
+}
+
+.chatHistoryContainer {
+  margin: 0 1em;
+  padding: 1em 0em;
+  background-color: #191919;
+}
+
+.chatHistoryContainer button {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 95%;
+  height: 2em;
+  background-color: #474747;
+  border: 1px solid black;
+  border-radius: 3px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-size: 1em;
+  color: white;
 }
 
 .messageContainer {

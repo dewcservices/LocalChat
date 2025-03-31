@@ -160,6 +160,10 @@ function processHTMLFile(fileContent) {
   return parsedString;
 }
 
+window.swapChatHistory = function(historyID) {
+  console.log("swapping to the chat history with an ID of " + historyID);
+}
+
 function checkFileType(fileName) {
   const fileExtension = fileName.slice(fileName.lastIndexOf("."));
 

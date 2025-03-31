@@ -15,11 +15,19 @@
     <div class="container">
       <div class="sidebarContainer">
         <h1>LocalChat</h1>
-        <h4>Options</h4>
+        <h2>Options</h2>
         <div>
           <label for="parseHTML">Parse HTML files</label>
           <input id="parseHTML" type="checkbox">
         </div>
+          
+        <h2>Chat History</h2>
+        <div id="chatHistoryList" class="chatHistoryContainer">
+          <button class="chatHistoryButton" onclick="swapChatHistory(0)">Test test test test test test test test test test test test</button>
+          <button class="chatHistoryButton" onclick="swapChatHistory(1)">Test test test test test test test test test test test test</button>
+          <button class="chatHistoryButton" onclick="swapChatHistory(2)">Test test test test test test test test test test test test</button>
+        </div>
+
       </div>
       <div class="messageContainer" id="messageContainer">
         <div class="userMessage">example user message</div>
