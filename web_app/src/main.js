@@ -252,6 +252,23 @@ window.clearLocalStorage = function() {
   console.log("cleared")
 }
 
+window.createNewChat = function() {
+
+  let newUserChatHistory = document.createElement("button");
+  newUserChatHistory.innerText = "New Chat History";
+  newUserChatHistory.classList.add("chatHistoryButton");
+
+  // Generate a unique ID for this chat history.
+  const newID = Date.now() + Math.random();
+
+  newUserChatHistory.onclick = function() {
+    swapChatHistory(newID);
+  };
+
+  document.getElementById("chatHistoryList").insertBefore(newUserChatHistory, document.getElementById("chatHistoryList").firstChild);
+
+}
+
 window.swapChatHistory = async function(id) {
   console.log("swapping to the chat history with an ID of " + id);
 

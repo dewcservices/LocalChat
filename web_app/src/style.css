@@ -36,7 +36,7 @@ body {
 }
 
 .chatHistoryContainer {
-  margin: 0 1em;
+  margin: 1em;
   padding: 1em 0em;
   background-color: #191919;
 }
@@ -78,10 +78,6 @@ body {
   position: relative;
   bottom: -2.5vh;
   left: 1vw;
-}
-
-.fileUploadContainer input[type=file] {
-  display: none;
 }
 
 .fileUploadLabel {

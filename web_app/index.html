@@ -22,12 +22,15 @@
         </div>
           
         <h2>Chat History</h2>
+        
+        <button id="clearChatHistoryButton" onclick="clearLocalStorage()" hidden></button>
+        <label for="clearChatHistoryButton" class="fileUploadLabel" >Remove All</label>
+        <button id="newChatButton" onclick="createNewChat()" hidden></button>
+        <label for="newChatButton" class="fileUploadLabel">New Chat</label>
+
         <div id="chatHistoryList" class="chatHistoryContainer">
-          <button class="chatHistoryButton" onclick="swapChatHistory(0)">Test test test test test test test test test test test test</button>
-          <button class="chatHistoryButton" onclick="swapChatHistory(1)">Test test test test test test test test test test test test</button>
-          <button class="chatHistoryButton" onclick="swapChatHistory(2)">Test test test test test test test test test test test test</button>
+          <button class="chatHistoryButton" onclick="swapChatHistory(0)">New Chat</button>
         </div>
-        <button onclick="clearLocalStorage()">Clear local storage</button>
       </div>
 
       <div id="historyID" hidden>0</div>
@@ -41,9 +44,9 @@
         <div class="fileUploadContainer">
           <label for="fileInput" class="fileUploadLabel" title="Select one or more files to upload">Upload
             File/s</label>
-          <input type="file" id="fileInput" multiple accept=".txt, .html">
+          <input type="file" id="fileInput" multiple accept=".txt, .html" hidden>
           <label for="folderInput" class="fileUploadLabel" id="folderInputLabel">Upload Folder</label>
-          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt, .html">
+          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt, .html" hidden>
           <label class="fileCount" id="fileCount">0 Files Selected</label>
         </div>
 
