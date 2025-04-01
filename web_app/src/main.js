@@ -75,7 +75,7 @@ function getUserInput() {
 
 }
 
-function addMessageToHistory(message, fromUser) {
+function addMessageToHistory(message, fromUser, instant = false) {
 
   const messageContainer = document.getElementById("messageContainer");
 
@@ -85,16 +85,18 @@ function addMessageToHistory(message, fromUser) {
 
   if (fromUser) {
     newUserMessageElement.classList.add("userMessage");
-  } else {
+  } else if (!fromUser && !instant) {
     newUserMessageElement.classList.add("chatbotMessage");
     newUserMessageElement.classList.add("thinkingMessage");
+  } else if (!fromUser && instant){
+    newUserMessageElement.classList.add("chatbotMessage");
   }
 
   messageContainer.appendChild(newUserMessageElement);
 
   newUserMessageElement.scrollIntoView({ behavior: "smooth"});
 
-  if (!fromUser) {
+  if (!fromUser && !instant) {
 
     // Wait 3 seconds and then send a sample AI message.
     setTimeout(() => {
@@ -191,13 +193,74 @@ function saveChatHistoryToBrowser(id) {
   console.log("New History String: " + messageString);
 
   localStorage.setItem(id, messageString);
-
   
 }
 
-window.swapChatHistory = function(historyID) {
-  console.log("swapping to the chat history with an ID of " + historyID);
-  saveChatHistoryToBrowser(historyID);
+function buildChatHistory(id) {
+
+  let chatHistory = localStorage.getItem(id);
+  console.log(id, chatHistory)
+
+  // Check if there is an existing chat history in local storage.
+  if (chatHistory == null) {
+    // There is no chat history to switch to.
+  } else {
+    
+    // Clear the existing message history.
+    document.getElementById("messageContainer").innerHTML = "";
+    document.getElementById("historyID").innerText = id;
+
+    let index = 0;
+
+    while(index < chatHistory.length) {
+
+      // Start by determining if the message is from a user or chatbot.
+      let messageType = chatHistory.charAt(index);
+      console.log(messageType)
+      index++;
+
+      // Get the position of the colon in the current message part of the string.
+      let colonIndex = index; 
+
+      while (chatHistory.charAt(colonIndex) != ":") {
+        colonIndex++;
+      }
+      
+      // Get the length of the message.
+      let messageLength = Number(chatHistory.substring(index, colonIndex));
+
+      let message = chatHistory.substring(colonIndex + 1, colonIndex + 1 + messageLength);
+
+      if (messageType == "U") {
+        addMessageToHistory(message, true, true);
+      } else if (messageType == "C") {
+        addMessageToHistory(message, false, true);
+      }
+
+      // Add 2 to the index to skip past the comma.
+      index = colonIndex + messageLength + 2;
+    }
+
+  }
+
+}
+
+window.clearLocalStorage = function() {
+  localStorage.clear();
+  console.log("cleared")
+}
+
+window.swapChatHistory = function(id) {
+  console.log("swapping to the chat history with an ID of " + id);
+
+  saveChatHistoryToBrowser(id);
+
+  console.log(document.getElementById("historyID").innerText != id)
+
+  // Check if the swapped chat history matches the current chat history.
+  if (document.getElementById("messageContainer").historyID !== id) {
+    buildChatHistory(id);
+  }
 }
 
 function checkFileType(fileName) {
