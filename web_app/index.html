@@ -29,15 +29,12 @@
         <label for="newChatButton" class="fileUploadLabel">New Chat</label>
 
         <div id="chatHistoryList" class="chatHistoryContainer">
-          <button class="chatHistoryButton" onclick="swapChatHistory(0)">New Chat</button>
         </div>
       </div>
 
-      <div id="historyID" hidden>0</div>
-      <div class="messageContainer" id="messageContainer">
-        <div class="userMessage">example user message</div>
-        <div class="chatbotMessage">example AI message</div>
-      </div>
+      <div id="historyID" hidden></div>
+      <h1 class="newChatRequiredDisplay" id="createNewChatMessage">Create a new chat to begin.</h1>
+      <div class="messageContainer" id="messageContainer"></div>
 
       <div class="inputContainer">
         <textarea id="inputTextArea"></textarea>

@@ -124,6 +124,14 @@ body {
   right: 6vw;
 }
 
+.newChatRequiredDisplay {
+  position: absolute;
+  top:30%;
+  left:20%;
+  width: 80%;
+  text-align: center;
+}
+
 .userMessage {
   background-color: #225bb5;
   align-self: flex-end;

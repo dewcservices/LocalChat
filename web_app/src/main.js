@@ -96,6 +96,8 @@ function addMessageToHistory(message, fromUser, instant = false) {
 
   newUserMessageElement.scrollIntoView({ behavior: "smooth"});
 
+  saveChatHistoryToBrowser();
+
   if (!fromUser && !instant) {
 
     // Wait 3 seconds and then send a sample AI message.
@@ -107,6 +109,8 @@ function addMessageToHistory(message, fromUser, instant = false) {
 
     }, 3000);
   }
+
+  saveChatHistoryToBrowser();
 
 }
 
@@ -249,20 +253,33 @@ function buildChatHistory(id) {
 window.clearLocalStorage = function() {
   localStorage.clear();
   document.getElementById("messageContainer").innerHTML = "";
+  document.getElementById("chatHistoryList").innerHTML = "";
+  document.getElementById("historyID").innerText = "";
+  document.getElementById("createNewChatMessage").hidden = false;
   console.log("cleared")
 }
 
-window.createNewChat = function() {
+window.createNewChat = function(name = null) {
 
   let newUserChatHistory = document.createElement("button");
-  newUserChatHistory.innerText = "New Chat History";
+
+  console.log("name:", name)
+  
+  if (name == null) {
+    newUserChatHistory.innerText = "New Chat History";
+    // Generate a unique ID for this chat history.
+    name = Date.now() + Math.random();
+  } else {
+    console.log("Create new chat", name)
+    newUserChatHistory.innerText = name;
+  }
+
   newUserChatHistory.classList.add("chatHistoryButton");
 
-  // Generate a unique ID for this chat history.
-  const newID = Date.now() + Math.random();
+  newUserChatHistory.id = name;
 
   newUserChatHistory.onclick = function() {
-    swapChatHistory(newID);
+    swapChatHistory(name);
   };
 
   document.getElementById("chatHistoryList").insertBefore(newUserChatHistory, document.getElementById("chatHistoryList").firstChild);
@@ -274,12 +291,13 @@ window.swapChatHistory = async function(id) {
 
   await saveChatHistoryToBrowser();
 
-  console.log(document.getElementById("historyID").innerText != id)
 
   // Check if the swapped chat history matches the current chat history.
-  if (document.getElementById("messageContainer").historyID !== id) {
+  if (document.getElementById("historyID").innerText != id || document.getElementById("historyID").innerText == "") {
     buildChatHistory(id);
+    document.getElementById("createNewChatMessage").hidden = true;
   }
+
 }
 
 function checkFileType(fileName) {
@@ -298,13 +316,31 @@ document.getElementById("fileInput").addEventListener("change", updateFileCount)
 document.getElementById("folderInput").addEventListener("change", updateFileCount)
 
 window.onload = function() {
+
+  // Check if the upload folder functionality is enabled on the device.
   const webkitdirectoryEnabled = 'webkitdirectory' in document.createElement('input')
   if (!webkitdirectoryEnabled) {
     document.getElementById("folderInput").disabled = true;
     document.getElementById("folderInputLabel").classList.add("disabledButton");
     document.getElementById("folderInputLabel").title = "Disabled due to outdated browser."
   }
+
 }
+
+window.addEventListener('load', function () {
+  let history = Object.entries(localStorage);
+  if (history.length > 0) {
+    for (let chatHistory of history) {
+      if (chatHistory[0] != "" && chatHistory[1] != "") {
+        buildChatHistory(chatHistory[0]);
+        createNewChat(chatHistory[0]);
+        this.document.getElementById("createNewChatMessage").hidden = true;
+      } else if (chatHistory[1] == "") {
+        this.localStorage.removeItem(chatHistory[0]);
+      }
+    }
+  }
+})
 
 let shiftKeyBeingPressed = false;
 
