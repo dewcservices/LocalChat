@@ -1,8 +1,9 @@
 # Transformer JS
 
-After little progress being made on getting the T5 ONNX model to work. The team looked into the Transformer JS library.
+After little progress being made on getting the T5 ONNX model to work. The team looked into Xenova's Transformer JS
+library.
 
-Transformer JS is a npm package that runs transformers in the browser. The library uses ONNX Runtimes under the hood 
+Xenova's Transformer JS is a npm package that runs transformers in the browser. The library uses ONNX Runtimes under the hood 
 and supports many natural language processing tasks as well as many models out of the box. Providing the `pipeline` 
 interface to allow users to easily choose tasks, models, and run inferencing.
 
@@ -47,4 +48,3 @@ console.log(output);
 ```
 
 See the documentation for all supported tasks.
-
