@@ -1,0 +1,94 @@
+
+.chatContainer {
+  display: grid;
+  grid-template-areas:
+    "messages"
+    "input";
+  grid-template-rows: 70% auto;
+  height: 100vh;
+}
+
+.messagesContainer {
+  grid-area: messages;
+  background-color: #191919;
+  overflow-y: scroll;
+  scrollbar-color: black #292929;
+  padding: 3vh 15vw;
+  align-content: start;
+  display: flex;
+  flex-direction: column;
+}
+
+.messagesContainer div,
+.inputContainer button {
+  border: 2px solid #474747;
+  color: white;
+  border-radius: 5px;
+  padding: 1vh;
+  display: block;
+  margin: 2vh 0;
+  width: fit-content;
+}
+
+.inputContainer button:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+
+.userMessage {
+  background-color: #225bb5;
+  align-self: flex-end;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.chatbotMessage {
+  background-color: #292929;
+}
+
+.inputContainer {
+  grid-area: input;
+  background-color: #191919;
+  padding: 3vh 5vw;
+  border-top: 1px solid black;
+  position: relative;
+}
+
+.fileUploadContainer {
+  position: relative;
+  bottom: -2.5vh;
+  left: 1vw;
+}
+
+.fileUploadContainer input[type=file] {
+  display: none;
+}
+
+.fileUploadLabel {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  margin-right: 1vw;
+  padding: 1vh;
+}
+
+.fileUploadContainer label:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+
+.inputContainer textarea {
+  width: 100%;
+  height: 17vh;
+  font-size: 16px;
+  padding: 1vh;
+  box-sizing: border-box;
+  resize: none;
+}
+
+.inputContainer button {
+  background-color: #292929;
+  position: absolute;
+  bottom: 0vh;
+  right: 6vw;
+}

@@ -1,0 +1,35 @@
+
+.newChat {
+  display: flex;
+  flex-direction: column;
+  padding-top: 30vh;
+  align-items: center;
+}
+
+.newChatButtons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 2em;
+}
+
+.newChatButtons a {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  text-align: center;
+  padding: 1.5em;
+  font-size: 1.4em;
+  font-weight: 500;
+  font-family: inherit;
+  color: white;
+  background-color: #292929;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.newChatButtons a:hover {
+  border-color: lightblue;
+}
+.newChatButtons a:focus,
+.newChatButtons a:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}

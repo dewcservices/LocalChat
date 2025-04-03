@@ -1,58 +1,13 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <link rel="stylesheet" href="src/style.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Local Chat</title>
-</head>
-
-<body>
-  <div id="app">
-
-    <div class="container">
-      <div class="sidebarContainer">
-        <h1>LocalChat</h1>
-        <h2>Options</h2>
-        <div>
-          <label for="parseHTML">Parse HTML files</label>
-          <input id="parseHTML" type="checkbox">
-        </div>
-          
-        <h2>Chat History</h2>
-        
-        <button id="clearChatHistoryButton" onclick="clearLocalStorage()" hidden></button>
-        <label for="clearChatHistoryButton" class="fileUploadLabel" >Remove All</label>
-        <button id="newChatButton" onclick="createNewChat()" hidden></button>
-        <label for="newChatButton" class="fileUploadLabel">New Chat</label>
-
-        <div id="chatHistoryList" class="chatHistoryContainer">
-        </div>
-      </div>
-
-      <div id="historyID" hidden></div>
-      <h1 class="newChatRequiredDisplay" id="createNewChatMessage">Create a new chat to begin.</h1>
-      <div class="messageContainer" id="messageContainer"></div>
-
-      <div class="inputContainer">
-        <textarea id="inputTextArea"></textarea>
-        <div class="fileUploadContainer">
-          <label for="fileInput" class="fileUploadLabel" title="Select one or more files to upload">Upload
-            File/s</label>
-          <input type="file" id="fileInput" multiple accept=".txt, .html, .docx" hidden>
-          <label for="folderInput" class="fileUploadLabel" id="folderInputLabel">Upload Folder</label>
-          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt, .html, .docx" hidden>
-          <label class="fileCount" id="fileCount">0 Files Selected</label>
-        </div>
-
-        <button id="submitUserQuery">Send</button>
-      </div>
-    </div>
-
-  </div>
-  <script type="module" src="/src/main.js"></script>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Local Chat</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/index.jsx"></script>
+  </body>
 </html>
