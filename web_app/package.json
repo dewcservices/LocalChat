@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "mammoth": "^1.9.0"
   }
 }

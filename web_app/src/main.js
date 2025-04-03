@@ -1,12 +1,12 @@
 //import './style.css';
 // I don't think this is needed and can be included in the html file
 // I'm mainly commenting this out because it makes testing easier for me.
+import mammoth from "mammoth";
 
-const allowedFileTypes = [".txt", ".html"];
+const allowedFileTypes = [".txt", ".html", ".docx"];
 let canSendMessage = true;
 
 function getUserInput() {
-
   if (!canSendMessage) {
     return;
   }
@@ -21,43 +21,56 @@ function getUserInput() {
   const allFiles = [...inputFiles, ...inputFolder];
 
   if (allFiles.length > 0) {
-
     for (const file of allFiles) {
-
-      if (!checkFileType(file.name)) {
+      if (!checkFileType(file.name) && !file.name.endsWith(".docx")) {
         continue;
       }
 
-      // Create the file reader for this file
       const fileReader = new FileReader();
-      fileReader.onload = () => {
 
-        if (file.name.endsWith(".html") && document.getElementById("parseHTML").checked) {
-          console.log(processHTMLFile(fileReader.result));
-        } else {
-          console.log(fileReader.result);
-        }
+      // Handle TXT & HTML files
+      if (file.name.endsWith(".txt") || file.name.endsWith(".html")) {
+        fileReader.onload = () => {
+          if (file.name.endsWith(".html") && document.getElementById("parseHTML").checked) {
+            console.log(processHTMLFile(fileReader.result));
+          } else {
+            console.log("Extracted TXT Text:", fileReader.result);
+          }
+          addMessageToHistory("Uploading 📄 " + file.name, true);
+        };
+        fileReader.readAsText(file);
+      }
 
-        addMessageToHistory("Uploading 📄 " + file.name, true);
-      };
-      fileReader.readAsText(file);
+      // Handle DOCX files
+      else if (file.name.endsWith(".docx")) {
+        fileReader.onload = function(event) {
+          const arrayBuffer = event.target.result;
+          mammoth.extractRawText({ arrayBuffer })
+            .then(function(result) {
+              console.log("Extracted DOCX Text:", result.value);
+              addMessageToHistory("Uploading 📄 " + file.name, true);
+            })
+            .catch(function(err) {
+              console.error("Error processing DOCX file:", err);
+              addMessageToHistory("Error reading " + file.name, true);
+            });
+        };
+        fileReader.readAsArrayBuffer(file);
+      }
     }
 
     fileInput.value = null;
     folderInput.value = null;
-
     document.getElementById("fileCount").innerText = "0 Files Selected";
-
     canSendMessage = false;
   }
 
-  // Check if a message was sent
+  // Handle user text input
   const inputTextArea = document.getElementById("inputTextArea");
-  const userMessage = inputTextArea.value
+  const userMessage = inputTextArea.value;
 
   // Add the user message to the history
-  if (userMessage != "") {
-
+  if (userMessage !== "") {
     canSendMessage = false;
     addMessageToHistory(userMessage, true);
   }
@@ -67,12 +80,10 @@ function getUserInput() {
     setTimeout(() => {
       addMessageToHistory("", false);
     }, 300);
-    
   }
 
   // Clear the message input
   inputTextArea.value = "";
-
 }
 
 function addMessageToHistory(message, fromUser, instant = false) {
@@ -122,7 +133,7 @@ function updateFileCount() {
   for (const file of folderInput) {
 
     // Check if the file is a valid selectable target.
-    if (checkFileType(file.name)) {
+    if (checkFileType(file.name) || (file.name.endsWith(".docx"))) {
       fileCount++;
     }
   }
