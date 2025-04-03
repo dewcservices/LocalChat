@@ -69,17 +69,20 @@ function getUserInput() {
   const inputTextArea = document.getElementById("inputTextArea");
   const userMessage = inputTextArea.value;
 
+  // Add the user message to the history
   if (userMessage !== "") {
     canSendMessage = false;
     addMessageToHistory(userMessage, true);
   }
 
+  // Send AI response message if the user just sent a message.
   if (!canSendMessage) {
     setTimeout(() => {
       addMessageToHistory("", false);
     }, 300);
   }
 
+  // Clear the message input
   inputTextArea.value = "";
 }
 
