@@ -108,6 +108,10 @@ body {
   width: fit-content;
 }
 
+.selectedHistory {
+  border-color: #225bb5 !important; 
+}
+
 .inputContainer textarea {
   width: 100%;
   height: 17vh;

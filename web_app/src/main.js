@@ -289,7 +289,11 @@ window.createNewChat = function(name = null) {
 window.swapChatHistory = async function(id) {
   console.log("swapping to the chat history with an ID of " + id);
 
+  document.getElementById(document.getElementById("historyID").innerText).classList.remove("selectedHistory");
+
   await saveChatHistoryToBrowser();
+
+  document.getElementById(id).classList.add("selectedHistory");
 
 
   // Check if the swapped chat history matches the current chat history.
