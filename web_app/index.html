@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="stylesheet" href="src/style.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Local Chat</title>
 </head>
@@ -14,20 +15,35 @@
     <div class="container">
       <div class="sidebarContainer">
         <h1>LocalChat</h1>
+        <h2>Options</h2>
+        <div>
+          <label for="parseHTML">Parse HTML files</label>
+          <input id="parseHTML" type="checkbox">
+        </div>
+          
+        <h2>Chat History</h2>
+        
+        <button id="clearChatHistoryButton" onclick="clearLocalStorage()" hidden></button>
+        <label for="clearChatHistoryButton" class="fileUploadLabel" >Remove All</label>
+        <button id="newChatButton" onclick="createNewChat()" hidden></button>
+        <label for="newChatButton" class="fileUploadLabel">New Chat</label>
+
+        <div id="chatHistoryList" class="chatHistoryContainer">
+        </div>
       </div>
-      <div class="messageContainer" id="messageContainer">
-        <div class="userMessage">example user message</div>
-        <div class="chatbotMessage">example AI message</div>
-      </div>
+
+      <div id="historyID" hidden></div>
+      <h1 class="newChatRequiredDisplay" id="createNewChatMessage">Create a new chat to begin.</h1>
+      <div class="messageContainer" id="messageContainer"></div>
+
       <div class="inputContainer">
         <textarea id="inputTextArea"></textarea>
         <div class="fileUploadContainer">
           <label for="fileInput" class="fileUploadLabel" title="Select one or more files to upload">Upload
             File/s</label>
-          <input type="file" id="fileInput" multiple accept=".txt">
-          <label for="folderInput" class="fileUploadLabel"
-            title="Select a folder to upload all files (not supported on older browsers)">Upload Folder</label>
-          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt">
+          <input type="file" id="fileInput" multiple accept=".txt, .html" hidden>
+          <label for="folderInput" class="fileUploadLabel" id="folderInputLabel">Upload Folder</label>
+          <input type="file" id="folderInput" webkitdirectory multiple accept=".txt, .html" hidden>
           <label class="fileCount" id="fileCount">0 Files Selected</label>
         </div>
 
