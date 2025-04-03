@@ -34,7 +34,7 @@ function getUserInput() {
           if (file.name.endsWith(".html") && document.getElementById("parseHTML").checked) {
             console.log(processHTMLFile(fileReader.result));
           } else {
-            console.log(fileReader.result);
+            console.log("Extracted TXT Text:", fileReader.result);
           }
           addMessageToHistory("Uploading 📄 " + file.name, true);
         };
