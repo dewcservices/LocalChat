@@ -27,3 +27,7 @@ However, this also means that Xenova's transformer library may not be suitable f
 the models within the distributable, as devices may be air-gapped. Meaning that they will not be able to download the model.
 
 The team will further investigate whether this is possible.
+
+2025/04/04 Update: `@xenova/transformers` is an older fork of `@huggingface/transformers`, hence, the team switched to
+Hugging Face in which the bug has been patched. The team will now look into how models are cached and see if we can 
+package the app with the models then inject the models into the cache.
