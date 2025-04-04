@@ -1,4 +1,4 @@
-import { pipeline, env } from '@xenova/transformers';
+import { pipeline, env } from '@huggingface/transformers';
 import { createSignal } from 'solid-js';
 import './Summarize.css';
 
@@ -23,18 +23,14 @@ function Summarize() {
 
     if (userMessage != "") {
       addMessage("Summarize: " + userMessage, true);
+      inputTextArea.value = "";
 
       console.log("Summarizing model...");
 
-      env.allowLocalModels = false;
-      env.useBrowserCache = false;
-      
       let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
       let output = await generator(userMessage, { max_new_tokens: 100});
 
       addMessage(output[0].summary_text, false);
-
-      inputTextArea.value = "";
     }
   };
 
