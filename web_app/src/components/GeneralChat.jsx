@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createSignal, createEffect } from 'solid-js';
 import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
@@ -11,55 +11,20 @@ function GeneralChat() {
     { sender: "chatbotMessage", content: "example AI message"}
   ], { equals: false });
 
-  const addMessage = (content, fromUser) => {
+  const appendMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
     setMessages(messages());
   };
 
+  // scrolls to the most recently appended message
+  createEffect(() => {
+    let messageContainer = document.getElementsByClassName("messagesContainer")[0];
+    let lastMessage = messageContainer.children[messages().length - 1];
+
+    lastMessage.scrollIntoView({behavior: "smooth"});
+  });
+
   const [fileCount, setFileCount] = createSignal(0);
-
-  const getUserInput = async () => {
-
-    // parse any selected files
-    let fileInput = document.getElementById("fileInput");
-    let folderInput = document.getElementById("folderInput");
-
-    let allFiles = [...fileInput.files, ...folderInput.files];
-
-    for (let file of allFiles) {
-
-      let content = "";
-
-      if (file.name.endsWith('.txt')) {
-        content = await parseTxtFileAsync(file);
-      }
-      if (file.name.endsWith('.html')) {
-        content = await parseHTMLFileAsync(file);
-      }
-      if (file.name.endsWith('.docx')) {
-        content = await parseDocxFileAsync(file);
-      }
-
-      if (content != "") {
-        console.log("Read file " + file.name + ". Content: " + content);
-        addMessage("Added File " + file.name, true);
-      }
-    }
-
-    fileInput.value = null;
-    folderInput.value = null;
-
-    setFileCount(0);
-
-    // parse user message if one was sent
-    let inputTextArea = document.getElementById("inputTextArea");
-    let userMessage = inputTextArea.value;
-
-    if (userMessage != "") {
-      addMessage(userMessage, true);
-      inputTextArea.value = "";
-    }
-  };
 
   const updateFileCount = () => {
 
@@ -74,6 +39,51 @@ function GeneralChat() {
     }
 
     setFileCount(fileCount);
+  };
+
+  const getUserInput = async () => {
+
+    { // parse any selected files
+      let fileInput = document.getElementById("fileInput");
+      let folderInput = document.getElementById("folderInput");
+
+      let allFiles = [...fileInput.files, ...folderInput.files];
+
+      for (let file of allFiles) {
+
+        let content = "";
+
+        if (file.name.endsWith('.txt')) {
+          content = await parseTxtFileAsync(file);
+        }
+        if (file.name.endsWith('.html')) {
+          content = await parseHTMLFileAsync(file);
+        }
+        if (file.name.endsWith('.docx')) {
+          content = await parseDocxFileAsync(file);
+        }
+
+        if (content != "") {
+          console.log("Read file " + file.name + ". Content: " + content);
+          appendMessage("Added File " + file.name, true);
+        }
+      }
+
+      fileInput.value = null;
+      folderInput.value = null;
+
+      setFileCount(0);
+    }
+
+    { // parse user message if one was sent
+      let inputTextArea = document.getElementById("inputTextArea");
+      let userMessage = inputTextArea.value;
+
+      if (userMessage != "") {
+        appendMessage(userMessage, true);
+        inputTextArea.value = "";
+      }
+    }
   };
 
   return (
