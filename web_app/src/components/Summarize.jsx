@@ -42,6 +42,8 @@ function Summarize() {
 
       console.log("Summarizing model...");
 
+      env.useBrowserCache = false;
+
       let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
       let output = await generator(userMessage, { max_new_tokens: 100});
 
@@ -68,7 +70,9 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
 
     console.log("Read file: " + fileContent);
-    console.log("Summarizing model...")
+    console.log("Summarizing model...");
+
+    env.useBrowserCache = false;
 
     let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
     let output = await generator(fileContent, { max_new_tokens: 100});
