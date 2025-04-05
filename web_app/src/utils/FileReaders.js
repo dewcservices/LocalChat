@@ -4,7 +4,7 @@ import mammoth from "mammoth";
 /**
  * Takes a txt file and return the text within it.
  * @param {File} file the txt file
- * @returns {Promise<string>} the txt file's contents
+ * @return {Promise<string>} the txt file's contents
  */
 export function parseTxtFileAsync(file) {
 
