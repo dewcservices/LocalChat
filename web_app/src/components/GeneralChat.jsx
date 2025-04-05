@@ -33,7 +33,7 @@ function GeneralChat() {
     let folderInput = document.getElementById("folderInput").files;
 
     for (let file of folderInput) {
-      if (file.name.endsWith(".txt")) {
+      if (file.name.endsWith(".txt") || file.name.endsWith(".html" || file.name.endsWith(".docx"))) {
         fileCount++;
       }
     }
