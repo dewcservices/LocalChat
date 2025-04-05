@@ -1,21 +1,36 @@
 import { pipeline, env } from '@huggingface/transformers';
-import { createSignal } from 'solid-js';
-import './Summarize.css';
+import { createSignal, createEffect } from 'solid-js';
+import { useParams } from '@solidjs/router';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
+import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
 
 
 function Summarize() {
+  // FIXME errors when a non-valid chatId is typed into url
 
-  const [messages, setMessages] = createSignal([
-    { sender: "userMessage", content: "example user message"},
-    { sender: "chatbotMessage", content: "example AI message"}
-  ], { equals: false });
+  const params = useParams();
+  const chatId = params.id;
+
+  const [messages, setMessages] = createSignal(getChatHistory(chatId), { equals: false });
 
   const addMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
     setMessages(messages());
   };
+
+  // scrolls to the most recently appended message
+  createEffect(() => {
+    let messageContainer = document.getElementsByClassName("messagesContainer")[0];
+    let lastMessage = messageContainer.children[messages().length - 1];
+
+    lastMessage.scrollIntoView({behavior: "smooth"});
+  });
+
+  // saves messages to local storage
+  createEffect(() => {
+    saveChatHistory(chatId, 'summarize', messages());
+  });
 
   const summarizeTextInput = async () => {
     let inputTextArea = document.getElementById("inputTextArea");
@@ -54,9 +69,6 @@ function Summarize() {
 
     console.log("Read file: " + fileContent);
     console.log("Summarizing model...")
-
-    env.allowLocalModels = false;
-    env.useBrowserCache = false;
 
     let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
     let output = await generator(fileContent, { max_new_tokens: 100});

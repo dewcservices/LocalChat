@@ -1,15 +1,18 @@
-import { createSignal, createEffect } from 'solid-js';
+import { createSignal, createEffect} from 'solid-js';
+import { useParams } from '@solidjs/router';
 import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
+import { getChatHistory, saveChatHistory} from '../utils/ChatHistory';
 
 
 function GeneralChat() {
+  // FIXME errors when a non-valid chatId is typed into url
 
-  const [messages, setMessages] = createSignal([
-    { sender: "userMessage", content: "example user message"},
-    { sender: "chatbotMessage", content: "example AI message"}
-  ], { equals: false });
+  const params = useParams();
+  const chatId = params.id;
+
+  const [messages, setMessages] = createSignal(getChatHistory(chatId), { equals: false });
 
   const appendMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
@@ -22,6 +25,11 @@ function GeneralChat() {
     let lastMessage = messageContainer.children[messages().length - 1];
 
     lastMessage.scrollIntoView({behavior: "smooth"});
+  });
+
+  // saves messages to local storage
+  createEffect(() => {
+    saveChatHistory(chatId, 'chat', messages());
   });
 
   const [fileCount, setFileCount] = createSignal(0);
