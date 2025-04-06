@@ -15,9 +15,9 @@ function Layout(props) {
   const location = useLocation();
   const [chats, setChats] = createSignal(getChatHistories());
 
+  // whenever the URL changes, re-fetch the chat history
   createEffect(() => {
     setChats(getChatHistories());
-
     location.pathname; // reactive dependency
   });
 
@@ -28,7 +28,7 @@ function Layout(props) {
           <h1>Local Chat</h1>
           <a href="/">Create New Chat</a>
           <br/><br/>
-          <h2>Chat History:</h2>
+          <h2>Chat History</h2>
           <For each={chats()}>{(chat) =>
             <>
               <a href={`/${chat.chatType}/${chat.chatId}`}>{chat.chatId}</a>
