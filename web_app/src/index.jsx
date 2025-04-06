@@ -12,6 +12,8 @@ import GeneralChat from './components/GeneralChat.jsx';
 
 
 // TODO edit behavior so that new chats aren't saved until the user sends a message within the chat
+// TODO port thinking animation from main branch, & edit so that it only shows when waiting for the chatbot to return 
+//      a response, i.e. when inferencing.
 
 
 const newSummarizeChat = () => {

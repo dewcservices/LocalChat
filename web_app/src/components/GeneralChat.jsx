@@ -8,6 +8,9 @@ import { getChatHistory, saveChatHistory} from '../utils/ChatHistory';
 
 function GeneralChat() {
   // FIXME errors when a non-valid chatId is typed into url
+  // TODO port disabling the upload folder functionality based off of browser support from main branch
+  //      (disable button and add tooltip that states why the button is disabled)
+  // TODO port the shift new line functionality from the main branch
 
   const params = useParams();
   const chatId = params.id;

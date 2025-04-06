@@ -31,7 +31,8 @@ export function newChatId() {
 
 /**
  * Fetches the chat history from the browser's local storage (only fetches chatIds and corresponding chatType).
- * @returns {Array<any>} [{chatId: "", chatType: ""}]
+ * Use getChatHistory to fetch the messages of a specific chat.
+ * @return {Array<any>} [{chatId: "", chatType: ""}]
  */
 export function getChatHistories() {
 
