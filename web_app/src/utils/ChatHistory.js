@@ -11,6 +11,14 @@ export function deleteChatHistories() {
 }
 
 /**
+ * Deletes the chat corresponding to the chatId.
+ * @param {string} chatId 
+ */
+export function deleteChatHistory(chatId) {
+  localStorage.removeItem(chatId);
+}
+
+/**
  * Returns a new chat id following the format "chat-001".
  * The function ensures that the id is not already in use.
  * @return {string} the id.
