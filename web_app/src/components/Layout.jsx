@@ -5,7 +5,6 @@ import { getChatHistories, deleteChatHistories, deleteChatHistory } from "../uti
 
 
 function Layout(props) {
-  // TODO add individual chat deletion
   // TODO polish deletion of entire chat history
   //    - currently reloads entire page
   //    - ui button is ugly, and needs to be clearer that the button is dangerous
