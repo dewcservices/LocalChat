@@ -15,11 +15,17 @@ function GeneralChat() {
   const params = useParams();
   const chatId = params.id;
 
-  const [messages, setMessages] = createSignal(getChatHistory(chatId), { equals: false });
+  const [messages, setMessages] = createSignal(getChatHistory(chatId)[0], { equals: false });
+  const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
 
   const appendMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
     setMessages(messages());
+  };
+
+  const addFile = (content, fileName) => {
+    files().push({fileName: fileName, content: content});
+    setFiles(files());
   };
 
   // scrolls to the most recently appended message
@@ -32,7 +38,7 @@ function GeneralChat() {
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'chat', messages());
+    saveChatHistory(chatId, 'chat', messages(), files());
   });
 
   const [fileCount, setFileCount] = createSignal(0);
@@ -76,6 +82,7 @@ function GeneralChat() {
 
         if (content != "") {
           console.log("Read file " + file.name + ". Content: " + content);
+          addFile(content, file.name);
           appendMessage("Added File " + file.name, true);
         }
       }

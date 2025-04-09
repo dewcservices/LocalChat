@@ -12,11 +12,17 @@ function Summarize() {
   const params = useParams();
   const chatId = params.id;
 
-  const [messages, setMessages] = createSignal(getChatHistory(chatId), { equals: false });
+  const [messages, setMessages] = createSignal(getChatHistory(chatId)[0], { equals: false });
+  const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
 
   const addMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
     setMessages(messages());
+  };
+
+  const addFile = (content, fileName) => {
+    files().push({fileName: fileName, content: content});
+    setFiles(files());
   };
 
   // scrolls to the most recently appended message
@@ -29,7 +35,7 @@ function Summarize() {
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'summarize', messages());
+    saveChatHistory(chatId, 'summarize', messages(), files());
   });
 
   const summarizeTextInput = async () => {
@@ -70,6 +76,9 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
 
     console.log("Read file: " + fileContent);
+
+    addFile(fileContent, file.name);
+
     console.log("Summarizing model...");
 
     env.useBrowserCache = false;
