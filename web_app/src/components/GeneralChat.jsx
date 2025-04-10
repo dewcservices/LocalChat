@@ -39,6 +39,11 @@ function GeneralChat() {
   // saves messages to local storage
   createEffect(() => {
     saveChatHistory(chatId, 'chat', messages(), files());
+
+    // Log the loaded files on page load
+    files().forEach((file) => {
+      console.log(file.fileName);
+    })
   });
 
   const [fileCount, setFileCount] = createSignal(0);

@@ -31,6 +31,11 @@ function Summarize() {
     let lastMessage = messageContainer.children[messages().length - 1];
 
     lastMessage.scrollIntoView({behavior: "smooth"});
+
+    // Log the loaded files on page load
+    files().forEach((file) => {
+      console.log(file.fileName);
+    })
   });
 
   // saves messages to local storage
