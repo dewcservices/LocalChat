@@ -63,7 +63,7 @@ export function getChatHistories() {
  * Saves a chat to the browser's local storage.
  * @param {string} chatId 
  * @param {string} chatType 
- * @param {Array<any>} messages [{sender: "", content: ""}]
+ * @param {Array<any>} messages [{sender: "", date: "", content: ""}]
  * @param {Array<any>} files [{fileName: "", content: ""}]
  * @throws {QuotaExceededError} if user has disabled storage for the site, or if the storage quote has been exceeded
  */
@@ -83,7 +83,7 @@ export function saveChatHistory(chatId, chatType, messages, files = []) {
 /**
  * Loads a chat from the browser's local storage.
  * @param {string} chatId 
- * @return {Array<any>} [[{sender: "", content: ""}],[{fileName: "", content: ""}]]
+ * @return {Array<any>} [[{sender: "", date: "", content: ""}],[{fileName: "", content: ""}]]
  */
 export function getChatHistory(chatId) {
   let chatJson = localStorage.getItem(chatId);

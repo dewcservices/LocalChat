@@ -16,7 +16,7 @@ function Summarize() {
   const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
 
   const addMessage = (content, fromUser) => {
-    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
+    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: Date.now(), content: content});
     setMessages(messages());
   };
 
@@ -103,7 +103,7 @@ function Summarize() {
         {/* Messages Container */}
         <div class="messagesContainer">
           <For each={messages()}>{(message) =>
-            <div class={message.sender}>{message.content}</div>
+            <div class={message.sender} title={new Date(message.date).toUTCString()}>{message.content}</div>
           }</For>
         </div>
 
