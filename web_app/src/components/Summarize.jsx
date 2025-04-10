@@ -11,12 +11,16 @@ function Summarize() {
 
   const params = useParams();
   const chatId = params.id;
+  const creationDate = getChatHistory(chatId)[2];
+  let latestMessageDate = getChatHistory(chatId)[3];
 
   const [messages, setMessages] = createSignal(getChatHistory(chatId)[0], { equals: false });
   const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
 
   const addMessage = (content, fromUser) => {
-    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: Date.now(), content: content});
+    let messageDate = Date.now();
+    latestMessageDate = messageDate;
+    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content});
     setMessages(messages());
   };
 
@@ -40,7 +44,7 @@ function Summarize() {
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'summarize', messages(), files());
+    saveChatHistory(chatId, 'summarize', creationDate, latestMessageDate, messages(), files());
   });
 
   const summarizeTextInput = async () => {

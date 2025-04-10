@@ -41,7 +41,8 @@ function Layout(props) {
           <h2>Chat History</h2>
           <For each={chats()}>{(chat) =>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-left:6em;padding-right:6em;">
-              <a href={`/${chat.chatType}/${chat.chatId}`}>{chat.chatId}</a>
+              {/* TODO make the latest message date update for each new message sent */}
+              <a href={`/${chat.chatType}/${chat.chatId}`} title={"creationDate: " + new Date(chat.creationDate).toUTCString() + " LatestMessageDate: " + new Date(chat.latestMessageDate).toUTCString()}>{chat.chatId}</a>
               <button onClick={() => {handleChatDeletion(chat.chatId)}}>Delete</button>
             </div>
           }</For>

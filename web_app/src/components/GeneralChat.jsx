@@ -14,12 +14,16 @@ function GeneralChat() {
 
   const params = useParams();
   const chatId = params.id;
+  const creationDate = getChatHistory(chatId)[2];
+  let latestMessageDate = getChatHistory(chatId)[3];
 
   const [messages, setMessages] = createSignal(getChatHistory(chatId)[0], { equals: false });
   const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
 
   const appendMessage = (content, fromUser) => {
-    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: Date.now(), content: content});
+    let messageDate = Date.now();
+    latestMessageDate = messageDate;
+    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content});
     setMessages(messages());
   };
 
@@ -38,7 +42,7 @@ function GeneralChat() {
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'chat', messages(), files());
+    saveChatHistory(chatId, 'chat', creationDate, latestMessageDate, messages(), files());
 
     // Log the loaded files on page load
     files().forEach((file) => {
