@@ -1,5 +1,5 @@
-import { createSignal, createEffect} from 'solid-js';
-import { useParams } from '@solidjs/router';
+import { createSignal, createEffect } from 'solid-js';
+import { useParams, useNavigate } from '@solidjs/router';
 import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
@@ -7,15 +7,19 @@ import { getChatHistory, saveChatHistory} from '../utils/ChatHistory';
 
 
 function GeneralChat() {
-  // FIXME errors when a non-valid chatId is typed into url
   // TODO port disabling the upload folder functionality based off of browser support from main branch
   //      (disable button and add tooltip that states why the button is disabled)
   // TODO port the shift new line functionality from the main branch
 
+  const navigate = useNavigate();
   const params = useParams();
-  const chatId = params.id;
 
-  const [messages, setMessages] = createSignal(getChatHistory(chatId), { equals: false });
+  const [messages, setMessages] = createSignal([], { equals: false });
+  createEffect(() => {
+    let chatHistory = getChatHistory(params.id);
+    if (chatHistory.length == 0) navigate('/');
+    setMessages(chatHistory);
+  });
 
   const appendMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
@@ -27,12 +31,12 @@ function GeneralChat() {
     let messageContainer = document.getElementsByClassName("messagesContainer")[0];
     let lastMessage = messageContainer.children[messages().length - 1];
 
-    lastMessage.scrollIntoView({behavior: "smooth"});
+    lastMessage?.scrollIntoView({behavior: "smooth"});
   });
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'chat', messages());
+    if (messages().length > 0) saveChatHistory(params.id, 'chat', messages());
   });
 
   const [fileCount, setFileCount] = createSignal(0);

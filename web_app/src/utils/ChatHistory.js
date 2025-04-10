@@ -79,13 +79,14 @@ export function saveChatHistory(chatId, chatType, messages) {
 }
 
 /**
- * Loads a chat from the browser's local storage.
+ * Loads a chat from the browser's local storage. If no chat is found with the chatId, the function returns an empty
+ * array.
  * @param {string} chatId 
  * @return {Array<any>} [{sender: "", content: ""}]
  */
 export function getChatHistory(chatId) {
   let chatJson = localStorage.getItem(chatId);
-  if (!chatJson) throw new Error("Could not find chat with id: " + chatId);
+  if (!chatJson) return [];
 
   let chat = JSON.parse(chatJson);
   return chat.messages;

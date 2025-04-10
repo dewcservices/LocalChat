@@ -1,18 +1,22 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { createSignal, createEffect } from 'solid-js';
-import { useParams } from '@solidjs/router';
+import { useParams, useNavigate } from '@solidjs/router';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
 
 
 function Summarize() {
-  // FIXME errors when a non-valid chatId is typed into url
 
+  const navigate = useNavigate();
   const params = useParams();
-  const chatId = params.id;
 
-  const [messages, setMessages] = createSignal(getChatHistory(chatId), { equals: false });
+  const [messages, setMessages] = createSignal([], { equals: false });
+  createEffect(() => {
+    let chatHistory = getChatHistory(params.id);
+    if (chatHistory.length == 0) navigate('/');
+    setMessages(chatHistory);
+  });
 
   const addMessage = (content, fromUser) => {
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
@@ -24,12 +28,12 @@ function Summarize() {
     let messageContainer = document.getElementsByClassName("messagesContainer")[0];
     let lastMessage = messageContainer.children[messages().length - 1];
 
-    lastMessage.scrollIntoView({behavior: "smooth"});
+    lastMessage?.scrollIntoView({behavior: "smooth"});
   });
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'summarize', messages());
+    if (messages().length > 0) saveChatHistory(params.id, 'summarize', messages());
   });
 
   const summarizeTextInput = async () => {
