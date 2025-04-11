@@ -14,23 +14,20 @@ function GeneralChat() {
   const navigate = useNavigate();
   const params = useParams();
 
-  let creationDate;
-  let latestMessageDate;
-
   const [messages, setMessages] = createSignal([], { equals: false });
   const [files, setFiles] = createSignal([], { equals: false });
+
+  let chatHistory;
   createEffect(() => {
-    let chatHistory = getChatHistory(params.id);
-    if (chatHistory[0].length == 0) navigate('/');
-    setMessages(chatHistory[0]);
-    setFiles(chatHistory[1]);
-    latestMessageDate = chatHistory[3];
-    creationDate = chatHistory[2];
+    chatHistory = getChatHistory(params.id);
+    if (chatHistory.messages.length == 0) navigate('/');
+    setMessages(chatHistory.messages);
+    setFiles(chatHistory.files);
   });
 
   const appendMessage = (content, fromUser) => {
     let messageDate = Date.now();
-    latestMessageDate = messageDate;
+    chatHistory.latestMessageDate = messageDate;
     messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content});
     setMessages(messages());
   };
@@ -50,7 +47,7 @@ function GeneralChat() {
 
   // saves messages to local storage
   createEffect(() => {
-    if (messages().length > 0) saveChatHistory(params.id, 'chat', creationDate, latestMessageDate, messages(), files());
+    if (messages().length > 0) saveChatHistory(params.id, 'chat', chatHistory.creationDate, chatHistory.latestMessageDate, messages(), files());
   });
 
   const [fileCount, setFileCount] = createSignal(0);

@@ -99,5 +99,5 @@ export function getChatHistory(chatId) {
   if (!chatJson) return [];
 
   let chat = JSON.parse(chatJson);
-  return [chat.messages, chat.files, chat.creationDate, chat.latestMessageDate];
+  return chat;
 }
