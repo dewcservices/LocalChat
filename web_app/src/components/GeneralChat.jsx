@@ -1,5 +1,5 @@
-import { createSignal, createEffect} from 'solid-js';
-import { useParams } from '@solidjs/router';
+import { createSignal, createEffect } from 'solid-js';
+import { useParams, useNavigate } from '@solidjs/router';
 import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
@@ -7,18 +7,26 @@ import { getChatHistory, saveChatHistory} from '../utils/ChatHistory';
 
 
 function GeneralChat() {
-  // FIXME errors when a non-valid chatId is typed into url
   // TODO port disabling the upload folder functionality based off of browser support from main branch
   //      (disable button and add tooltip that states why the button is disabled)
   // TODO port the shift new line functionality from the main branch
 
+  const navigate = useNavigate();
   const params = useParams();
-  const chatId = params.id;
-  const creationDate = getChatHistory(chatId)[2];
-  let latestMessageDate = getChatHistory(chatId)[3];
 
-  const [messages, setMessages] = createSignal(getChatHistory(chatId)[0], { equals: false });
-  const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
+  let creationDate;
+  let latestMessageDate;
+
+  const [messages, setMessages] = createSignal([], { equals: false });
+  const [files, setFiles] = createSignal([], { equals: false });
+  createEffect(() => {
+    let chatHistory = getChatHistory(params.id);
+    if (chatHistory[0].length == 0) navigate('/');
+    setMessages(chatHistory[0]);
+    setFiles(chatHistory[1]);
+    latestMessageDate = chatHistory[3];
+    creationDate = chatHistory[2];
+  });
 
   const appendMessage = (content, fromUser) => {
     let messageDate = Date.now();
@@ -37,17 +45,12 @@ function GeneralChat() {
     let messageContainer = document.getElementsByClassName("messagesContainer")[0];
     let lastMessage = messageContainer.children[messages().length - 1];
 
-    lastMessage.scrollIntoView({behavior: "smooth"});
+    lastMessage?.scrollIntoView({behavior: "smooth"});
   });
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'chat', creationDate, latestMessageDate, messages(), files());
-
-    // Log the loaded files on page load
-    files().forEach((file) => {
-      console.log(file.fileName);
-    })
+    if (messages().length > 0) saveChatHistory(params.id, 'chat', creationDate, latestMessageDate, messages(), files());
   });
 
   const [fileCount, setFileCount] = createSignal(0);

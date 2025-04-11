@@ -1,22 +1,30 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { createSignal, createEffect } from 'solid-js';
-import { useParams } from '@solidjs/router';
+import { useParams, useNavigate } from '@solidjs/router';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
 
 
 function Summarize() {
-  // FIXME errors when a non-valid chatId is typed into url
 
+  const navigate = useNavigate();
   const params = useParams();
-  const chatId = params.id;
-  const creationDate = getChatHistory(chatId)[2];
-  let latestMessageDate = getChatHistory(chatId)[3];
 
-  const [messages, setMessages] = createSignal(getChatHistory(chatId)[0], { equals: false });
-  const [files, setFiles] = createSignal(getChatHistory(chatId)[1], { equals: false });
+  let creationDate;
+  let latestMessageDate;
 
+  const [messages, setMessages] = createSignal([], { equals: false });
+  const [files, setFiles] = createSignal([], { equals: false });
+  createEffect(() => {
+    let chatHistory = getChatHistory(params.id);
+    if (chatHistory[0].length == 0) navigate('/');
+    setMessages(chatHistory[0]);
+    setFiles(chatHistory[1]);
+    latestMessageDate = chatHistory[3];
+    creationDate = chatHistory[2];
+  });
+  
   const addMessage = (content, fromUser) => {
     let messageDate = Date.now();
     latestMessageDate = messageDate;
@@ -34,17 +42,12 @@ function Summarize() {
     let messageContainer = document.getElementsByClassName("messagesContainer")[0];
     let lastMessage = messageContainer.children[messages().length - 1];
 
-    lastMessage.scrollIntoView({behavior: "smooth"});
-
-    // Log the loaded files on page load
-    files().forEach((file) => {
-      console.log(file.fileName);
-    })
+    lastMessage?.scrollIntoView({behavior: "smooth"});
   });
 
   // saves messages to local storage
   createEffect(() => {
-    saveChatHistory(chatId, 'summarize', creationDate, latestMessageDate, messages(), files());
+    if (messages().length > 0) saveChatHistory(params.id, 'summarize', creationDate, latestMessageDate, messages(), files());
   });
 
   const summarizeTextInput = async () => {

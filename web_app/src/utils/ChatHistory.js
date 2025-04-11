@@ -83,21 +83,20 @@ export function saveChatHistory(chatId, chatType, creationDate, latestMessageDat
     files: files
   };
 
-  console.log("T",creationDate, latestMessageDate, chat);
-
   let chatJson = JSON.stringify(chat);
 
   localStorage.setItem(chatId, chatJson);
 }
 
 /**
- * Loads a chat from the browser's local storage.
+ * Loads a chat from the browser's local storage. If no chat is found with the chatId, the function returns an empty
+ * array.
  * @param {string} chatId 
  * @return {Array<any>} [[{sender: "", date: "", content: ""}],[{fileName: "", content: ""}]]
  */
 export function getChatHistory(chatId) {
   let chatJson = localStorage.getItem(chatId);
-  if (!chatJson) throw new Error("Could not find chat with id: " + chatId);
+  if (!chatJson) return [];
 
   let chat = JSON.parse(chatJson);
   return [chat.messages, chat.files, chat.creationDate, chat.latestMessageDate];

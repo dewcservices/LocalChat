@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from "solid-js";
-import { useLocation, useNavigate } from "@solidjs/router";
+import { useLocation, useNavigate, A } from "@solidjs/router";
 
 import { getChatHistories, deleteChatHistories, deleteChatHistory } from "../utils/ChatHistory";
 
@@ -36,13 +36,13 @@ function Layout(props) {
       <div class="container">
         <div class="sidebarContainer">
           <h1>Local Chat</h1>
-          <a href="/">Create New Chat</a>
+          <A href="/">Create New Chat</A>
           <br/><br/>
           <h2>Chat History</h2>
           <For each={chats()}>{(chat) =>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-left:6em;padding-right:6em;">
               {/* TODO make the latest message date update for each new message sent */}
-              <a href={`/${chat.chatType}/${chat.chatId}`} title={"creationDate: " + new Date(chat.creationDate).toUTCString() + " LatestMessageDate: " + new Date(chat.latestMessageDate).toUTCString()}>{chat.chatId}</a>
+              <A href={`/${chat.chatType}/${chat.chatId}`} title={"creationDate: " + new Date(chat.creationDate).toUTCString() + " LatestMessageDate: " + new Date(chat.latestMessageDate).toUTCString()}>{chat.chatId}</A>
               <button onClick={() => {handleChatDeletion(chat.chatId)}}>Delete</button>
             </div>
           }</For>
