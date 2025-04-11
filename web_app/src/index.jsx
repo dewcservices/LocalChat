@@ -18,8 +18,9 @@ import GeneralChat from './components/GeneralChat.jsx';
 
 const newSummarizeChat = () => {
   let newId = newChatId();
-  saveChatHistory(newId, 'summarize', 
-    [{sender: 'chatbotMessage', content: "Hi, I can summarize information for you. Please enter some text or a file and I'll summarize the contents."}]
+  let currentDate = Date.now();
+  saveChatHistory(newId, 'summarize', currentDate, currentDate,
+    [{sender: 'chatbotMessage', date: currentDate, content: "Hi, I can summarize information for you. Please enter some text or a file and I'll summarize the contents."}]
   );
 
   const navigate = useNavigate();
@@ -28,8 +29,9 @@ const newSummarizeChat = () => {
 
 const newChat = () => {
   let newId = newChatId();
-  saveChatHistory(newId, 'chat',
-    [{sender: 'chatbotMessage', content: "Hi, this is a general chat where we can have conversations."}]
+  let currentDate = Date.now();
+  saveChatHistory(newId, 'chat', currentDate, currentDate,
+    [{sender: 'chatbotMessage', date: currentDate, content: "Hi, this is a general chat where we can have conversations."}]
   );
 
   const navigate = useNavigate();

@@ -11,16 +11,30 @@ function Summarize() {
   const navigate = useNavigate();
   const params = useParams();
 
+  let creationDate;
+  let latestMessageDate;
+
   const [messages, setMessages] = createSignal([], { equals: false });
+  const [files, setFiles] = createSignal([], { equals: false });
   createEffect(() => {
     let chatHistory = getChatHistory(params.id);
-    if (chatHistory.length == 0) navigate('/');
-    setMessages(chatHistory);
+    if (chatHistory[0].length == 0) navigate('/');
+    setMessages(chatHistory[0]);
+    setFiles(chatHistory[1]);
+    latestMessageDate = chatHistory[3];
+    creationDate = chatHistory[2];
   });
-
+  
   const addMessage = (content, fromUser) => {
-    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", content: content});
+    let messageDate = Date.now();
+    latestMessageDate = messageDate;
+    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content});
     setMessages(messages());
+  };
+
+  const addFile = (content, fileName) => {
+    files().push({fileName: fileName, content: content});
+    setFiles(files());
   };
 
   // scrolls to the most recently appended message
@@ -33,7 +47,7 @@ function Summarize() {
 
   // saves messages to local storage
   createEffect(() => {
-    if (messages().length > 0) saveChatHistory(params.id, 'summarize', messages());
+    if (messages().length > 0) saveChatHistory(params.id, 'summarize', creationDate, latestMessageDate, messages(), files());
   });
 
   const summarizeTextInput = async () => {
@@ -74,6 +88,9 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
 
     console.log("Read file: " + fileContent);
+
+    addFile(fileContent, file.name);
+
     console.log("Summarizing model...");
 
     env.useBrowserCache = false;
@@ -93,7 +110,7 @@ function Summarize() {
         {/* Messages Container */}
         <div class="messagesContainer">
           <For each={messages()}>{(message) =>
-            <div class={message.sender}>{message.content}</div>
+            <div class={message.sender} title={new Date(message.date).toUTCString()}>{message.content}</div>
           }</For>
         </div>
 

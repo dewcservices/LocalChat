@@ -40,7 +40,7 @@ export function newChatId() {
 /**
  * Fetches the chat history from the browser's local storage (only fetches chatIds and corresponding chatType).
  * Use getChatHistory to fetch the messages of a specific chat.
- * @return {Array<any>} [{chatId: "", chatType: ""}]
+ * @return {Array<any>} [{chatId: "", chatType: "", creationDate: "", latestMessageDate: ""}]
  */
 export function getChatHistories() {
 
@@ -53,7 +53,11 @@ export function getChatHistories() {
     let chat = JSON.parse(value);
 
     if (!key.startsWith('chat-')) continue;
-    chatHistory.push({chatId: key, chatType: chat.chatType});
+    chatHistory.push({
+      chatId: key,
+      chatType: chat.chatType,
+      creationDate: chat.creationDate,
+      latestMessageDate: chat.latestMessageDate});
   }
 
   return chatHistory;
@@ -63,14 +67,20 @@ export function getChatHistories() {
  * Saves a chat to the browser's local storage.
  * @param {string} chatId 
  * @param {string} chatType 
- * @param {Array<any>} messages [{sender: "", content: ""}]
+ * @param {string} creationDate
+ * @param {string} latestMessageDate
+ * @param {Array<any>} messages [{sender: "", date: "", content: ""}]
+ * @param {Array<any>} files [{fileName: "", content: ""}]
  * @throws {QuotaExceededError} if user has disabled storage for the site, or if the storage quote has been exceeded
  */
-export function saveChatHistory(chatId, chatType, messages) {
+export function saveChatHistory(chatId, chatType, creationDate, latestMessageDate, messages, files = []) {
   let chat = {
     chatId: chatId,
     chatType: chatType,
-    messages: messages
+    creationDate: creationDate,
+    latestMessageDate: latestMessageDate,
+    messages: messages,
+    files: files
   };
 
   let chatJson = JSON.stringify(chat);
@@ -82,12 +92,12 @@ export function saveChatHistory(chatId, chatType, messages) {
  * Loads a chat from the browser's local storage. If no chat is found with the chatId, the function returns an empty
  * array.
  * @param {string} chatId 
- * @return {Array<any>} [{sender: "", content: ""}]
+ * @return {Array<any>} [[{sender: "", date: "", content: ""}],[{fileName: "", content: ""}]]
  */
 export function getChatHistory(chatId) {
   let chatJson = localStorage.getItem(chatId);
   if (!chatJson) return [];
 
   let chat = JSON.parse(chatJson);
-  return chat.messages;
+  return [chat.messages, chat.files, chat.creationDate, chat.latestMessageDate];
 }
