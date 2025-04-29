@@ -26,9 +26,24 @@ function Summarize() {
   const addMessage = (content, fromUser) => {
     let messageDate = Date.now();
     chatHistory.latestMessageDate = messageDate;
-    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content});
-    setMessages(messages());
+    setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content}]);
+    return messageDate;
   };
+
+  const updateMessage = (messageDate, newContent) => {
+
+    // find the message with the matching date.
+    const updatedMessageHistory = messages().map((message) => {
+      if (message.date == messageDate) {
+        // update and return the message with the updated message content.
+        console.log(newContent);
+        return { ...message, content: newContent };
+      }
+      return message;
+    })
+
+    setMessages(updatedMessageHistory);
+  }
 
   const addFile = (content, fileName) => {
     files().push({fileName: fileName, content: content});
@@ -57,13 +72,17 @@ function Summarize() {
       inputTextArea.value = "";
 
       console.log("Summarizing model...");
+      let messageDate = addMessage("Loading Model", false);
 
-      env.useBrowserCache = false;
+      env.useBrowserCache = true;
 
       let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+
+      updateMessage(messageDate, "Generating Message");
+
       let output = await generator(userMessage, { max_new_tokens: 100});
 
-      addMessage(output[0].summary_text, false);
+      updateMessage(messageDate, output[0].summary_text);
     }
   };
 
@@ -89,9 +108,11 @@ function Summarize() {
 
     addFile(fileContent, file.name);
 
-    console.log("Summarizing model...");
+    console.log("Summarizing model.....");
 
     env.useBrowserCache = false;
+
+    console.log("Test1")
 
     let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
     let output = await generator(fileContent, { max_new_tokens: 100});
