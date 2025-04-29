@@ -47,7 +47,8 @@ function GeneralChat() {
 
   // saves messages to local storage
   createEffect(() => {
-    if (messages().length > 0) saveChatHistory(params.id, 'chat', chatHistory.creationDate, chatHistory.latestMessageDate, messages(), files());
+    if (messages().length > 0) saveChatHistory(params.id, 'chat', chatHistory.creationDate, 
+      chatHistory.latestMessageDate, messages(), files());
   });
 
   const [fileCount, setFileCount] = createSignal(0);
