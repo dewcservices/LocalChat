@@ -1,6 +1,7 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { createSignal, createEffect } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
+import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
@@ -10,7 +11,6 @@ function Summarize() {
 
   const navigate = useNavigate();
   const params = useParams();
-
 
   const [messages, setMessages] = createSignal([], { equals: false });
   const [files, setFiles] = createSignal([], { equals: false });
@@ -71,15 +71,12 @@ function Summarize() {
       addMessage("Summarize: " + userMessage, true);
       inputTextArea.value = "";
 
-      console.log("Summarizing model...");
       let messageDate = addMessage("Loading Model", false);
 
       env.useBrowserCache = true;
-
       let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
       updateMessage(messageDate, "Generating Message");
-
       let output = await generator(userMessage, { max_new_tokens: 100});
 
       updateMessage(messageDate, output[0].summary_text);
@@ -108,16 +105,15 @@ function Summarize() {
 
     addFile(fileContent, file.name);
 
-    console.log("Summarizing model.....");
+    let messageDate = addMessage("Loading Model", false);
 
     env.useBrowserCache = false;
-
-    console.log("Test1")
-
     let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+
+    updateMessage(messageDate, "Generating Message");
     let output = await generator(fileContent, { max_new_tokens: 100});
 
-    addMessage(output[0].summary_text, false);
+    updateMessage(messageDate, output[0].summary_text);
 
     fileInput.value = null;
   };
@@ -129,7 +125,7 @@ function Summarize() {
         {/* Messages Container */}
         <div class="messagesContainer">
           <For each={messages()}>{(message) =>
-            <div class={message.sender} title={new Date(message.date).toUTCString()}>{message.content}</div>
+            <div class={`${message.sender} ${(message.content == "Loading Model..." || message.content == "Generating Message...") ? "messageLoading" : ""}`} title={new Date(message.date).toUTCString()}>{message.content}</div>
           }</For>
         </div>
 
