@@ -86,3 +86,5 @@ copyFileSync(`../${fileserver_exe_name}`, `../dist/${fileserver_exe_name}`)
 console.log("Copied fileserver executable into dist successfully.")
 
 copyDirectory("./dist", "../dist")
+
+copyDirectory("../models", "../dist/models")
