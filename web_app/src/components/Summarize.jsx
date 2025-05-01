@@ -37,7 +37,6 @@ function Summarize() {
     const updatedMessageHistory = messages().map((message) => {
       if (message.date == messageDate) {
         // update and return the message with the updated message content.
-        console.log(newContent);
         return { ...message, content: newContent };
       }
       return message;
@@ -122,17 +121,18 @@ function Summarize() {
     let inputTextArea = document.getElementById("inputTextArea");
     let userMessage = inputTextArea.value;
 
-    if (userMessage != "") {
-      addMessage("Summarize: " + userMessage, true);
-      inputTextArea.value = "";
+    if (userMessage == "") return;
 
-      let messageDate = addMessage("Loading Model", false);
-      let generator = await pipeline('summarization', selectedModel);
-      updateMessage(messageDate, "Generating Message");
-      let output = await generator(userMessage, { max_new_tokens: 100});
+    addMessage("Summarize: " + userMessage, true);
+    inputTextArea.value = "";
 
-      updateMessage(messageDate, output[0].summary_text);
-    }
+    let messageDate = addMessage("Loading Model", false);  // temporary message to indicate progress
+    let generator = await pipeline('summarization', selectedModel);  // load model/pipeline
+
+    updateMessage(messageDate, "Generating Message");  // update temp message to indicate progress
+    let output = await generator(userMessage, { max_new_tokens: 100});  // generate response
+
+    updateMessage(messageDate, output[0].summary_text);  // update temp message to response
   };
 
   const summarizeFileInput = async () => {
@@ -159,14 +159,15 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
     addFile(fileContent, file.name);
 
-    let messageDate = addMessage("Loading Model", false);
-    let generator = await pipeline('summarization', selectedModel);
-    updateMessage(messageDate, "Generating Message");
-    let output = await generator(fileContent, { max_new_tokens: 100});
+    let messageDate = addMessage("Loading Model", false);  // temporary message to indicate progress
+    let generator = await pipeline('summarization', selectedModel);  // load model/pipeline
 
-    updateMessage(messageDate, output[0].summary_text);
+    updateMessage(messageDate, "Generating Message");  // update temp message to indicate progress
+    let output = await generator(fileContent, { max_new_tokens: 100});  // generate response
 
-    fileInput.value = null;
+    updateMessage(messageDate, output[0].summary_text);  // update temp message to response
+
+    fileInput.value = null;  // clear file input element
   };
 
   return (
