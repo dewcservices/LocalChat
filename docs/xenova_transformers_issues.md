@@ -31,3 +31,7 @@ The team will further investigate whether this is possible.
 2025/04/05 Update: `@xenova/transformers` is an older fork of `@huggingface/transformers`, hence, the team switched to
 Hugging Face however the bug is still occurring. The team will now look into how models are cached and see if we can 
 package the app with the models then inject the models into the cache.
+
+2025/04/30 Update: The team is resuming the project after a two week break. This issue was simpler user error on our 
+side as developers. The team has since integrated TransformersJS into the project and implemented a feature to allow
+users to select the models locally, preventing the need for remote servers.

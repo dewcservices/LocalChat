@@ -5,6 +5,7 @@ import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
+import { pathJoin } from '../utils/PathJoin';
 
 
 function Summarize() {
@@ -60,10 +61,64 @@ function Summarize() {
 
   // saves messages to local storage
   createEffect(() => {
-    if (messages().length > 0) saveChatHistory(params.id, 'summarize', chatHistory.creationDate, chatHistory.latestMessageDate, messages(), files());
+    if (messages().length > 0) saveChatHistory(params.id, 'summarize', chatHistory.creationDate, 
+      chatHistory.latestMessageDate, messages(), files());
   });
 
+  let selectedModel = "";
+
+  const setupModel = async () => {
+    // configure transformer js environment
+    env.useBrowserCache = true;
+    env.allowRemoteModels = true;
+
+    // inject models into browser cache
+    let cache = await caches.open('transformers-cache');
+
+    let folderElement = document.getElementById("folderInput");
+    let files = [...folderElement.files];
+
+    if (files.length == 0) {
+      alert("Empty model directory was selected, please select again."); // TODO improve UX
+    }
+    
+    if (files[0].webkitRelativePath.includes("distilbart-cnn-6-6")) {
+      selectedModel = "Xenova/distilbart-cnn-6-6";
+    } else if (files[0].webkitRelativePath.includes("bart-large-cnn")) {
+      selectedModel = "Xenova/bart-large-cnn";
+    } else {
+      alert("Unsupported Model."); // TODO improve UX
+      return;
+    }
+
+    for (let file of files) {
+
+      let cacheKey = pathJoin(
+        env.remoteHost, 
+        env.remotePathTemplate
+          .replaceAll('{model}', selectedModel)
+          .replaceAll('{revision}', 'main'),
+        file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
+      );
+
+      let fileReader = new FileReader();
+      fileReader.onload = async () => {
+        let arrayBuffer = fileReader.result;
+        let uint8Array = new Uint8Array(arrayBuffer);
+        
+        console.log(file.webkitRelativePath, uint8Array);
+        await cache.put(cacheKey, new Response(uint8Array))
+      };
+      fileReader.readAsArrayBuffer(file);
+    }
+  };
+
   const summarizeTextInput = async () => {
+    if (selectedModel == "") {
+      alert("A model must be selected before summarizing text. Please select a model.");
+      return;
+    }
+
     let inputTextArea = document.getElementById("inputTextArea");
     let userMessage = inputTextArea.value;
 
@@ -73,8 +128,7 @@ function Summarize() {
 
       let messageDate = addMessage("Loading Model", false);
 
-      env.useBrowserCache = true;
-      let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+      let generator = await pipeline('summarization', selectedModel);
 
       updateMessage(messageDate, "Generating Message");
       let output = await generator(userMessage, { max_new_tokens: 100});
@@ -83,7 +137,12 @@ function Summarize() {
     }
   };
 
-  const summarizeFile = async () => {
+  const summarizeFileInput = async () => {
+    if (selectedModel == "") {
+      alert("A model must be selected before summarizing text. Please select a model.");
+      return;
+    }
+
     let fileInput = document.getElementById("fileInput");
 
     let file = fileInput.files[0];
@@ -108,7 +167,7 @@ function Summarize() {
     let messageDate = addMessage("Loading Model", false);
 
     env.useBrowserCache = false;
-    let generator = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+    let generator = await pipeline('summarization', selectedModel);
 
     updateMessage(messageDate, "Generating Message");
     let output = await generator(fileContent, { max_new_tokens: 100});
@@ -134,8 +193,10 @@ function Summarize() {
           <div>Enter text to summarize in area below:</div>
           <textarea id="inputTextArea"></textarea>
           <div class="fileUploadContainer">
+            <label for="folderInput" class="fileUploadLabel">Select Model</label>
+            <input type="file" id="folderInput" webkitdirectory multiple onChange={setupModel} />
             <label for="fileInput" class="fileUploadLabel">Summarize File</label>
-            <input type="file" id="fileInput" accept=".txt, .html, .docx" onChange={summarizeFile} />
+            <input type="file" id="fileInput" accept=".txt, .html, .docx" onChange={summarizeFileInput} />
             <label onClick={summarizeTextInput} class="fileUploadLabel">Summarize Text</label>
           </div>
         </div>
