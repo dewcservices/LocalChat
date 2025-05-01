@@ -22,12 +22,27 @@ function Layout(props) {
     location.pathname; // reactive dependency
   });
 
-  const handleChatDeletion = (chatId) => {
-    deleteChatHistory(chatId);
-    setChats(getChatHistories());
+  const handleChatDeletion = (chatId = null) => {
 
-    if (location.pathname.includes(chatId)) {
-      navigate('/');
+    // handle a single chat removal.
+    if (chatId != null) {
+      if (confirm("are you sure you want to remove this history?")) {
+        deleteChatHistory(chatId);
+        setChats(getChatHistories());
+
+        if (location.pathname.includes(chatId)) {
+          navigate('/');
+        }
+      }
+
+    // handle deletion of multiple chat histories.
+    } else {
+      if (confirm("Are you sure you want to remove all chat histories.")) {
+        if (confirm("This is a confirmation check to ensure that this is really what you want to do.")) {
+          deleteChatHistories();
+          navigate('/');
+        }
+      }
     }
   };
 
@@ -40,14 +55,14 @@ function Layout(props) {
           <br/><br/>
           <h2>Chat History</h2>
           <For each={chats()}>{(chat) =>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-left:6em;padding-right:6em;">
+            <div style="display:flex;justify-content:space-between;align-items:center;justify-content:center;margin:0.3em 2em;border:1px solid black;">
               {/* TODO make the latest message date update for each new message sent */}
               <A href={`/${chat.chatType}/${chat.chatId}`} title={"creationDate: " + new Date(chat.creationDate).toUTCString() + " LatestMessageDate: " + new Date(chat.latestMessageDate).toUTCString()}>{chat.chatId}</A>
               <button onClick={() => {handleChatDeletion(chat.chatId)}}>Delete</button>
             </div>
           }</For>
           <br/>
-          <button onClick={() => {deleteChatHistories(); navigate('/');}}>
+          <button onClick={() => {handleChatDeletion();}}>
             Delete Chat History
           </button>
         </div>

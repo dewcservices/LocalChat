@@ -92,3 +92,17 @@
   bottom: 0vh;
   right: 6vw;
 }
+
+.messageLoading::after {
+  content: "";
+  display: inline-block;
+  animation: thinkingAnimation  1s steps(4) infinite;
+  width:0.7em;
+}
+
+@keyframes thinkingAnimation  {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}

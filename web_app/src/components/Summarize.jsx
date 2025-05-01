@@ -1,6 +1,7 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { createSignal, createEffect } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
+import './GeneralChat.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
@@ -26,9 +27,24 @@ function Summarize() {
   const addMessage = (content, fromUser) => {
     let messageDate = Date.now();
     chatHistory.latestMessageDate = messageDate;
-    messages().push({sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content});
-    setMessages(messages());
+    setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content}]);
+    return messageDate;
   };
+
+  const updateMessage = (messageDate, newContent) => {
+
+    // find the message with the matching date.
+    const updatedMessageHistory = messages().map((message) => {
+      if (message.date == messageDate) {
+        // update and return the message with the updated message content.
+        console.log(newContent);
+        return { ...message, content: newContent };
+      }
+      return message;
+    })
+
+    setMessages(updatedMessageHistory);
+  }
 
   const addFile = (content, fileName) => {
     files().push({fileName: fileName, content: content});
@@ -110,12 +126,12 @@ function Summarize() {
       addMessage("Summarize: " + userMessage, true);
       inputTextArea.value = "";
 
-      console.log("Summarizing model...");
-
+      let messageDate = addMessage("Loading Model", false);
       let generator = await pipeline('summarization', selectedModel);
+      updateMessage(messageDate, "Generating Message");
       let output = await generator(userMessage, { max_new_tokens: 100});
 
-      addMessage(output[0].summary_text, false);
+      updateMessage(messageDate, output[0].summary_text);
     }
   };
 
@@ -143,12 +159,12 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
     addFile(fileContent, file.name);
 
-    console.log("Summarizing model...");
-
+    let messageDate = addMessage("Loading Model", false);
     let generator = await pipeline('summarization', selectedModel);
+    updateMessage(messageDate, "Generating Message");
     let output = await generator(fileContent, { max_new_tokens: 100});
 
-    addMessage(output[0].summary_text, false);
+    updateMessage(messageDate, output[0].summary_text);
 
     fileInput.value = null;
   };
@@ -160,7 +176,7 @@ function Summarize() {
         {/* Messages Container */}
         <div class="messagesContainer">
           <For each={messages()}>{(message) =>
-            <div class={message.sender} title={new Date(message.date).toUTCString()}>{message.content}</div>
+            <div class={`${message.sender} ${(message.content == "Loading Model..." || message.content == "Generating Message...") ? "messageLoading" : ""}`} title={new Date(message.date).toUTCString()}>{message.content}</div>
           }</For>
         </div>
 
