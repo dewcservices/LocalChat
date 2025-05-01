@@ -127,9 +127,7 @@ function Summarize() {
       inputTextArea.value = "";
 
       let messageDate = addMessage("Loading Model", false);
-
       let generator = await pipeline('summarization', selectedModel);
-
       updateMessage(messageDate, "Generating Message");
       let output = await generator(userMessage, { max_new_tokens: 100});
 
@@ -159,16 +157,10 @@ function Summarize() {
     }
 
     addMessage("Summarize File: " + file.name, true);
-
-    console.log("Read file: " + fileContent);
-
     addFile(fileContent, file.name);
 
     let messageDate = addMessage("Loading Model", false);
-
-    env.useBrowserCache = false;
     let generator = await pipeline('summarization', selectedModel);
-
     updateMessage(messageDate, "Generating Message");
     let output = await generator(fileContent, { max_new_tokens: 100});
 
