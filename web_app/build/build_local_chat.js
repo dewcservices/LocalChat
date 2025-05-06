@@ -117,14 +117,21 @@ copyDirectory("./dist", "../dist")
 
 // download models
 let model_file_urls = [
+  // Xenova/bart-large-cnn
   ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/config.json", "summarization/Xenova/bart-large-cnn/config.json"],
   ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/generation_config.json", "summarization/Xenova/bart-large-cnn/generation_config.json"],
   ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/tokenizer.json", "summarization/Xenova/bart-large-cnn/tokenizer.json"],
   ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/tokenizer_config.json", "summarization/Xenova/bart-large-cnn/tokenizer_config.json"],
   ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/onnx/decoder_model_merged_quantized.onnx","summarization/Xenova/bart-large-cnn/decoder_model_merged_quantized.onnx"],
-  ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/bart-large-cnn/encoder_model_quantized.onnx"]
+  ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/bart-large-cnn/encoder_model_quantized.onnx"],
+  // Xenova/distilbart-cnn-6-6
+  ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/config.json", "summarization/Xenova/distilbart-cnn-6-6/config.json"],
+  ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/generation_config.json", "summarization/Xenova/distilbart-cnn-6-6/generation_config.json"],
+  ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/tokenizer.json", "summarization/Xenova/distilbart-cnn-6-6/tokenizer.json"],
+  ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/tokenizer_config.json", "summarization/Xenova/distilbart-cnn-6-6/tokenizer_config.json"],
+  ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/decoder_model_merged_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/decoder_model_merged_quantized.onnx"],
+  ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/encoder_model_quantized.onnx"],
 ];
 for (let url of model_file_urls) {
-  console.log(url);
   downloadFile(url[0], `../dist/models/${url[1]}`);
 }
