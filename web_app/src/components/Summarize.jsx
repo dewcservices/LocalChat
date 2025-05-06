@@ -65,6 +65,7 @@ function Summarize() {
   });
 
   let selectedModel = "";
+  let generator;
 
   const setupModel = async () => {
     // configure transformer js environment
@@ -110,6 +111,8 @@ function Summarize() {
       };
       fileReader.readAsArrayBuffer(file);
     }
+
+    generator = await pipeline('summarization', selectedModel);
   };
 
   const summarizeTextInput = async () => {
@@ -126,12 +129,8 @@ function Summarize() {
     addMessage("Summarize: " + userMessage, true);
     inputTextArea.value = "";
 
-    let messageDate = addMessage("Loading Model", false);  // temporary message to indicate progress
-    let generator = await pipeline('summarization', selectedModel);  // load model/pipeline
-
-    updateMessage(messageDate, "Generating Message");  // update temp message to indicate progress
+    let messageDate = addMessage("Generating Message", false);  // temporary message to indicate progress
     let output = await generator(userMessage, { max_new_tokens: 100});  // generate response
-
     updateMessage(messageDate, output[0].summary_text);  // update temp message to response
   };
 
@@ -159,12 +158,8 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
     addFile(fileContent, file.name);
 
-    let messageDate = addMessage("Loading Model", false);  // temporary message to indicate progress
-    let generator = await pipeline('summarization', selectedModel);  // load model/pipeline
-
-    updateMessage(messageDate, "Generating Message");  // update temp message to indicate progress
+    let messageDate = addMessage("Generating Message", false);  // temporary message to indicate progress
     let output = await generator(fileContent, { max_new_tokens: 100});  // generate response
-
     updateMessage(messageDate, output[0].summary_text);  // update temp message to response
 
     fileInput.value = null;  // clear file input element
