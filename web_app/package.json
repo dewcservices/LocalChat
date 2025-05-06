@@ -16,6 +16,7 @@
     "solid-js": "^1.9.5"
   },
   "devDependencies": {
+    "follow-redirects": "^1.15.9",
     "vite": "^6.2.0",
     "vite-plugin-solid": "^2.11.2"
   }
