@@ -34,3 +34,4 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 - [2025/03/31 Xenova's Transformers JS](xenova_transformers.md)
 - [2025/04/03 Issues with Xenova's Transformers JS](xenova_transformers_issues.md)
 - [2025/04/30 Model Selection](model_selection_2025-04-30.md)
+- [2025/05/07 Update on Distribution Packaging](dist_packaging_2025-05-07.md)
