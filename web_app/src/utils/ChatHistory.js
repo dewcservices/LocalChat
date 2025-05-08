@@ -57,7 +57,8 @@ export function getChatHistories() {
       chatId: key,
       chatType: chat.chatType,
       creationDate: chat.creationDate,
-      latestMessageDate: chat.latestMessageDate});
+      latestMessageDate: chat.latestMessageDate
+    });
   }
 
   return chatHistory;
