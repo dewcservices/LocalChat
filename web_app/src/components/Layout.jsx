@@ -15,9 +15,6 @@ function Layout(props) {
   const navigate = useNavigate();
 
   const [chats, setChats] = createSignal(getChatHistories());
-  const [orderBy, setOrderBy] = createSignal("last modified");
-    // FIXME orderBy is reset to 'last modified' upon every reload of this component
-    //       (which is frequent due to some sketchy code... written by me...)
 
   // updates the chat history
   createEffect(() => {
@@ -25,11 +22,7 @@ function Layout(props) {
     
     // order chat history
     // FIXME does not update order when a new message is added to a chat
-    if (orderBy() == "last modified") {
-      chatList.sort((c1, c2) => c2.latestMessageDate - c1.latestMessageDate);
-    } else if (orderBy() == "date created") {
-      chatList.sort((c1, c2) => c2.creationDate - c1.creationDate);
-    }
+    chatList.sort((c1, c2) => c2.latestMessageDate - c1.latestMessageDate);
     setChats(chatList);
 
     location.pathname;  // whenever the URL changes, re-fetch the chat history
@@ -65,13 +58,6 @@ function Layout(props) {
           <br/><br/>
 
           <h2>Chat History</h2>
-          <label for="orderChatsBy">Order By:  </label>
-          <select value={orderBy()} onChange={(e) => setOrderBy(e.target.value)} id="orderChatsBy">
-            <option value="last modified">last modified</option>
-            <option value="date created">date created</option>
-          </select>
-          <br/><br/>
-
           <For each={chats()}>{(chat) =>
             <div style="display:flex;justify-content:space-between;align-items:center;justify-content:center;margin:0.3em 2em;border:1px solid black;">
               {/* TODO make the latest message date update for each new message sent */}
