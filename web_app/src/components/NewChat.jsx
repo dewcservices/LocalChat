@@ -1,4 +1,6 @@
+import { A } from '@solidjs/router';
 import './NewChat.css';
+
 
 function NewChat() {
   return (
@@ -6,10 +8,10 @@ function NewChat() {
       <div class="newChat">
         <h2>Select an option:</h2>
         <div class="newChatButtons">
-          <a href="/summarize">Summarize Text</a>
-          <a>Ask Question</a>
-          <a href="/chat">General Chat</a>
-          <a>Placeholder 2</a>
+          <A href="/summarize">Summarize Text</A>
+          <A href="/">Ask Question</A>
+          <A href="/chat">General Chat</A>
+          <A href="/">Placeholder 2</A>
         </div>
       </div>
     </>

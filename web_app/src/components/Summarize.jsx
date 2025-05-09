@@ -1,4 +1,4 @@
-import { pipeline, env } from '@huggingface/transformers';
+import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
 import { createSignal, createEffect } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 import './GeneralChat.css';
@@ -120,6 +120,11 @@ function Summarize() {
       alert("A model must be selected before summarizing text. Please select a model.");
       return;
     }
+    // TODO improve UX around model loading, promise handling, and error handling
+    if (!(generator instanceof SummarizationPipeline)) {
+      alert("Model is loading... please try again.");
+      return;
+    }
 
     let inputTextArea = document.getElementById("inputTextArea");
     let userMessage = inputTextArea.value;
@@ -137,6 +142,11 @@ function Summarize() {
   const summarizeFileInput = async () => {
     if (selectedModel == "") {
       alert("A model must be selected before summarizing text. Please select a model.");
+      return;
+    }
+    // TODO improve UX around model loading, promise handling, and error handling
+    if (!(generator instanceof SummarizationPipeline)) {
+      alert("Model is loading... please try again.");
       return;
     }
 
