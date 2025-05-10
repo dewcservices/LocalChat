@@ -13,7 +13,7 @@
   gap: 2em;
 }
 
-.newChatButtons a {
+.newChatButtons A {
   border-radius: 8px;
   border: 1px solid transparent;
   text-align: center;
@@ -26,10 +26,10 @@
   cursor: pointer;
   transition: border-color 0.25s;
 }
-.newChatButtons a:hover {
+.newChatButtons A:hover {
   border-color: lightblue;
 }
-.newChatButtons a:focus,
-.newChatButtons a:focus-visible {
+.newChatButtons A:focus,
+.newChatButtons A:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }

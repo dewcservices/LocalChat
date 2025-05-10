@@ -71,6 +71,8 @@ async function downloadFile(url, outputPath) {
 
 const args = process.argv.slice(2);
 
+let download_models = args[1] == "wm" ? false : true;
+
 let target_operating_system = args[0];
 let fileserver_exe_name = "";
 let go_build_command = "";
@@ -132,6 +134,8 @@ let model_file_urls = [
   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/decoder_model_merged_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/decoder_model_merged_quantized.onnx"],
   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/encoder_model_quantized.onnx"],
 ];
-for (let url of model_file_urls) {
-  downloadFile(url[0], `../dist/models/${url[1]}`);
+if (download_models) {
+  for (let url of model_file_urls) {
+    downloadFile(url[0], `../dist/models/${url[1]}`);
+  }
 }

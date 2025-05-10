@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
-import { Router, Route, useNavigate } from '@solidjs/router';
+import { HashRouter, Route, useNavigate } from '@solidjs/router';
 
 import './index.css';
 import { newChatId, saveChatHistory } from './utils/ChatHistory.js';
@@ -41,13 +41,14 @@ const newChat = () => {
 
 render(
   () => (
-    <Router root={Layout}>
+    <HashRouter root={Layout}>
       <Route path="/" component={NewChat} />
       <Route path="summarize" component={() => newSummarizeChat()} />
       <Route path="summarize/:id" component={Summarize} />
       <Route path="chat" component={() => newChat()} />
       <Route path="chat/:id" component={GeneralChat} />
-    </Router>
+      <Route path="*" component={NewChat} />
+    </HashRouter>
   ),
   document.getElementById('root')
 );
