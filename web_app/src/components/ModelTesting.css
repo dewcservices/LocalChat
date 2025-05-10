@@ -1,0 +1,39 @@
+.modelTesting {
+    margin: 3%;
+}
+
+input[type=file] {
+    display: none;
+}
+
+.modelSelectLabel {
+    border: 1px solid #474747;
+    border-radius: 3px;
+    background-color: #292929;
+    margin-right: 1vw;
+    padding: 1vh;
+}
+
+.modelSelectLabel:hover {
+    border-color: lightblue;
+    cursor: pointer;
+}
+
+.tableContainer {
+    margin-top: 2em;
+    border: 1px solid black;
+    overflow-x: auto;
+    max-width: 75vw;
+}
+  
+.tableMMLU {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    overflow: hidden;
+}
+
+.tableMMLU th, .tableMMLU td {
+    border: 1px solid black;
+    width: 6em;
+}

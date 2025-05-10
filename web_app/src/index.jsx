@@ -9,6 +9,7 @@ import Layout from './components/Layout.jsx';
 import NewChat from './components/NewChat.jsx';
 import Summarize from './components/Summarize.jsx';
 import GeneralChat from './components/GeneralChat.jsx';
+import ModelTesting from './components/ModelTesting.jsx'
 
 
 // TODO edit behavior so that new chats aren't saved until the user sends a message within the chat
@@ -48,6 +49,7 @@ render(
       <Route path="chat" component={() => newChat()} />
       <Route path="chat/:id" component={GeneralChat} />
       <Route path="*" component={NewChat} />
+      <Route path="models" component={ModelTesting} />
     </HashRouter>
   ),
   document.getElementById('root')

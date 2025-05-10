@@ -74,6 +74,8 @@ function Layout(props) {
           <br/>
 
           <button onClick={deleteAllChats}>Delete Chat History</button>
+          <br />
+          <A href="models">Model Testing</A>
         </div>
         <div class="pageContainer">
           {props.children} {/* nested components are passed in here */}

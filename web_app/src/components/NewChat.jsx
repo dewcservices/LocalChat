@@ -11,7 +11,7 @@ function NewChat() {
           <A href="/summarize">Summarize Text</A>
           <A href="/">Ask Question</A>
           <A href="/chat">General Chat</A>
-          <A href="/">Placeholder 2</A>
+          <A href="/models">Model Testing</A>
         </div>
       </div>
     </>
