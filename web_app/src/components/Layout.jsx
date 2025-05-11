@@ -59,7 +59,7 @@ function Layout(props) {
 
           <h2>Chat History</h2>
           <For each={chats()}>{(chat) =>
-            <div style="display:flex;justify-content:space-between;align-items:center;justify-content:center;margin:0.3em 2em;border:1px solid black;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding-left:6em;padding-right:6em;">
               {/* TODO make the latest message date update for each new message sent */}
               <A 
                 href={`/${chat.chatType}/${chat.chatId}`} 

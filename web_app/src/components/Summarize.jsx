@@ -1,7 +1,7 @@
 import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
 import { createSignal, createEffect } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
-import './GeneralChat.css';
+import styles from './Chat.module.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory } from '../utils/ChatHistory';
@@ -52,7 +52,7 @@ function Summarize() {
 
   // scrolls to the most recently appended message
   createEffect(() => {
-    let messageContainer = document.getElementsByClassName("messagesContainer")[0];
+    let messageContainer = document.getElementById("messagesContainer");
     let lastMessage = messageContainer.children[messages().length - 1];
 
     lastMessage?.scrollIntoView({behavior: "smooth"});
@@ -134,7 +134,7 @@ function Summarize() {
     addMessage("Summarize: " + userMessage, true);
     inputTextArea.value = "";
 
-    let messageDate = addMessage("Generating Message", false);  // temporary message to indicate progress
+    let messageDate = addMessage("Generating Message...", false);  // temporary message to indicate progress
     let output = await generator(userMessage, { max_new_tokens: 100});  // generate response
     updateMessage(messageDate, output[0].summary_text);  // update temp message to response
   };
@@ -168,7 +168,7 @@ function Summarize() {
     addMessage("Summarize File: " + file.name, true);
     addFile(fileContent, file.name);
 
-    let messageDate = addMessage("Generating Message", false);  // temporary message to indicate progress
+    let messageDate = addMessage("Generating Message...", false);  // temporary message to indicate progress
     let output = await generator(fileContent, { max_new_tokens: 100});  // generate response
     updateMessage(messageDate, output[0].summary_text);  // update temp message to response
 
@@ -177,30 +177,35 @@ function Summarize() {
 
   return (
     <>
-      <div class="chatContainer">
+      <div class={styles.chatContainer}>
 
         {/* Messages Container */}
-        <div class="messagesContainer">
+        <div id="messagesContainer" class={styles.messagesContainer}>
           <For each={messages()}>{(message) =>
-            <div class={`${message.sender} ${(message.content == "Loading Model..." || message.content == "Generating Message...") ? "messageLoading" : ""}`} title={new Date(message.date).toUTCString()}>{message.content}</div>
+            <div 
+              class={`${message.sender == "userMessage" ? styles.userMessage : styles.chatbotMessage} 
+                      ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
+              title={new Date(message.date).toUTCString()}
+            >
+              {message.content}
+            </div>
           }</For>
         </div>
 
         {/* Input Container */}
-        <div class="inputContainer">
+        <div class={styles.inputContainer}>
           <div>Enter text to summarize in area below:</div>
           <textarea id="inputTextArea"></textarea>
-          <div class="fileUploadContainer">
-            <label for="folderInput" class="fileUploadLabel">Select Model</label>
+          <div class={styles.fileUploadContainer}>
+            <label for="folderInput" class={styles.fileUploadLabel}>Select Model</label>
             <input type="file" id="folderInput" webkitdirectory multiple onChange={setupModel} />
-            <label for="fileInput" class="fileUploadLabel">Summarize File</label>
+            <label for="fileInput" class={styles.fileUploadLabel}>Summarize File</label>
             <input type="file" id="fileInput" accept=".txt, .html, .docx" onChange={summarizeFileInput} />
-            <label onClick={summarizeTextInput} class="fileUploadLabel">Summarize Text</label>
+            <label onClick={summarizeTextInput} class={styles.fileUploadLabel}>Summarize Text</label>
           </div>
         </div>
 
       </div>
- 
     </>
   );
 }

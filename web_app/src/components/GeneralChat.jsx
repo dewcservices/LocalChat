@@ -1,6 +1,6 @@
 import { createSignal, createEffect } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
-import './GeneralChat.css';
+import styles from './Chat.module.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
 import { getChatHistory, saveChatHistory} from '../utils/ChatHistory';
@@ -39,7 +39,7 @@ function GeneralChat() {
 
   // scrolls to the most recently appended message
   createEffect(() => {
-    let messageContainer = document.getElementsByClassName("messagesContainer")[0];
+    let messageContainer = document.getElementById("messagesContainer");
     let lastMessage = messageContainer.children[messages().length - 1];
 
     lastMessage?.scrollIntoView({behavior: "smooth"});
@@ -116,25 +116,32 @@ function GeneralChat() {
 
   return (
     <>
-      <div class="chatContainer">
+      <div class={styles.chatContainer}>
 
         {/* Messages Container */}
-        <div class="messagesContainer">
+        <div id="messagesContainer" class={styles.messagesContainer}>
           <For each={messages()}>{(message) =>
-            <div class={message.sender} title={new Date(message.date).toUTCString()}>{message.content}</div>
+            <div 
+              class={message.sender == "userMessage" ? styles.userMessage : styles.chatbotMessage} 
+              title={new Date(message.date).toUTCString()}
+            >
+              {message.content}
+            </div>
           }</For>
         </div>
 
         {/* Input Container */}
-        <div class="inputContainer">
+        <div class={styles.inputContainer}>
           <textarea id="inputTextArea"></textarea>
-          <div class="fileUploadContainer">
-            <label for="fileInput" class="fileUploadLabel" title="Select one or more files to upload">Upload File/s</label>
+          <div class={styles.fileUploadContainer}>
+            <label for="fileInput" class={styles.fileUploadLabel} title="Select one or more files to upload">Upload File/s</label>
             <input type="file" id="fileInput" multiple accept=".txt, .html, .docx" onChange={updateFileCount} />
-            <label for="folderInput" class="fileUploadLabel"
-              title="Select a folder to upload all files (not supported on older browsers)">Upload Folder</label>
+            <label 
+              for="folderInput" class={styles.fileUploadLabel}
+              title="Select a folder to upload all files (not supported on older browsers)"
+            >Upload Folder</label>
             <input type="file" id="folderInput" webkitdirectory multiple accept=".txt, .html, .docx" onChange={updateFileCount} />
-            <label class="fileCount">{fileCount()} Files Selected</label>
+            <label class={styles.fileCount}>{fileCount()} Files Selected</label>
           </div>
           <button onClick={getUserInput}>Send</button>
         </div>

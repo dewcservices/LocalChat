@@ -1,13 +1,13 @@
 import { A } from '@solidjs/router';
-import './NewChat.css';
+import styles from './NewChat.module.css';
 
 
 function NewChat() {
   return (
     <>
-      <div class="newChat">
+      <div class={styles.newChat}>
         <h2>Select an option:</h2>
-        <div class="newChatButtons">
+        <div class={styles.newChatButtons}>
           <A href="/summarize">Summarize Text</A>
           <A href="/">Ask Question</A>
           <A href="/chat">General Chat</A>
