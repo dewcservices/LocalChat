@@ -2,14 +2,13 @@
     margin: 3%;
 }
 
-input[type=file] {
-    display: none;
+.inputButton {
 }
 
 .modelSelectLabel {
     border: 1px solid #474747;
     border-radius: 3px;
-    background-color: #292929;
+    background-color: #221d1d;
     margin-right: 1vw;
     padding: 1vh;
 }
@@ -17,6 +16,10 @@ input[type=file] {
 .modelSelectLabel:hover {
     border-color: lightblue;
     cursor: pointer;
+}
+
+.hidden {
+    display: none;
 }
 
 .tableContainer {
