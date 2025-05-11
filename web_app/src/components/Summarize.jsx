@@ -68,6 +68,9 @@ function Summarize() {
   let generator;
 
   const setupModel = async () => {
+
+    console.log("Setting up model...");
+
     // configure transformer js environment
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
@@ -112,7 +115,25 @@ function Summarize() {
       fileReader.readAsArrayBuffer(file);
     }
 
-    generator = await pipeline('summarization', selectedModel);
+    console.log("testing GPU compatibility");
+
+    let device = "wasm";
+
+    // Check if the webGPU API is available.
+    if (navigator.gpu) {
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        console.log("Adapter:", adapter);
+        if (adapter !== null) device = "webgpu";
+      } catch {
+        console.warn("Error detecting GPU, defaulting to using CPU.");
+      }
+    }
+
+    console.log("creating model pipeline");
+
+    generator = await pipeline('summarization', selectedModel, { device: device });
+    console.log("Finished model setup using", device);
   };
 
   const summarizeTextInput = async () => {
