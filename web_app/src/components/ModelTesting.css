@@ -3,6 +3,23 @@
 }
 
 .inputButton {
+    border: 1px solid #474747;
+    border-radius: 3px;
+    background-color: #292929;
+    margin-right: 1vw;
+    padding: 1vh;
+    color: white;
+}
+
+.inputButton:hover {
+    border-color: lightblue;
+    cursor: pointer;
+}
+
+.inputButton:disabled {
+    cursor: auto;
+    color: gray;
+    border-color: #474747;
 }
 
 .modelSelectLabel {
@@ -27,6 +44,7 @@
     border: 1px solid black;
     overflow-x: auto;
     max-width: 75vw;
+    scrollbar-color: black #292929;
 }
   
 .tableMMLU {
@@ -39,4 +57,5 @@
 .tableMMLU th, .tableMMLU td {
     border: 1px solid black;
     width: 6em;
+    text-align: center;
 }
