@@ -54,6 +54,8 @@ function Layout(props) {
         <div class="sidebarContainer">
 
           <h1>Local Chat</h1>
+          <A href="models">Model Testing</A>
+          <br/><br/>
           <A href="/">Create New Chat</A>
           <br/><br/>
 
@@ -75,7 +77,6 @@ function Layout(props) {
 
           <button onClick={deleteAllChats}>Delete Chat History</button>
           <br />
-          <A href="models">Model Testing</A>
         </div>
         <div class="pageContainer">
           {props.children} {/* nested components are passed in here */}

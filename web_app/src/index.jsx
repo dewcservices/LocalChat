@@ -48,8 +48,8 @@ render(
       <Route path="summarize/:id" component={Summarize} />
       <Route path="chat" component={() => newChat()} />
       <Route path="chat/:id" component={GeneralChat} />
-      <Route path="*" component={NewChat} />
       <Route path="models" component={ModelTesting} />
+      <Route path="*" component={NewChat} />
     </HashRouter>
   ),
   document.getElementById('root')
