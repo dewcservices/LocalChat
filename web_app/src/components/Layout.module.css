@@ -1,0 +1,24 @@
+.chatHistoryContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding:0.5em;
+}
+
+.chatHistoryEntry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.chatHistoryEntry A {
+    flex: 1;
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+    color: lightblue;
+    text-decoration: none;
+}

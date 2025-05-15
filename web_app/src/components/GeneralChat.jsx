@@ -3,7 +3,7 @@ import { useParams, useNavigate } from '@solidjs/router';
 import styles from './Chat.module.css';
 
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../utils/FileReaders';
-import { getChatHistory, saveChatHistory} from '../utils/ChatHistory';
+import { getChatHistory, saveMessages, saveFiles } from '../utils/ChatHistory';
 
 
 function GeneralChat() {
@@ -47,8 +47,9 @@ function GeneralChat() {
 
   // saves messages to local storage
   createEffect(() => {
-    if (messages().length > 0) saveChatHistory(params.id, 'chat', chatHistory.creationDate, 
-      chatHistory.latestMessageDate, messages(), files());
+    if (messages().length <= 0) return;
+    saveMessages(chatHistory.chatId, chatHistory.latestMessageDate, messages());
+    saveFiles(chatHistory.chatId, files());
   });
 
   const [fileCount, setFileCount] = createSignal(0);

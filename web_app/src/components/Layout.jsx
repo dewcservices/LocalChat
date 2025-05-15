@@ -1,7 +1,8 @@
 import { createSignal, createEffect } from "solid-js";
 import { useLocation, useNavigate, A } from "@solidjs/router";
 
-import { getChatHistories, deleteChatHistories, deleteChatHistory } from "../utils/ChatHistory";
+import styles from './Layout.module.css';
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
 
 
 function Layout(props) {
@@ -14,6 +15,8 @@ function Layout(props) {
   const navigate = useNavigate();
 
   const [chats, setChats] = createSignal(getChatHistories());
+  const [renamingId, setRenamingId] = createSignal(null);
+  const [newTitle, setNewTitle]  = createSignal("");
 
   // updates the chat history
   createEffect(() => {
@@ -46,6 +49,20 @@ function Layout(props) {
     navigate('/');
     setChats([]);
   };
+  
+  // start renaming mode for a given chat
+  const startRenaming = (chatId) => {
+    setRenamingId(chatId);
+    const chat = chats().find(c => c.chatId === chatId);
+    setNewTitle(chat?.title || chat.chatId);
+  };
+
+  // apply and save new title
+  const applyRename = () => {
+    renameChat(renamingId(), newTitle());
+    setChats(getChatHistories());
+    setRenamingId(null);
+  };
 
   return (
     <>
@@ -60,16 +77,37 @@ function Layout(props) {
 
           <h2>Chat History</h2>
           <For each={chats()}>{(chat) =>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding-left:6em;padding-right:6em;">
+            <div class={styles.chatHistoryContainer}>
               {/* TODO make the latest message date update for each new message sent */}
-              <A 
-                href={`/${chat.chatType}/${chat.chatId}`} 
-                title={"creationDate: " + new Date(chat.creationDate).toUTCString() + 
-                  " LatestMessageDate: " + new Date(chat.latestMessageDate).toUTCString()}
+              <Show
+                when={renamingId() === chat.chatId}
+                fallback={
+                  <div class={styles.chatHistoryEntry}>
+                    <A 
+                      href={`/${chat.chatType}/${chat.chatId}`}
+                      title={
+                        "Created: " + new Date(chat.creationDate).toUTCString() +
+                        " | Latest: " + new Date(chat.latestMessageDate).toUTCString()
+                      }
+                    >
+                      {chat.chatName}
+                    </A>
+                    <div>
+                      <button onClick={() => startRenaming(chat.chatId)}>Rename</button>
+                      <button onClick={() => deleteChat(chat.chatId)}>Delete</button>
+                    </div>
+                  </div>
+                }
               >
-                {chat.chatId}
-              </A>
-              <button onClick={() => {deleteChat(chat.chatId);}}>Delete</button>
+                {/* section handling renaming UI */}
+                <input type="text" value={newTitle()}
+                  onInput={e => setNewTitle(e.currentTarget.value)}
+                  onKeyDown={e => e.key === 'Enter' && applyRename()}
+                  style="margin-right:0.5em; width: 200px;"
+                />
+                <button onClick={applyRename}>Save</button>
+                <button onClick={() => setRenamingId(null)}>Cancel</button>
+              </Show>
             </div>
           }</For>
           <br/>

@@ -3,7 +3,7 @@ import { render } from 'solid-js/web';
 import { HashRouter, Route, useNavigate } from '@solidjs/router';
 
 import './index.css';
-import { newChatId, saveChatHistory } from './utils/ChatHistory.js';
+import { newChatId, createNewChat, saveMessages } from './utils/ChatHistory.js';
 
 import Layout from './components/Layout.jsx';
 import NewChat from './components/NewChat.jsx';
@@ -20,8 +20,11 @@ import ModelTesting from './components/ModelTesting.jsx'
 const newSummarizeChat = () => {
   let newId = newChatId();
   let currentDate = Date.now();
-  saveChatHistory(newId, 'summarize', currentDate, currentDate,
-    [{sender: 'chatbotMessage', date: currentDate, content: "Hi, I can summarize information for you. Please enter some text or a file and I'll summarize the contents."}]
+
+  createNewChat(newId, 'summarize', currentDate);
+  saveMessages(newId, currentDate,
+    [{sender: 'chatbotMessage', date: currentDate, 
+      content: "Hi, I can summarize information for you. Please enter some text or a file and I'll summarize the contents."}]
   );
 
   const navigate = useNavigate();
@@ -31,7 +34,9 @@ const newSummarizeChat = () => {
 const newChat = () => {
   let newId = newChatId();
   let currentDate = Date.now();
-  saveChatHistory(newId, 'chat', currentDate, currentDate,
+
+  createNewChat(newId, 'chat', currentDate);
+  saveMessages(newId, currentDate,
     [{sender: 'chatbotMessage', date: currentDate, content: "Hi, this is a general chat where we can have conversations."}]
   );
 
