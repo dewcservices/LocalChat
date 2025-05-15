@@ -24,9 +24,24 @@ basic fileserver executable included in the distribution the app does work on Fi
 
 Additionally, the web-app has yet to be tested on older browser versions.
 
-To summarise:
-- the app distribution now consists of `index.html` (the app), a `models` folder containing the supported models, and a
-`fileserver` executable.
-- `index.html` can be ran using modern Chrome and Edge browsers using the file protocol.
-- Firefox cannot run the `index.html` file using the file protocol, however, can run the app using the `fileserver` 
-executable.
+### To summarise:
+- `index.html`is the **single-file**.
+- `models/` is the directory that contains all the downloaded supported TransformerJS models.
+- `fileserver` executable used for serving over HTTP.
+
+#### Brower support over `file://`
+As of now we have verified that the following browsers are supported:
+| Browser     | Status      |
+| ----------- | ----------- |
+| Modern Chrome      | ✅          |
+| Moden Edge        | ✅          |
+| Modern FireFox| ❌* |
+- *firefox as of now doesnt work, however if launched via the included `fileserver`, firefox works fine.
+
+#### Debugging steps and other considerations:
+- We did breifly look into why firefox doesn't work as to disable javascript minification during bundling as to get a clearer picture and pinpoint why it only errors on firefox.
+- However, the specifications only requires both chrome and edge support over `file://`, thus we decided not to persue this any further.
+
+#### Next steps
+- Testing the `file://` with older versions of edge and chrome.
+- We may come back and revisit the firefox support if time allows as to make a more **robust system**.
