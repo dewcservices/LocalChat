@@ -116,8 +116,8 @@ export function rename(chatId, newTitle) {
     const chat = JSON.parse(raw);
     chat.title = newTitle;
     localStorage.setItem(chatId, JSON.stringify(chat));
+  // empyt catch block to ignore any parsing errors
   } catch {
-    // ignore parse errors
   }
 }
 
