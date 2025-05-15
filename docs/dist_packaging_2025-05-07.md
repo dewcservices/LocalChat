@@ -35,7 +35,7 @@ As of now we have verified that the following browsers are supported:
 | ----------- | ----------- |
 | Modern Chrome      | ✅          |
 | Moden Edge        | ✅          |
-| Modern FireFox| ❌*
+| Modern FireFox| ❌* |
 - *firefox as of now doesnt work, however if launched via the included `fileserver`, firefox works fine.
 
 #### Debugging steps and other considerations:
@@ -45,5 +45,3 @@ As of now we have verified that the following browsers are supported:
 #### Next steps
 - Testing the `file://` with older versions of edge and chrome.
 - We may come back and revisit the firefox support if time allows as to make a more **robust system**.
-
-
