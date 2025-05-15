@@ -57,8 +57,7 @@ export function getChatHistories() {
       chatId: key,
       chatType: chat.chatType,
       creationDate: chat.creationDate,
-      latestMessageDate: chat.latestMessageDate,
-      title: chat.title ||""
+      latestMessageDate: chat.latestMessageDate
     });
   }
 
@@ -103,21 +102,3 @@ export function getChatHistory(chatId) {
   let chat = JSON.parse(chatJson);
   return chat;
 }
-
-/**
- * Renames a chat by updating its title in local storage.
- * @param {string} chatId 
- * @param {string} newTitle 
- */
-export function rename(chatId, newTitle) {
-  const raw = localStorage.getItem(chatId);
-  if (!raw) return;
-  try {
-    const chat = JSON.parse(raw);
-    chat.title = newTitle;
-    localStorage.setItem(chatId, JSON.stringify(chat));
-  // empty catch block to ignore any parsing errors
-  } catch {
-  }
-}
-
