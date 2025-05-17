@@ -93,12 +93,14 @@ function Chat() {
 
         {/* Input Container */}
         <ChatContext.Provider value={{ addMessage, updateMessage, addFile }}>
-          <Show when={chatHistory()?.chatType == "summarize"}>
-            <Summarize />
-          </Show>
-          <Show when={chatHistory()?.chatType == "general"}>
-            <GeneralChat />
-          </Show>
+          <Switch>
+            <Match when={chatHistory()?.chatType === "summarize"}>
+              <Summarize />
+            </Match>
+            <Match when={chatHistory()?.chatType === "general"}>
+              <GeneralChat />
+            </Match>
+          </Switch>
         </ChatContext.Provider>
 
       </div>
