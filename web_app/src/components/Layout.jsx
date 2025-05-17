@@ -78,7 +78,6 @@ function Layout(props) {
           <h2>Chat History</h2>
           <For each={chatHistories()}>{(chat) =>
             <div class={styles.chatHistoryContainer}>
-              {/* TODO make the latest message date update for each new message sent */}
               <Show
                 when={renamingId() === chat.chatId}
                 fallback={
