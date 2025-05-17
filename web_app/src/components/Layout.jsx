@@ -1,6 +1,7 @@
 import { createSignal, createEffect } from "solid-js";
 import { useLocation, useNavigate, A } from "@solidjs/router";
 
+import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
 import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
 
@@ -14,7 +15,7 @@ function Layout(props) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [chats, setChats] = createSignal(getChatHistories());
+  const [chatHistories, setChatHistories] = createSignal(getChatHistories());
   const [renamingId, setRenamingId] = createSignal(null);
   const [newTitle, setNewTitle]  = createSignal("");
 
@@ -22,11 +23,10 @@ function Layout(props) {
   createEffect(() => {
     let chatList = getChatHistories();
     
-    // order chat history
-    // FIXME does not update order when a new message is added to a chat
     chatList.sort((c1, c2) => c2.latestMessageDate - c1.latestMessageDate);
-    setChats(chatList);
+    setChatHistories(chatList);
 
+    chatHistories();  // whenever chatHistories is set, re-order it
     location.pathname;  // whenever the URL changes, re-fetch the chat history
   });
   
@@ -34,7 +34,7 @@ function Layout(props) {
     if (!confirm("are you sure you want to remove this history?")) return;
 
     deleteChatHistory(chatId);
-    setChats(getChatHistories());
+    setChatHistories(getChatHistories());
 
     if (location.pathname.includes(chatId)) {
       navigate('/');
@@ -47,20 +47,20 @@ function Layout(props) {
 
     deleteChatHistories();
     navigate('/');
-    setChats([]);
+    setChatHistories([]);
   };
   
   // start renaming mode for a given chat
   const startRenaming = (chatId) => {
     setRenamingId(chatId);
-    const chat = chats().find(c => c.chatId === chatId);
+    const chat = chatHistories().find(c => c.chatId === chatId);
     setNewTitle(chat?.title || chat.chatId);
   };
 
   // apply and save new title
   const applyRename = () => {
     renameChat(renamingId(), newTitle());
-    setChats(getChatHistories());
+    setChatHistories(getChatHistories());
     setRenamingId(null);
   };
 
@@ -76,7 +76,7 @@ function Layout(props) {
           <br/><br/>
 
           <h2>Chat History</h2>
-          <For each={chats()}>{(chat) =>
+          <For each={chatHistories()}>{(chat) =>
             <div class={styles.chatHistoryContainer}>
               {/* TODO make the latest message date update for each new message sent */}
               <Show
@@ -84,11 +84,8 @@ function Layout(props) {
                 fallback={
                   <div class={styles.chatHistoryEntry}>
                     <A 
-                      href={`/${chat.chatType}/${chat.chatId}`}
-                      title={
-                        "Created: " + new Date(chat.creationDate).toUTCString() +
-                        " | Latest: " + new Date(chat.latestMessageDate).toUTCString()
-                      }
+                      href={`/chat/${chat.chatId}`}
+                      title={`Created: ${new Date(chat.creationDate).toUTCString()} | Latest: ${new Date(chat.latestMessageDate).toUTCString()}`}
                     >
                       {chat.chatName}
                     </A>
@@ -116,7 +113,9 @@ function Layout(props) {
           <br />
         </div>
         <div class="pageContainer">
-          {props.children} {/* nested components are passed in here */}
+          <ChatHistoriesContext.Provider value={{ setChatHistories }}>
+            {props.children} {/* nested components are passed in here */}
+          </ChatHistoriesContext.Provider>
         </div>
       </div>
     </>

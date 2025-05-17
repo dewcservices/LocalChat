@@ -1,14 +1,12 @@
 /* @refresh reload */
 import { render } from 'solid-js/web';
-import { HashRouter, Route, useNavigate } from '@solidjs/router';
+import { HashRouter, Route } from '@solidjs/router';
 
 import './index.css';
-import { newChatId, createNewChat, saveMessages } from './utils/ChatHistory.js';
 
 import Layout from './components/Layout.jsx';
 import NewChat from './components/NewChat.jsx';
-import Summarize from './components/Summarize.jsx';
-import GeneralChat from './components/GeneralChat.jsx';
+import Chat from './components/chats/Chat.jsx';
 import ModelTesting from './components/ModelTesting.jsx'
 
 
@@ -17,42 +15,11 @@ import ModelTesting from './components/ModelTesting.jsx'
 //      a response, i.e. when inferencing.
 
 
-const newSummarizeChat = () => {
-  let newId = newChatId();
-  let currentDate = Date.now();
-
-  createNewChat(newId, 'summarize', currentDate);
-  saveMessages(newId, currentDate,
-    [{sender: 'chatbotMessage', date: currentDate, 
-      content: "Hi, I can summarize information for you. Please enter some text or a file and I'll summarize the contents."}]
-  );
-
-  const navigate = useNavigate();
-  navigate(`/summarize/${newId}`, { replace: true });
-};
-
-const newChat = () => {
-  let newId = newChatId();
-  let currentDate = Date.now();
-
-  createNewChat(newId, 'chat', currentDate);
-  saveMessages(newId, currentDate,
-    [{sender: 'chatbotMessage', date: currentDate, content: "Hi, this is a general chat where we can have conversations."}]
-  );
-
-  const navigate = useNavigate();
-  navigate(`/chat/${newId}`, { replace: true });
-};
-
-
 render(
   () => (
     <HashRouter root={Layout}>
       <Route path="/" component={NewChat} />
-      <Route path="summarize" component={() => newSummarizeChat()} />
-      <Route path="summarize/:id" component={Summarize} />
-      <Route path="chat" component={() => newChat()} />
-      <Route path="chat/:id" component={GeneralChat} />
+      <Route path="chat/:id" component={Chat} />
       <Route path="models" component={ModelTesting} />
       <Route path="*" component={NewChat} />
     </HashRouter>
