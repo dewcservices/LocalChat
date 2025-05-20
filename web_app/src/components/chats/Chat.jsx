@@ -54,7 +54,14 @@ function Chat() {
     setMessages(updatedMessageHistory);
   }
 
+  const copyMessage = (date) => {
+    let message = messages().find((message) => message.date == date);
+    console.log(message.content);
+    navigator.clipboard.writeText(message.content);
+  }
+
   const addFile = (content, fileName) => {
+    console.log(messages())
     files().push({fileName: fileName, content: content});
     setFiles(files());
   };
@@ -81,13 +88,17 @@ function Chat() {
         {/* Messages Container */}
         <div id="messagesContainer" class={styles.messagesContainer}>
           <For each={messages()}>{(message) =>
-            <div 
-              class={`${message.sender == "userMessage" ? styles.userMessage : styles.chatbotMessage} 
-                      ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
-              title={new Date(message.date).toUTCString()}
-            >
-              {message.content}
-            </div>
+            <>
+              <div 
+                class={`${message.sender == "userMessage" ? styles.userMessage : styles.chatbotMessage} 
+                        ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
+                title={new Date(message.date).toUTCString()}
+              >
+                {message.content}
+                <br />
+                <button onClick={() => copyMessage(message.date)}>copy</button>
+              </div>
+            </>
           }</For>
         </div>
 
