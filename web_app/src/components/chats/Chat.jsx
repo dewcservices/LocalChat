@@ -90,14 +90,15 @@ function Chat() {
           <For each={messages()}>{(message) =>
             <>
               <div 
-                class={`${message.sender == "userMessage" ? styles.userMessage : styles.chatbotMessage} 
+                class={`${message.sender == "userMessage" ? styles.userMessage + " " + styles.rightAlignedMessage : styles.chatbotMessage} 
                         ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
                 title={new Date(message.date).toUTCString()}
               >
                 {message.content}
-                <br />
-                <button onClick={() => copyMessage(message.date)}>copy</button>
               </div>
+              <button class={`${
+                message.sender == "userMessage" ? styles.copyButton + " " + styles.rightAlignedMessage : styles.copyButton
+              }`} onClick={() => copyMessage(message.date)} title="Copy message">📋</button>
             </>
           }</For>
         </div>
