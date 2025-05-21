@@ -26,7 +26,6 @@
   border-radius: 5px;
   padding: 1vh;
   display: block;
-  margin: 4vh 0 2vh 0;
   width: fit-content;
 }
 
@@ -43,6 +42,10 @@
 
 .chatbotMessage {
   background-color: #292929;
+}
+
+.userMessage, .chatbotMessage {
+  margin: 1vh 0;
 }
 
 .rightAlignedMessage {
@@ -126,4 +129,10 @@
 
 .copyButton:active {
   border: 1px solid white;
+}
+
+.modelNameText {
+  border: none !important;
+  background-color: #292929;
+  margin-top: 2vh;
 }

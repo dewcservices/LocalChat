@@ -89,6 +89,7 @@ function Chat() {
         <div id="messagesContainer" class={styles.messagesContainer}>
           <For each={messages()}>{(message) =>
             <>
+              {message.modelName != null ? <div class={styles.modelNameText}>{message.modelName}</div> : ""}
               <div 
                 class={`${message.sender == "userMessage" ? styles.userMessage + " " + styles.rightAlignedMessage : styles.chatbotMessage} 
                         ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
