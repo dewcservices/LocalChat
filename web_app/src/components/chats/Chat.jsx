@@ -30,10 +30,10 @@ function Chat() {
     setFiles(chatHistory().files);
   });
   
-  const addMessage = (content, fromUser) => {
+  const addMessage = (content, fromUser, selectedModel = null) => {
     let messageDate = Date.now();
     chatHistory().latestMessageDate = messageDate;
-    setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content}]);
+    setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 
     chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
 
