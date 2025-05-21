@@ -30,10 +30,10 @@ function Chat() {
     setFiles(chatHistory().files);
   });
   
-  const addMessage = (content, fromUser) => {
+  const addMessage = (content, fromUser, selectedModel = null) => {
     let messageDate = Date.now();
     chatHistory().latestMessageDate = messageDate;
-    setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, content: content}]);
+    setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 
     chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
 
@@ -54,7 +54,14 @@ function Chat() {
     setMessages(updatedMessageHistory);
   }
 
+  const copyMessage = (date) => {
+    let message = messages().find((message) => message.date == date);
+    console.log(message.content);
+    navigator.clipboard.writeText(message.content);
+  }
+
   const addFile = (content, fileName) => {
+    console.log(messages())
     files().push({fileName: fileName, content: content});
     setFiles(files());
   };
@@ -81,13 +88,19 @@ function Chat() {
         {/* Messages Container */}
         <div id="messagesContainer" class={styles.messagesContainer}>
           <For each={messages()}>{(message) =>
-            <div 
-              class={`${message.sender == "userMessage" ? styles.userMessage : styles.chatbotMessage} 
-                      ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
-              title={new Date(message.date).toUTCString()}
-            >
-              {message.content}
-            </div>
+            <>
+              {message.modelName != null ? <div class={styles.modelNameText}>{message.modelName}</div> : ""}
+              <div 
+                class={`${message.sender == "userMessage" ? styles.userMessage + " " + styles.rightAlignedMessage : styles.chatbotMessage} 
+                        ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
+                title={new Date(message.date).toUTCString()}
+              >
+                {message.content}
+              </div>
+              <button class={`${
+                message.sender == "userMessage" ? styles.copyButton + " " + styles.rightAlignedMessage : styles.copyButton
+              }`} onClick={() => copyMessage(message.date)} title="Copy message">📋</button>
+            </>
           }</For>
         </div>
 

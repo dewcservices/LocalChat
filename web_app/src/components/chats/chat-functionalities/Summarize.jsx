@@ -102,7 +102,7 @@ function Summarize() {
     chatContext.addMessage("Summarize: " + userMessage, true);
     inputTextArea.value = "";
 
-    let messageDate = chatContext.addMessage("Generating Message...", false);  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel);  // temporary message to indicate progress
     let output = await generator(userMessage, { max_new_tokens: 100});  // generate response
     chatContext.updateMessage(messageDate, output[0].summary_text);  // update temp message to response
   };
@@ -136,7 +136,7 @@ function Summarize() {
     chatContext.addMessage("Summarize File: " + file.name, true);
     chatContext.addFile(fileContent, file.name);
 
-    let messageDate = chatContext.addMessage("Generating Message...", false);  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel);  // temporary message to indicate progress
     let output = await generator(fileContent, { max_new_tokens: 100});  // generate response
     chatContext.updateMessage(messageDate, output[0].summary_text);  // update temp message to response
 

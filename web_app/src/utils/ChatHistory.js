@@ -101,7 +101,7 @@ export function saveFiles(chatId, files) {
  * Loads a chat from the browser's local storage. If no chat is found with the chatId, the function returns an empty
  * array.
  * @param {string} chatId 
- * @return {Array<any>} [[{sender: "", date: "", content: ""}],[{fileName: "", content: ""}]]
+ * @return {Array<any>} [[{sender: "", date: "", modelName: "", content: ""}],[{fileName: "", content: ""}]]
  */
 export function getChatHistory(chatId) {
   let chatJson = localStorage.getItem(chatId);
