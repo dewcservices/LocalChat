@@ -81,11 +81,26 @@ function Chat() {
     saveFiles(chatHistory().chatId, files());
   });
 
+  window.addEventListener("load", async (event) => {
+    if (navigator.gpu) {
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        if (adapter !== null) {
+          document.getElementById("GPUButton").disabled = false;
+          document.getElementById("GPUButton").title = "Swap to using GPU";
+
+        }
+      } catch {
+        console.warn("Error detecting GPU, defaulting to using CPU.");
+      }
+    }
+  });
+
   return (
     <>
       <div id="processorSelector" class={styles.processSelector}>
-        <button onClick={() => console.log("Switching to CPU")} class={styles.processorButton}>CPU</button>
-        <button onClick={() => console.log("Switching to GPU")} class={styles.processorButton} disabled>GPU</button>
+        <button onClick={() => console.log("Switching to CPU")} class={styles.processorButton} id="CPUButton" title="Swap to using CPU">CPU</button>
+        <button onClick={() => console.log("Switching to GPU")} class={styles.processorButton} id="GPUButton" disabled title="No GPU Detected">GPU</button>
       </div>
 
       <div class={styles.chatContainer}>
