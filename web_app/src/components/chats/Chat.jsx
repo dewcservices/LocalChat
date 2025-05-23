@@ -83,10 +83,16 @@ function Chat() {
 
   return (
     <>
+      <div id="processorSelector" class={styles.processSelector}>
+        <button onClick={() => console.log("Switching to CPU")} class={styles.processorButton}>CPU</button>
+        <button onClick={() => console.log("Switching to GPU")} class={styles.processorButton} disabled>GPU</button>
+      </div>
+
       <div class={styles.chatContainer}>
 
         {/* Messages Container */}
         <div id="messagesContainer" class={styles.messagesContainer}>
+
           <For each={messages()}>{(message) =>
             <>
               {message.modelName != null ? <div class={styles.modelNameText}>{message.modelName}</div> : ""}
