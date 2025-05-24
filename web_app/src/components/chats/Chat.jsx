@@ -20,6 +20,7 @@ function Chat() {
 
   const [messages, setMessages] = createSignal([], { equals: false });
   const [files, setFiles] = createSignal([], { equals: false });
+  const [processor, setProcessor] = createSignal("wasm");
 
   const [chatHistory, setChatHistory] = createSignal(null);
 
@@ -81,6 +82,16 @@ function Chat() {
     saveFiles(chatHistory().chatId, files());
   });
 
+  const changeProcessor = (newProcessor) => {
+    // The processor is already selected
+    if (processor() == newProcessor) {
+      return;
+    } else {
+      console.log("Switching to", newProcessor);
+      setProcessor(newProcessor);
+    }
+  }
+
   window.addEventListener("load", async (event) => {
     if (navigator.gpu) {
       try {
@@ -99,8 +110,8 @@ function Chat() {
   return (
     <>
       <div id="processorSelector" class={styles.processSelector}>
-        <button onClick={() => console.log("Switching to CPU")} class={styles.processorButton} id="CPUButton" title="Swap to using CPU">CPU</button>
-        <button onClick={() => console.log("Switching to GPU")} class={styles.processorButton} id="GPUButton" disabled title="No GPU Detected">GPU</button>
+        <button onClick={() => changeProcessor("wasm")} class={styles.processorButton} id="CPUButton" title="Swap to using CPU">CPU</button>
+        <button onClick={() => changeProcessor("webgpu")} class={styles.processorButton} id="GPUButton" disabled title="No GPU Detected">GPU</button>
       </div>
 
       <div class={styles.chatContainer}>
@@ -126,7 +137,7 @@ function Chat() {
         </div>
 
         {/* Input Container */}
-        <ChatContext.Provider value={{ addMessage, updateMessage, addFile }}>
+        <ChatContext.Provider value={{ addMessage, updateMessage, addFile, processor }}>
           <Switch>
             <Match when={chatHistory()?.chatType === "summarize"}>
               <Summarize />

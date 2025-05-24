@@ -10,7 +10,6 @@ import { pathJoin } from '../../../utils/PathJoin';
 function Summarize() {
 
   const chatContext = useContext(ChatContext);
-
   let selectedModel = "";
   let generator;
 
@@ -62,22 +61,10 @@ function Summarize() {
       fileReader.readAsArrayBuffer(file);
     }
 
-    console.log("testing GPU compatibility");
-
-    let device = "wasm";
-
-    // Check if the webGPU API is available.
-    if (navigator.gpu) {
-      try {
-        const adapter = await navigator.gpu.requestAdapter();
-        console.log("Adapter:", adapter);
-        if (adapter !== null) device = "webgpu";
-      } catch {
-        console.warn("Error detecting GPU, defaulting to using CPU.");
-      }
-    }
-
     console.log("creating model pipeline");
+
+    const device = chatContext.processor()
+    //console.log(selectedProcessor);
 
     generator = await pipeline('summarization', selectedModel, { device: device });
     console.log("Finished model setup using", device);
