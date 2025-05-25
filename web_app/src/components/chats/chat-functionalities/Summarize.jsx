@@ -15,7 +15,11 @@ function Summarize() {
 
   const setupModel = async () => {
 
-    console.log("Setting up model...");
+    // disable uploading another model, and change the text to indicate a model is being loaded.
+    document.getElementById("folderInput").disabled = true;
+    const modelUploadLabel = document.getElementById("modelInputLabel");
+    modelUploadLabel.classList.add(styles.disabledLabel);
+    modelUploadLabel.innerText = "Loading Model";
 
     // configure transformer js environment
     env.useBrowserCache = true;
@@ -55,19 +59,26 @@ function Summarize() {
         let arrayBuffer = fileReader.result;
         let uint8Array = new Uint8Array(arrayBuffer);
         
-        console.log(file.webkitRelativePath, uint8Array);
+        //console.log(file.webkitRelativePath, uint8Array);
         await cache.put(cacheKey, new Response(uint8Array))
       };
       fileReader.readAsArrayBuffer(file);
     }
 
-    console.log("creating model pipeline");
+    // Change model button text to indicate a change in the procedure,
+    // and request an animation frame to show this change.
+    modelUploadLabel.innerText = "Creating pipeline";
+    await new Promise(requestAnimationFrame);
 
     const device = chatContext.processor()
-    //console.log(selectedProcessor);
 
     generator = await pipeline('summarization', selectedModel, { device: device });
     console.log("Finished model setup using", device);
+    
+    // Re-enable uploading another model.
+    document.getElementById("folderInput").disabled = false;
+    modelUploadLabel.classList.remove(styles.disabledLabel);
+    modelUploadLabel.innerText = "Select Model";
   };
 
   const summarizeTextInput = async () => {
@@ -136,7 +147,7 @@ function Summarize() {
         <div>Enter text to summarize in area below:</div>
         <textarea id="inputTextArea"></textarea>
         <div class={styles.fileUploadContainer}>
-          <label for="folderInput" class={styles.fileUploadLabel}>Select Model</label>
+          <label for="folderInput" id="modelInputLabel" class={styles.fileUploadLabel}>Select Model</label>
           <input type="file" id="folderInput" webkitdirectory multiple onChange={setupModel} />
           <label for="fileInput" class={styles.fileUploadLabel}>Summarize File</label>
           <input type="file" id="fileInput" accept=".txt, .html, .docx" onChange={summarizeFileInput} />

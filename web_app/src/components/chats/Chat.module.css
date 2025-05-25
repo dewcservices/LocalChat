@@ -80,6 +80,17 @@
   padding: 1vh;
 }
 
+.disabledLabel {
+  background-color: #191919;
+  cursor: auto;
+  border-color: #292929 !important;
+}
+
+.disabledLabel:after {
+  content: "";
+  animation: thinkingAnimation  1s steps(4) infinite;
+}
+
 .fileUploadContainer label:hover {
   border-color: lightblue;
   cursor: pointer;

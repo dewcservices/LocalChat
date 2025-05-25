@@ -1,4 +1,4 @@
-import { createSignal, createEffect, useContext } from 'solid-js';
+import { createSignal, createEffect, useContext, onMount } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 
 import styles from './Chat.module.css';
@@ -97,11 +97,11 @@ function Chat() {
     }
   }
 
-  window.addEventListener("load", async (event) => {
+  onMount(async () => {
     if (navigator.gpu) {
       try {
         const adapter = await navigator.gpu.requestAdapter();
-        if (adapter !== null) {
+        if (adapter == null) {
           document.getElementById("GPUButton").disabled = false;
           document.getElementById("GPUButton").title = "Swap to using GPU";
 
