@@ -171,3 +171,7 @@
   background-color: #191919;
   cursor: auto;
 }
+
+.processorButtonSelected {
+  border-color: white !important;
+}
