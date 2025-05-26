@@ -33,13 +33,25 @@ function NewChat() {
     navigate(`/chat/${newId}`);
   };
 
+  const newQuestionAnswerChat = () => {
+    let newId = newChatId();
+    let currentDate = Date.now();
+
+    createNewChat(newId, 'question-answer', currentDate);
+    saveMessages(newId, currentDate,
+      [{sender: 'chatbotMessage', date: currentDate, content: "Hi, this is a question-answer chat where I can provide an answer based on some input text."}]
+    );
+
+    navigate(`/chat/${newId}`);
+  };
+
   return (
     <>
       <div class={styles.newChat}>
         <h2>Select an option:</h2>
         <div class={styles.newChatButtons}>
           <button onclick={newSummarizeChat}>Summarize Text</button>
-          <button>Ask Question</button>
+          <button onClick={newQuestionAnswerChat}>Ask Question</button>
           <button onclick={newGeneralChat}>General Chat</button>
           <A href="/models">Model Testing</A>
         </div>
