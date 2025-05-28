@@ -10,15 +10,19 @@ import { pathJoin } from '../../../utils/PathJoin';
 function Summarize() {
 
   const chatContext = useContext(ChatContext);
-
   const [selectedModel, setSelectedModel] = createSignal("");
+
   let generator;
 
   const [tab, setTab] = createSignal("text");
 
   const setupModel = async () => {
 
-    console.log("Setting up model...");
+    // disable uploading another model, and change the text to indicate a model is being loaded.
+    document.getElementById("folderInput").disabled = true;
+    const modelUploadLabel = document.getElementById("modelInputLabel");
+    modelUploadLabel.classList.add(styles.disabledLabel);
+    modelUploadLabel.innerText = "Loading Model";
 
     // configure transformer js environment
     env.useBrowserCache = true;
@@ -58,31 +62,26 @@ function Summarize() {
         let arrayBuffer = fileReader.result;
         let uint8Array = new Uint8Array(arrayBuffer);
         
-        console.log(file.webkitRelativePath, uint8Array);
+        //console.log(file.webkitRelativePath, uint8Array);
         await cache.put(cacheKey, new Response(uint8Array))
       };
       fileReader.readAsArrayBuffer(file);
     }
 
-    console.log("testing GPU compatibility");
+    // Change model button text to indicate a change in the procedure,
+    // and request an animation frame to show this change.
+    modelUploadLabel.innerText = "Creating pipeline";
+    await new Promise(requestAnimationFrame);
 
-    let device = "wasm";
-
-    // Check if the webGPU API is available.
-    if (navigator.gpu) {
-      try {
-        const adapter = await navigator.gpu.requestAdapter();
-        console.log("Adapter:", adapter);
-        if (adapter !== null) device = "webgpu";
-      } catch {
-        console.warn("Error detecting GPU, defaulting to using CPU.");
-      }
-    }
-
-    console.log("creating model pipeline");
+    const device = chatContext.processor()
 
     generator = await pipeline('summarization', selectedModel(), { device: device });
     console.log("Finished model setup using", device);
+    
+    // Re-enable uploading another model.
+    document.getElementById("folderInput").disabled = false;
+    modelUploadLabel.classList.remove(styles.disabledLabel);
+    modelUploadLabel.innerText = "Select Model";
   };
 
   const summarizeTextInput = async () => {
@@ -150,7 +149,7 @@ function Summarize() {
       <div class={styles.inputContainer}>
 
         {/* header row */}
-        <label for="folderInput" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+        <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
           {selectedModel() === "" ? "Select Model" : selectedModel()}
         </label>
         <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />

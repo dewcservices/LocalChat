@@ -1,4 +1,4 @@
-import { createSignal, createEffect, useContext } from 'solid-js';
+import { createSignal, createEffect, useContext, onMount } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 
 import styles from './Chat.module.css';
@@ -21,6 +21,7 @@ function Chat() {
 
   const [messages, setMessages] = createSignal([], { equals: false });
   const [files, setFiles] = createSignal([], { equals: false });
+  const [processor, setProcessor] = createSignal("wasm");
 
   const [chatHistory, setChatHistory] = createSignal(null);
 
@@ -82,12 +83,53 @@ function Chat() {
     saveFiles(chatHistory().chatId, files());
   });
 
+  const changeProcessor = (newProcessor) => {
+    // The processor is already selected
+    if (processor() == newProcessor) {
+      return;
+    } else {
+
+      if (newProcessor == "webgpu") {
+        alert("Warning, Using a GPU may cause a longer initial load time");
+      }
+
+      console.log("Switching to", newProcessor);
+      setProcessor(newProcessor);
+    }
+  }
+
+  onMount(async () => {
+    if (navigator.gpu) {
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        if (adapter == null) {
+          document.getElementById("GPUButton").disabled = false;
+          document.getElementById("GPUButton").title = "Swap to using GPU";
+
+        }
+      } catch {
+        console.warn("Error detecting GPU, defaulting to using CPU.");
+      }
+    }
+  });
+
   return (
     <>
+      <div id="processorSelector" class={styles.processSelector}>
+        <button onClick={() => changeProcessor("wasm")}
+        class={styles.processorButton + " " + `${processor() == "wasm" ? styles.processorButtonSelected : ""}`}
+        id="CPUButton" title="Swap to using CPU">CPU</button>
+        
+        <button onClick={() => changeProcessor("webgpu")}
+        class={styles.processorButton + " " + `${processor() == "webgpu" ? styles.processorButtonSelected : ""}`}
+        id="GPUButton" disabled title="No GPU Detected">GPU</button>
+      </div>
+
       <div class={styles.chatContainer}>
 
         {/* Messages Container */}
         <div id="messagesContainer" class={styles.messagesContainer}>
+
           <For each={messages()}>{(message) =>
             <>
               {message.modelName != null ? <div class={styles.modelNameText}>{message.modelName}</div> : ""}
@@ -106,7 +148,7 @@ function Chat() {
         </div>
 
         {/* Input Container */}
-        <ChatContext.Provider value={{ addMessage, updateMessage, addFile }}>
+        <ChatContext.Provider value={{ addMessage, updateMessage, addFile, processor }}>
           <Switch>
             <Match when={chatHistory()?.chatType === "summarize"}>
               <Summarize />
