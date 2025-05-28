@@ -81,7 +81,7 @@ function Summarize() {
     // Re-enable uploading another model.
     document.getElementById("folderInput").disabled = false;
     modelUploadLabel.classList.remove(styles.disabledLabel);
-    modelUploadLabel.innerText = "Select Model";
+    modelUploadLabel.innerText = selectedModel();
   };
 
   const summarizeTextInput = async () => {
