@@ -9,6 +9,7 @@ import { getChatHistory, saveMessages, saveFiles, getChatHistories } from '../..
 // Chat Functionalities
 import Summarize from './chat-functionalities/Summarize';
 import GeneralChat from './chat-functionalities/GeneralChat';
+import QuestionAnswer from './chat-functionalities/QuestionAnswer';
 
 
 function Chat() {
@@ -53,16 +54,16 @@ function Chat() {
     })
 
     setMessages(updatedMessageHistory);
-  }
+  };
 
   const copyMessage = (date) => {
     let message = messages().find((message) => message.date == date);
     console.log(message.content);
     navigator.clipboard.writeText(message.content);
-  }
+  };
 
   const addFile = (content, fileName) => {
-    console.log(messages())
+    console.log(messages());
     files().push({fileName: fileName, content: content});
     setFiles(files());
   };
@@ -83,32 +84,25 @@ function Chat() {
   });
 
   const changeProcessor = (newProcessor) => {
-    // The processor is already selected
-    if (processor() == newProcessor) {
-      return;
-    } else {
+    if (processor() == newProcessor) return;
 
-      if (newProcessor == "webgpu") {
-        alert("Warning, Using a GPU may cause a longer initial load time");
-      }
-
-      console.log("Switching to", newProcessor);
-      setProcessor(newProcessor);
+    if (newProcessor == "webgpu") {
+      alert("Warning, Using a GPU may cause a longer initial load time");
     }
-  }
+    console.log("Switching to", newProcessor);
+    setProcessor(newProcessor);
+  };
 
   onMount(async () => {
-    if (navigator.gpu) {
-      try {
-        const adapter = await navigator.gpu.requestAdapter();
-        if (adapter !== null) {
-          document.getElementById("GPUButton").disabled = false;
-          document.getElementById("GPUButton").title = "Swap to using GPU";
-
-        }
-      } catch {
-        console.warn("Error detecting GPU, defaulting to using CPU.");
+    if (!navigator.gpu) return;
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter == null) {
+        document.getElementById("GPUButton").disabled = false;
+        document.getElementById("GPUButton").title = "Swap to using GPU";
       }
+    } catch {
+      console.warn("Error detecting GPU, defaulting to using CPU.");
     }
   });
 
@@ -154,6 +148,9 @@ function Chat() {
             </Match>
             <Match when={chatHistory()?.chatType === "general"}>
               <GeneralChat />
+            </Match>
+            <Match when={chatHistory()?.chatType === "question-answer"}>
+              <QuestionAnswer />
             </Match>
           </Switch>
         </ChatContext.Provider>
