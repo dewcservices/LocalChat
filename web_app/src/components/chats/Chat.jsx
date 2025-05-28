@@ -54,16 +54,16 @@ function Chat() {
     })
 
     setMessages(updatedMessageHistory);
-  }
+  };
 
   const copyMessage = (date) => {
     let message = messages().find((message) => message.date == date);
     console.log(message.content);
     navigator.clipboard.writeText(message.content);
-  }
+  };
 
   const addFile = (content, fileName) => {
-    console.log(messages())
+    console.log(messages());
     files().push({fileName: fileName, content: content});
     setFiles(files());
   };

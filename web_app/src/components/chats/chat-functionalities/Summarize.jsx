@@ -37,16 +37,20 @@ function Summarize() {
     if (files.length == 0) {
       alert("Empty model directory was selected, please select again."); // TODO improve UX
     }
+
+    let configFile = files.find(file => file.name == "browser_config.json");
     
-    if (files[0].webkitRelativePath.includes("distilbart-cnn-6-6")) {
-      setSelectedModel("Xenova/distilbart-cnn-6-6");
-    } else if (files[0].webkitRelativePath.includes("bart-large-cnn")) {
-      setSelectedModel("Xenova/bart-large-cnn");
-    } else {
-      alert("Unsupported Model."); // TODO improve UX
+    if (!configFile) {
+      alert("Unsupported or Malformed Model");
       return;
     }
+    
+    let fileText = await configFile.text();
+    fileText = JSON.parse(fileText);
 
+    selectedModel = fileText.fileName;
+    console.log(selectedModel);
+    
     for (let file of files) {
 
       let cacheKey = pathJoin(
@@ -63,7 +67,7 @@ function Summarize() {
         let uint8Array = new Uint8Array(arrayBuffer);
         
         //console.log(file.webkitRelativePath, uint8Array);
-        await cache.put(cacheKey, new Response(uint8Array))
+        await cache.put(cacheKey, new Response(uint8Array));
       };
       fileReader.readAsArrayBuffer(file);
     }
@@ -73,7 +77,7 @@ function Summarize() {
     modelUploadLabel.innerText = "Creating pipeline";
     await new Promise(requestAnimationFrame);
 
-    const device = chatContext.processor()
+    const device = chatContext.processor();
 
     generator = await pipeline('summarization', selectedModel(), { device: device });
     console.log("Finished model setup using", device);
