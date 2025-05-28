@@ -1,8 +1,8 @@
-import { useContext } from 'solid-js';
-import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
+import { useContext, createSignal } from 'solid-js';
+import { pipeline, env, SummarizationPipeline, GemmaPreTrainedModel } from '@huggingface/transformers';
 
 import { ChatContext } from '../ChatContext';
-import styles from '../Chat.module.css';
+import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { pathJoin } from '../../../utils/PathJoin';
 
@@ -10,8 +10,11 @@ import { pathJoin } from '../../../utils/PathJoin';
 function Summarize() {
 
   const chatContext = useContext(ChatContext);
-  let selectedModel = "";
+  const [selectedModel, setSelectedModel] = createSignal("");
+
   let generator;
+
+  const [tab, setTab] = createSignal("text");
 
   const setupModel = async () => {
 
@@ -36,9 +39,9 @@ function Summarize() {
     }
     
     if (files[0].webkitRelativePath.includes("distilbart-cnn-6-6")) {
-      selectedModel = "Xenova/distilbart-cnn-6-6";
+      setSelectedModel("Xenova/distilbart-cnn-6-6");
     } else if (files[0].webkitRelativePath.includes("bart-large-cnn")) {
-      selectedModel = "Xenova/bart-large-cnn";
+      setSelectedModel("Xenova/bart-large-cnn");
     } else {
       alert("Unsupported Model."); // TODO improve UX
       return;
@@ -49,7 +52,7 @@ function Summarize() {
       let cacheKey = pathJoin(
         env.remoteHost, 
         env.remotePathTemplate
-          .replaceAll('{model}', selectedModel)
+          .replaceAll('{model}', selectedModel())
           .replaceAll('{revision}', 'main'),
         file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
       );
@@ -72,7 +75,7 @@ function Summarize() {
 
     const device = chatContext.processor()
 
-    generator = await pipeline('summarization', selectedModel, { device: device });
+    generator = await pipeline('summarization', selectedModel(), { device: device });
     console.log("Finished model setup using", device);
     
     // Re-enable uploading another model.
@@ -82,7 +85,7 @@ function Summarize() {
   };
 
   const summarizeTextInput = async () => {
-    if (selectedModel == "") {
+    if (selectedModel() == "") {
       alert("A model must be selected before summarizing text. Please select a model.");
       return;
     }
@@ -100,13 +103,13 @@ function Summarize() {
     chatContext.addMessage("Summarize: " + userMessage, true);
     inputTextArea.value = "";
 
-    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel);  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel());  // temporary message to indicate progress
     let output = await generator(userMessage, { max_new_tokens: 100});  // generate response
     chatContext.updateMessage(messageDate, output[0].summary_text);  // update temp message to response
   };
 
   const summarizeFileInput = async () => {
-    if (selectedModel == "") {
+    if (selectedModel() == "") {
       alert("A model must be selected before summarizing text. Please select a model.");
       return;
     }
@@ -134,7 +137,7 @@ function Summarize() {
     chatContext.addMessage("Summarize File: " + file.name, true);
     chatContext.addFile(fileContent, file.name);
 
-    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel);  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel());  // temporary message to indicate progress
     let output = await generator(fileContent, { max_new_tokens: 100});  // generate response
     chatContext.updateMessage(messageDate, output[0].summary_text);  // update temp message to response
 
@@ -144,15 +147,46 @@ function Summarize() {
   return (
     <>
       <div class={styles.inputContainer}>
-        <div>Enter text to summarize in area below:</div>
-        <textarea id="inputTextArea"></textarea>
-        <div class={styles.fileUploadContainer}>
-          <label for="folderInput" id="modelInputLabel" class={styles.fileUploadLabel}>Select Model</label>
-          <input type="file" id="folderInput" webkitdirectory multiple onChange={setupModel} />
-          <label for="fileInput" class={styles.fileUploadLabel}>Summarize File</label>
-          <input type="file" id="fileInput" accept=".txt, .html, .docx" onChange={summarizeFileInput} />
-          <label onClick={summarizeTextInput} class={styles.fileUploadLabel}>Summarize Text</label>
-        </div>
+
+        {/* header row */}
+        <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+          {selectedModel() === "" ? "Select Model" : selectedModel()}
+        </label>
+        <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
+        <button 
+          class={tab() === "file" ? styles.selectedTab : styles.tab}
+          onClick={() => setTab("file")}
+        >
+          Summarize File
+        </button>
+        <button 
+          class={tab() === "text" ? styles.selectedTab : styles.tab}
+          onClick={() => setTab("text")}
+        >
+          Summarize Text
+        </button>
+
+        {/* dynamic input UI */}
+        <Switch>
+          <Match when={tab() === "text"}>
+            <textarea id="inputTextArea" 
+              placeholder='Enter text to summarize here...'
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  summarizeTextInput();
+                }
+              }}
+            ></textarea>
+            <button onClick={summarizeTextInput} class={styles.sendButton}>Send</button>
+          </Match>
+          <Match when={tab() === "file"}>
+            <div style="margin-top:2vh;margin-left:2vh;">
+              <input type="file" id="fileInput" accept=".txt, .html., .docx" onChange={summarizeFileInput} />
+            </div>
+          </Match>
+        </Switch>
+
       </div>
     </>
   );

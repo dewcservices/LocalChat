@@ -9,6 +9,7 @@ import { getChatHistory, saveMessages, saveFiles, getChatHistories } from '../..
 // Chat Functionalities
 import Summarize from './chat-functionalities/Summarize';
 import GeneralChat from './chat-functionalities/GeneralChat';
+import QuestionAnswer from './chat-functionalities/QuestionAnswer';
 
 
 function Chat() {
@@ -154,6 +155,9 @@ function Chat() {
             </Match>
             <Match when={chatHistory()?.chatType === "general"}>
               <GeneralChat />
+            </Match>
+            <Match when={chatHistory()?.chatType === "question-answer"}>
+              <QuestionAnswer />
             </Match>
           </Switch>
         </ChatContext.Provider>

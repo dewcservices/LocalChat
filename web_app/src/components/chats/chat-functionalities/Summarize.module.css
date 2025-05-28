@@ -1,0 +1,105 @@
+
+.inputContainer {
+  grid-area: input;
+  background-color: #191919;
+  padding: 1vh;
+  border-top: 1px solid black;
+  position: relative;
+}
+
+.hidden {
+  display: none;
+}
+
+.unselectedModelButton {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  margin-right: 3vh;
+  border-color: darkred;
+}
+
+.unselectedModelButton:hover {
+  border-color: firebrick;
+  cursor: pointer;
+}
+
+.selectedModelButton {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  margin-right: 3vh;
+  border-color: darkgreen;
+}
+
+.selectedModelButton:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+
+.tab {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+}
+
+.tab:hover {
+  cursor: pointer;
+  border-color: green;
+}
+
+.selectedTab {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  border-color: darkgreen;
+}
+
+.selectedTab:hover {
+  cursor: pointer;
+  border-color: green;
+}
+
+.inputContainer textarea {
+  margin-top: 1vh;
+  margin-left: 1vh;
+  width: 95%;
+  height: 17vh;
+  font-size: 16px;
+  box-sizing: border-box;
+  resize: none;
+}
+
+.sendButton {
+  position: absolute;
+  bottom: 1vh;
+  right: 9vh;
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+}
+
+.sendButton:hover {
+  cursor: pointer;
+  border-color: lightblue;
+}
