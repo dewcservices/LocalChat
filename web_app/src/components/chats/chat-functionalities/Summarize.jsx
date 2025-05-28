@@ -1,5 +1,5 @@
 import { useContext, createSignal } from 'solid-js';
-import { pipeline, env, SummarizationPipeline, GemmaPreTrainedModel } from '@huggingface/transformers';
+import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
 
 import { ChatContext } from '../ChatContext';
 import styles from './Summarize.module.css';
@@ -48,7 +48,7 @@ function Summarize() {
     let fileText = await configFile.text();
     fileText = JSON.parse(fileText);
 
-    selectedModel = fileText.fileName;
+    setSelectedModel(fileText.fileName);
     console.log(selectedModel);
     
     for (let file of files) {
