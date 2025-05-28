@@ -22,3 +22,17 @@
     color: lightblue;
     text-decoration: none;
 }
+
+.chatHistoryContainer {
+  transition: background-color 0.2s ease;
+  border-radius: 4px;
+  padding: 4px;
+  /* Add a transparent border to prevent shifting */
+  border: 1px solid transparent;
+}
+
+.chatHistoryContainer.highlighted {
+/* Purple highlight */
+background-color: rgba(156, 39, 176, 0.2);
+border: 1px solid rgba(156, 39, 176, 0.4);
+}

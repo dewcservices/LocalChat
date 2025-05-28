@@ -19,6 +19,9 @@ function Layout(props) {
   const [renamingId, setRenamingId] = createSignal(null);
   const [newTitle, setNewTitle]  = createSignal("");
 
+  // hover state for mouse navigation of chats
+  const [hoveredChatId, setHoveredChatId] = createSignal(null); 
+  
   // updates the chat history
   createEffect(() => {
     let chatList = getChatHistories();
@@ -77,7 +80,9 @@ function Layout(props) {
 
           <h2>Chat History</h2>
           <For each={chatHistories()}>{(chat) =>
-            <div class={styles.chatHistoryContainer}>
+            <div class={`${styles.chatHistoryContainer}${hoveredChatId() === chat.chatId ? styles.highlighted : ''}`}
+            onMouseEnter={() => setHoveredChatId(chat.chatId)}
+            onMouseLeave={() => setHoveredChatId(null)}>
               <Show
                 when={renamingId() === chat.chatId}
                 fallback={
@@ -112,7 +117,7 @@ function Layout(props) {
           <br />
         </div>
         <div class="pageContainer">
-          <ChatHistoriesContext.Provider value={{ setChatHistories }}>
+          <ChatHistoriesContext.Provider value={{ setChatHistories, hoveredChatId, setHoveredChatId }}>
             {props.children} {/* nested components are passed in here */}
           </ChatHistoriesContext.Provider>
         </div>
