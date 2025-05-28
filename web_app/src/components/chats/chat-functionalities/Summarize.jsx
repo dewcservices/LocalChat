@@ -49,7 +49,7 @@ function Summarize() {
     fileText = JSON.parse(fileText);
 
     setSelectedModel(fileText.fileName);
-    console.log(selectedModel);
+    console.log(selectedModel());
     
     for (let file of files) {
 
