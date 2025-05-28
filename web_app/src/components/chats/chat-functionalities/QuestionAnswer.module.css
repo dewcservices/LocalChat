@@ -1,48 +1,24 @@
 
 .inputContainer {
   grid-area: input;
+  display: grid;
+  grid-template-areas:
+    "context question";
+  grid-template-columns: 50% auto;
   background-color: #191919;
   padding: 1vh;
   border-top: 1px solid black;
   position: relative;
 }
 
-.hidden {
-  display: none;
+.contextContainer {
+  grid-area: context;
+  border-right: 1px solid black;
 }
 
-.unselectedModelButton {
-  border: 1px solid #474747;
-  border-radius: 3px;
-  background-color: #292929;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
-  color: white;
-  margin-right: 3vh;
-  border-color: darkred;
-}
-
-.unselectedModelButton:hover {
-  border-color: firebrick;
-  cursor: pointer;
-}
-
-.selectedModelButton {
-  border: 1px solid #474747;
-  border-radius: 3px;
-  background-color: #292929;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
-  color: white;
-  margin-right: 3vh;
-  border-color: darkgreen;
-}
-
-.selectedModelButton:hover {
-  border-color: lightblue;
-  cursor: pointer;
+.questionContainer {
+  grid-area: question;
+  padding-left: 1vh;
 }
 
 .tab {
@@ -50,8 +26,8 @@
   border-radius: 3px;
   background-color: #292929;
   padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
+  padding-left: 3vh;
+  padding-right: 3vh;
   color: white;
 }
 
@@ -65,8 +41,6 @@
   border-radius: 3px;
   background-color: #292929;
   padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
   color: white;
   border-color: darkgreen;
 }
@@ -89,13 +63,13 @@
 .sendButton {
   position: absolute;
   bottom: 1vh;
-  right: 9vh;
+  right: 4vh;
   border: 1px solid #474747;
   border-radius: 3px;
   background-color: #292929;
   padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
+  padding-left: 3vh;
+  padding-right: 3vh;
   color: white;
 }
 
