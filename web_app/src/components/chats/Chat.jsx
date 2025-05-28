@@ -101,7 +101,7 @@ function Chat() {
     if (navigator.gpu) {
       try {
         const adapter = await navigator.gpu.requestAdapter();
-        if (adapter == null) {
+        if (adapter !== null) {
           document.getElementById("GPUButton").disabled = false;
           document.getElementById("GPUButton").title = "Swap to using GPU";
 

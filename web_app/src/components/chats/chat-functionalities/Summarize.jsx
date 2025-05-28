@@ -34,16 +34,20 @@ function Summarize() {
     if (files.length == 0) {
       alert("Empty model directory was selected, please select again."); // TODO improve UX
     }
+
+    let configFile = files.find(file => file.name == "browser_config.json");
     
-    if (files[0].webkitRelativePath.includes("distilbart-cnn-6-6")) {
-      selectedModel = "Xenova/distilbart-cnn-6-6";
-    } else if (files[0].webkitRelativePath.includes("bart-large-cnn")) {
-      selectedModel = "Xenova/bart-large-cnn";
+    if (configFile) {
+      let fileText = await configFile.text();
+      fileText = JSON.parse(fileText);
+
+      selectedModel = fileText.fileName;
+      console.log(selectedModel)
     } else {
-      alert("Unsupported Model."); // TODO improve UX
+      alert("Unsupported or Malformed Model");
       return;
     }
-
+    
     for (let file of files) {
 
       let cacheKey = pathJoin(

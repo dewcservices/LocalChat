@@ -147,8 +147,11 @@ if (download_models) {
       const url = model[i];
       downloadFile(url[0], `../dist/models/${url[1]}`);
     }
-    console.log(model)
-    let fileName = {"fileName": model[0][0]}
+
+    let modelName = model[0][0];
+    let firstSlashIndex = modelName.indexOf("/");
+
+    let fileName = {"fileName": modelName.substring(firstSlashIndex + 1)}
 
     // Create local chat specific file.
     fs.writeFile("../dist/models/" + model[0][0] + "/browser_config.json", JSON.stringify(fileName));
