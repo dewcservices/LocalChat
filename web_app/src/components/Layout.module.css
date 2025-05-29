@@ -11,7 +11,7 @@
 .chatHistoryContainer:hover,
 .chatHistoryContainer.highlighted {
     background-color: rgba(255, 255, 255, 0.1) !important;
-    /* this effect is inspired and essentially copied off of discords UI */
+    /* this effect is inspired from discords UI */
     margin-left: 4px;
 }
 
@@ -33,7 +33,6 @@
     text-decoration: none;
 }
 
-/* Active/selected state - more prominent than hover */
 .chatHistoryContainer.active {
     background-color: grey;
     border: 1px solid lightgrey;
