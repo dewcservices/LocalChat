@@ -12,7 +12,7 @@
 .chatHistoryContainer.highlighted {
     background-color: rgba(255, 255, 255, 0.1) !important;
     /* this effect is inspired and essentially copied off of discords UI */
-    transform: translateX(4px);
+    margin-left: 4px;
 }
 
 .chatHistoryEntry {
@@ -35,12 +35,12 @@
 
 /* Active/selected state - more prominent than hover */
 .chatHistoryContainer.active {
-    background-color: rgba(0, 123, 255, 0.3);
-    border: 1px solid rgba(0, 123, 255, 0.6);
+    background-color: grey;
+    border: 1px solid lightgrey;
 }
 
 /* When both active and hovered */
 .chatHistoryContainer.active.highlighted {
-    background-color: rgba(0, 123, 255, 0.4);
-    border: 1px solid rgba(0, 123, 255, 0.8);
+    background-color: grey;
+    border: 1px solid lightgrey;
 }
