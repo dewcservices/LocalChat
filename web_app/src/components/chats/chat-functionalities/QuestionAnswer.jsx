@@ -3,6 +3,7 @@ import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transform
 
 import styles from './QuestionAnswer.module.css';
 import { ChatContext } from '../ChatContext';
+import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 
 
 function QuestionAnswer() {
@@ -30,7 +31,20 @@ function QuestionAnswer() {
       let contextTextarea = document.getElementById('contextTextarea');
       context = contextTextarea.value;
     } else if (contextTab() === 'file') {
-      // TODO
+      let fileInput = document.getElementById("fileInput");
+
+      let file = fileInput.files[0];
+
+      context = "";
+      if (file.name.endsWith('.txt')) {
+        context = await parseTxtFileAsync(file);
+      }
+      if (file.name.endsWith('.html')) {
+        context = await parseHTMLFileAsync(file);
+      }
+      if (file.name.endsWith('.docx')) {
+        context = await parseDocxFileAsync(file);
+      }
     }
 
     let question = document.getElementById('questionTextarea').value;
@@ -46,7 +60,6 @@ function QuestionAnswer() {
     let output = await qaPipeline(question, context);
     chatContext.addMessage(output.answer, false, model)
 
-    document.getElementById('contextTextarea').value = '';
     document.getElementById('questionTextarea').value = '';
   };
 
@@ -73,7 +86,7 @@ function QuestionAnswer() {
               <textarea id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
             </Match>
             <Match when={contextTab() === "file"}>
-              <div>File Input</div>
+              <input type="file" id="fileInput" accept=".txt, .html., .docx" />
             </Match>
           </Switch>
         </div>
