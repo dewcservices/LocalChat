@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from "solid-js";
-import { useLocation, useNavigate, A } from "@solidjs/router";
+import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
@@ -9,10 +9,9 @@ import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } 
 function Layout(props) {
   // TODO polish deletion of entire chat history
   //    - ui button is ugly, and needs to be clearer that the button is dangerous
-  // TODO add styling to chat links (& highlight current chat)
-  // TODO chat link order based on most recently accessed?
 
   const location = useLocation();
+  const params = useParams();
   const navigate = useNavigate();
 
   const [chatHistories, setChatHistories] = createSignal(getChatHistories());
@@ -21,15 +20,6 @@ function Layout(props) {
 
   // hover state for mouse navigation of chats
   const [hoveredChatId, setHoveredChatId] = createSignal(null);
-
-    // Get current active chat ID from URL
-  const getCurrentChatId = () => {
-    const path = location.pathname;
-    if (path.startsWith('/chat/')) {
-      return path.split('/chat/')[1];
-    }
-    return null;
-  };
   
   // updates the chat history
   createEffect(() => {
@@ -89,9 +79,10 @@ function Layout(props) {
 
           <h2>Chat History</h2>
           <For each={chatHistories()}>{(chat) =>
-            <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${getCurrentChatId() === chat.chatId ? styles.active : ''}`}
-            onMouseEnter={() => setHoveredChatId(chat.chatId)}
-            onMouseLeave={() => setHoveredChatId(null)}>
+            <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${params.id === chat.chatId ? styles.active : ''}`}
+              onMouseEnter={() => setHoveredChatId(chat.chatId)}
+              onMouseLeave={() => setHoveredChatId(null)}
+            >
               <Show
                 when={renamingId() === chat.chatId}
                 fallback={
@@ -126,7 +117,7 @@ function Layout(props) {
           <br />
         </div>
         <div class="pageContainer">
-          <ChatHistoriesContext.Provider value={{ setChatHistories, hoveredChatId, setHoveredChatId }}>
+          <ChatHistoriesContext.Provider value={{ setChatHistories }}>
             {props.children} {/* nested components are passed in here */}
           </ChatHistoriesContext.Provider>
         </div>
