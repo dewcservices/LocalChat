@@ -109,13 +109,20 @@ function Chat() {
   return (
     <>
       <div id="processorSelector" class={styles.processSelector}>
-        <button onClick={() => changeProcessor("wasm")}
-        class={styles.processorButton + " " + `${processor() == "wasm" ? styles.processorButtonSelected : ""}`}
-        id="CPUButton" title="Swap to using CPU">CPU</button>
-        
-        <button onClick={() => changeProcessor("webgpu")}
-        class={styles.processorButton + " " + `${processor() == "webgpu" ? styles.processorButtonSelected : ""}`}
-        id="GPUButton" disabled title="No GPU Detected">GPU</button>
+        <button 
+          onClick={() => changeProcessor("wasm")}
+          class={styles.processorButton + " " + `${processor() == "wasm" ? styles.processorButtonSelected : ""}`}
+          id="CPUButton" title="Swap to using CPU"
+        >
+          CPU
+        </button>
+        <button 
+          onClick={() => changeProcessor("webgpu")}
+          class={styles.processorButton + " " + `${processor() == "webgpu" ? styles.processorButtonSelected : ""}`}
+          id="GPUButton" disabled title="No GPU Detected"
+        >
+          GPU
+        </button>
       </div>
 
       <div class={styles.chatContainer}>
