@@ -2,7 +2,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding:0.5em;
+    padding: 0.5em;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    margin: 2px 0; /* Add some space between items */
+}
+
+.chatHistoryContainer:hover,
+.chatHistoryContainer.highlighted {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    /* this effect is inspired and essentially copied off of discords UI */
+    transform: translateX(4px);
 }
 
 .chatHistoryEntry {
@@ -23,16 +33,14 @@
     text-decoration: none;
 }
 
-.chatHistoryContainer {
-  transition: background-color 0.2s ease;
-  border-radius: 4px;
-  padding: 4px;
-  /* Add a transparent border to prevent shifting */
-  border: 1px solid transparent;
+/* Active/selected state - more prominent than hover */
+.chatHistoryContainer.active {
+    background-color: rgba(0, 123, 255, 0.3);
+    border: 1px solid rgba(0, 123, 255, 0.6);
 }
 
-.chatHistoryContainer.highlighted {
-/* Purple highlight */
-background-color: rgba(156, 39, 176, 0.2);
-border: 1px solid rgba(156, 39, 176, 0.4);
+/* When both active and hovered */
+.chatHistoryContainer.active.highlighted {
+    background-color: rgba(0, 123, 255, 0.4);
+    border: 1px solid rgba(0, 123, 255, 0.8);
 }

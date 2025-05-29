@@ -20,7 +20,16 @@ function Layout(props) {
   const [newTitle, setNewTitle]  = createSignal("");
 
   // hover state for mouse navigation of chats
-  const [hoveredChatId, setHoveredChatId] = createSignal(null); 
+  const [hoveredChatId, setHoveredChatId] = createSignal(null);
+
+    // Get current active chat ID from URL
+  const getCurrentChatId = () => {
+    const path = location.pathname;
+    if (path.startsWith('/chat/')) {
+      return path.split('/chat/')[1];
+    }
+    return null;
+  };
   
   // updates the chat history
   createEffect(() => {
@@ -80,7 +89,7 @@ function Layout(props) {
 
           <h2>Chat History</h2>
           <For each={chatHistories()}>{(chat) =>
-            <div class={`${styles.chatHistoryContainer}${hoveredChatId() === chat.chatId ? styles.highlighted : ''}`}
+            <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${getCurrentChatId() === chat.chatId ? styles.active : ''}`}
             onMouseEnter={() => setHoveredChatId(chat.chatId)}
             onMouseLeave={() => setHoveredChatId(null)}>
               <Show
