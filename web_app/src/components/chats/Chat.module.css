@@ -6,6 +6,7 @@
     "input";
   grid-template-rows: 70% auto;
   height: 100vh;
+  overflow: hidden;
 }
 
 .messagesContainer {
@@ -17,6 +18,7 @@
   align-content: start;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .messagesContainer div,
@@ -78,6 +80,17 @@
   padding: 1vh;
 }
 
+.disabledLabel {
+  background-color: #191919;
+  cursor: auto;
+  border-color: #292929 !important;
+}
+
+.disabledLabel:after {
+  content: "";
+  animation: thinkingAnimation  1s steps(4) infinite;
+}
+
 .fileUploadContainer label:hover {
   border-color: lightblue;
   cursor: pointer;
@@ -135,4 +148,41 @@
   border: none !important;
   background-color: #292929;
   margin-top: 2vh;
+}
+
+.processSelector {
+  position: fixed;
+  top: 1vw;
+  z-index: 1;
+  border: 1px solid #474747;
+  border-radius: 3px;
+  margin: 1vh 1vw;
+  padding: 1vh;
+}
+
+.processorButton {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  margin: 0 1vh;
+  color: white;
+}
+
+.processorButton:hover {
+  cursor: pointer;
+}
+
+.processorButton:hover:enabled {
+  border-color: lightblue;
+}
+
+.processorButton:disabled {
+  color: black;
+  background-color: #191919;
+  cursor: auto;
+}
+
+.processorButtonSelected {
+  border-color: white !important;
 }

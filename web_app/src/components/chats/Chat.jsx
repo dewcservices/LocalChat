@@ -1,4 +1,4 @@
-import { createSignal, createEffect, useContext } from 'solid-js';
+import { createSignal, createEffect, useContext, onMount } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 
 import styles from './Chat.module.css';
@@ -9,6 +9,7 @@ import { getChatHistory, saveMessages, saveFiles, getChatHistories } from '../..
 // Chat Functionalities
 import Summarize from './chat-functionalities/Summarize';
 import GeneralChat from './chat-functionalities/GeneralChat';
+import QuestionAnswer from './chat-functionalities/QuestionAnswer';
 
 
 function Chat() {
@@ -20,6 +21,7 @@ function Chat() {
 
   const [messages, setMessages] = createSignal([], { equals: false });
   const [files, setFiles] = createSignal([], { equals: false });
+  const [processor, setProcessor] = createSignal("wasm");
 
   const [chatHistory, setChatHistory] = createSignal(null);
 
@@ -52,16 +54,16 @@ function Chat() {
     })
 
     setMessages(updatedMessageHistory);
-  }
+  };
 
   const copyMessage = (date) => {
     let message = messages().find((message) => message.date == date);
     console.log(message.content);
     navigator.clipboard.writeText(message.content);
-  }
+  };
 
   const addFile = (content, fileName) => {
-    console.log(messages())
+    console.log(messages());
     files().push({fileName: fileName, content: content});
     setFiles(files());
   };
@@ -81,12 +83,46 @@ function Chat() {
     saveFiles(chatHistory().chatId, files());
   });
 
+  const changeProcessor = (newProcessor) => {
+    if (processor() == newProcessor) return;
+
+    if (newProcessor == "webgpu") {
+      alert("Warning, Using a GPU may cause a longer initial load time");
+    }
+    console.log("Switching to", newProcessor);
+    setProcessor(newProcessor);
+  };
+
+  onMount(async () => {
+    if (!navigator.gpu) return;
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter == null) {
+        document.getElementById("GPUButton").disabled = false;
+        document.getElementById("GPUButton").title = "Swap to using GPU";
+      }
+    } catch {
+      console.warn("Error detecting GPU, defaulting to using CPU.");
+    }
+  });
+
   return (
     <>
+      <div id="processorSelector" class={styles.processSelector}>
+        <button onClick={() => changeProcessor("wasm")}
+        class={styles.processorButton + " " + `${processor() == "wasm" ? styles.processorButtonSelected : ""}`}
+        id="CPUButton" title="Swap to using CPU">CPU</button>
+        
+        <button onClick={() => changeProcessor("webgpu")}
+        class={styles.processorButton + " " + `${processor() == "webgpu" ? styles.processorButtonSelected : ""}`}
+        id="GPUButton" disabled title="No GPU Detected">GPU</button>
+      </div>
+
       <div class={styles.chatContainer}>
 
         {/* Messages Container */}
         <div id="messagesContainer" class={styles.messagesContainer}>
+
           <For each={messages()}>{(message) =>
             <>
               {message.modelName != null ? <div class={styles.modelNameText}>{message.modelName}</div> : ""}
@@ -105,13 +141,16 @@ function Chat() {
         </div>
 
         {/* Input Container */}
-        <ChatContext.Provider value={{ addMessage, updateMessage, addFile }}>
+        <ChatContext.Provider value={{ addMessage, updateMessage, addFile, processor }}>
           <Switch>
             <Match when={chatHistory()?.chatType === "summarize"}>
               <Summarize />
             </Match>
             <Match when={chatHistory()?.chatType === "general"}>
               <GeneralChat />
+            </Match>
+            <Match when={chatHistory()?.chatType === "question-answer"}>
+              <QuestionAnswer />
             </Match>
           </Switch>
         </ChatContext.Provider>
