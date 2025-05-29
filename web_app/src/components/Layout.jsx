@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from "solid-js";
-import { useLocation, useNavigate, A } from "@solidjs/router";
+import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
@@ -9,16 +9,18 @@ import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } 
 function Layout(props) {
   // TODO polish deletion of entire chat history
   //    - ui button is ugly, and needs to be clearer that the button is dangerous
-  // TODO add styling to chat links (& highlight current chat)
-  // TODO chat link order based on most recently accessed?
 
   const location = useLocation();
+  const params = useParams();
   const navigate = useNavigate();
 
   const [chatHistories, setChatHistories] = createSignal(getChatHistories());
   const [renamingId, setRenamingId] = createSignal(null);
   const [newTitle, setNewTitle]  = createSignal("");
 
+  // hover state for mouse navigation of chats
+  const [hoveredChatId, setHoveredChatId] = createSignal(null);
+  
   // updates the chat history
   createEffect(() => {
     let chatList = getChatHistories();
@@ -77,7 +79,10 @@ function Layout(props) {
 
           <h2>Chat History</h2>
           <For each={chatHistories()}>{(chat) =>
-            <div class={styles.chatHistoryContainer}>
+            <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${params.id === chat.chatId ? styles.active : ''}`}
+              onMouseEnter={() => setHoveredChatId(chat.chatId)}
+              onMouseLeave={() => setHoveredChatId(null)}
+            >
               <Show
                 when={renamingId() === chat.chatId}
                 fallback={

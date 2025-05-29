@@ -2,7 +2,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding:0.5em;
+    padding: 0.5em;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    margin: 2px 0; /* Add some space between items */
+}
+
+.chatHistoryContainer:hover,
+.chatHistoryContainer.highlighted {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    /* this effect is inspired from discords UI */
+    margin-left: 4px;
 }
 
 .chatHistoryEntry {
@@ -21,4 +31,15 @@
     display: inline-block;
     color: lightblue;
     text-decoration: none;
+}
+
+.chatHistoryContainer.active {
+    background-color: grey;
+    border: 1px solid lightgrey;
+}
+
+/* When both active and hovered */
+.chatHistoryContainer.active.highlighted {
+    background-color: grey;
+    border: 1px solid lightgrey;
 }
