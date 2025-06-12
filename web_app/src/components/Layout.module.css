@@ -130,7 +130,7 @@
 .deleteAllButton {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #ffffff;
+    color: lightgray;
     padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
@@ -140,12 +140,12 @@
 }
 
 .deleteAllButton:hover {
-    background-color: #ff4444;
-    border-color: #ff4444;
-    color: #ffffff;
+    background-color: rgb(255, 74, 54);
+    border-color: rgb(255, 74, 54);
+    color: lightgray;
 }
 
 .deleteAllButton:active {
-    background-color: #cc0000;
-    border-color: #cc0000;
+    background-color: red;
+    border-color: red;
 }
