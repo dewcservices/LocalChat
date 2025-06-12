@@ -7,16 +7,15 @@ import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../..
 function QuestionAnswer() {
   const chatContext = useContext(ChatContext);
   const [contextTab, setContextTab] = createSignal("text");
-
- 
+  
   // TODO force it to use local models (like summarize)
   const model = 'Xenova/distilbert-base-uncased-distilled-squad';
   let qaPipeline;
- 
+  
   const setupModel = async () => {
     qaPipeline = await pipeline('question-answering', model);
   };
- 
+  
   setupModel();
  
   const processQuestion = async () => {
@@ -24,7 +23,7 @@ function QuestionAnswer() {
       alert("Model is loading... please try again.");
       return;
     }
-   
+    
     let context = '';
     if (contextTab() === 'text') {
       let contextTextarea = document.getElementById('contextTextarea');
@@ -43,20 +42,20 @@ function QuestionAnswer() {
         context = await parseDocxFileAsync(file);
       }
     }
-   
+    
     let question = document.getElementById('questionTextarea').value;
-   
+    
     if (context == '' || question == '') {
       alert('Must provide context and question.');
       return;
     }
-   
+    
     chatContext.addMessage(`Context: ${context}`, true);
     chatContext.addMessage(`Question: ${question}`, true);
-   
+    
     let output = await qaPipeline(question, context);
     chatContext.addMessage(output.answer, false, model);
-   
+    
     document.getElementById('questionTextarea').value = '';
   };
 
@@ -87,7 +86,7 @@ function QuestionAnswer() {
             </Match>
           </Switch>
         </div>
-       
+        
         <div class={styles.questionContainer}>
           <div class={styles.tabContainer}>
             <button class={styles.selectedTab}>Question:</button>
@@ -96,9 +95,9 @@ function QuestionAnswer() {
             <textarea
               id="questionTextarea"
               placeholder='Enter question here.'
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
+              onKeyDown={p_holder => {
+                if (p_holder.key === 'Enter' && !p_holder.shiftKey) {
+                  p_holder.preventDefault();
                   processQuestion();
                 }
               }}
