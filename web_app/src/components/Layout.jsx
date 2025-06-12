@@ -101,23 +101,23 @@ function Layout(props) {
                     <div class={styles.actionIcons}>
                       <button 
                         class={styles.actionButton}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
+                        onClick={(clicked) => {
+                          clicked.preventDefault();
+                          clicked.stopPropagation();
                           startRenaming(chat.chatId);
                         }}
-                        title="Rename chat"
+                        title="Rename Chat"
                       >
                         <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
                       </button>
                       <button 
                         class={styles.actionButton}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
+                        onClick={(clicked) => {
+                          clicked.preventDefault();
+                          clicked.stopPropagation();
                           deleteChat(chat.chatId);
                         }}
-                        title="Delete chat"
+                        title="Delete Chat"
                       >
                         <img src={trashIcon} alt="Delete" class={styles.actionIcon} />
                       </button>
@@ -125,20 +125,20 @@ function Layout(props) {
                   </div>
                 }
               >
-                {/* section handling renaming UI */}
+                {/* section handling editing options UI */}
                 <div class={styles.renameContainer}>
                   <input 
                     type="text" 
                     value={newTitle()}
-                    onInput={e => setNewTitle(e.currentTarget.value)}
-                    onKeyDown={e => e.key === 'Enter' && applyRename()}
+                    onInput={clicked => setNewTitle(clicked.currentTarget.value)}
+                    onKeyDown={clicked => clicked.key === 'Enter' && applyRename()}
                     class={styles.renameInput}
                   />
                   <div class={styles.renameActions}>
                     <button 
                       class={styles.actionButton}
                       onClick={applyRename}
-                      title="Save changes"
+                      title="Save Changes"
                     >
                       <img src={saveIcon} alt="Save" class={styles.actionIcon} />
                     </button>
