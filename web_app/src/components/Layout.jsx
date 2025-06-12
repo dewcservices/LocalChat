@@ -61,7 +61,7 @@ function Layout(props) {
   const startRenaming = (chatId) => {
     setRenamingId(chatId);
     const chat = chatHistories().find(c => c.chatId === chatId);
-    setNewTitle(chat?.title || chat.chatId);
+    setNewTitle(chat?.chatName || chat.chatId);
   };
 
   // apply and save new title
