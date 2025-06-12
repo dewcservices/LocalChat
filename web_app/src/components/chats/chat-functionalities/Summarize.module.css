@@ -1,16 +1,16 @@
-
 .inputContainer {
   grid-area: input;
   background-color: #191919;
   padding: 1vh;
   border-top: 1px solid black;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
-
 .hidden {
   display: none;
 }
-
 .unselectedModelButton {
   border: 1px solid #474747;
   border-radius: 3px;
@@ -22,12 +22,10 @@
   margin-right: 3vh;
   border-color: darkred;
 }
-
 .unselectedModelButton:hover {
   border-color: firebrick;
   cursor: pointer;
 }
-
 .selectedModelButton {
   border: 1px solid #474747;
   border-radius: 3px;
@@ -39,12 +37,10 @@
   margin-right: 3vh;
   border-color: darkgreen;
 }
-
 .selectedModelButton:hover {
   border-color: lightblue;
   cursor: pointer;
 }
-
 .tab {
   border: 1px solid #474747;
   border-radius: 3px;
@@ -53,14 +49,77 @@
   padding-left: 2vh;
   padding-right: 2vh;
   color: white;
+  transition: all 0.2s ease;
 }
-
 .tab:hover {
   cursor: pointer;
   border-color: green;
 }
-
+.tab.highlighted {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transform: translateX(2px);
+}
 .selectedTab {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #555555; /* light grey background for selected option mimics chat history */
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  border-color: darkgreen;
+  transition: all 0.2s ease;
+}
+.selectedTab:hover {
+  cursor: pointer;
+  border-color: green;
+}
+.selectedTab.highlighted {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transform: translateX(2px);
+}
+/* main content area which expands to fill space */
+.searchBarContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 3vh; /* more space for housing additional controls below text entry area */
+}
+.inputContainer textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 15vh;
+  font-size: 16px;
+  box-sizing: border-box;
+  resize: none;
+  border-radius: 10px;
+  border: 1px solid #474747;
+  background-color: #292929;
+  color: white;
+  padding: 12px 20px;
+  overflow-y: auto; /* make it scrollable when content exceeds max height */
+}
+.inputContainer textarea:focus {
+  outline: none;
+  border-color: lightblue;
+}
+/* custom scrollbar styling to fit theme and (roughly) fit borders */
+.inputContainer textarea::-webkit-scrollbar {
+  width: 8px;
+}
+.inputContainer textarea::-webkit-scrollbar-track {
+  background: #191919;
+  border-radius: 4px;
+}
+.inputContainer textarea::-webkit-scrollbar-thumb {
+  background: #474747;
+  border-radius: 4px;
+}
+.inputContainer textarea::-webkit-scrollbar-thumb:hover {
+  background: #666666;
+}
+.sendButton {
   border: 1px solid #474747;
   border-radius: 3px;
   background-color: #292929;
@@ -68,38 +127,30 @@
   padding-left: 2vh;
   padding-right: 2vh;
   color: white;
-  border-color: darkgreen;
 }
-
-.selectedTab:hover {
-  cursor: pointer;
-  border-color: green;
-}
-
-.inputContainer textarea {
-  margin-top: 1vh;
-  margin-left: 1vh;
-  width: 95%;
-  height: 17vh;
-  font-size: 16px;
-  box-sizing: border-box;
-  resize: none;
-}
-
-.sendButton {
-  position: absolute;
-  bottom: 1vh;
-  right: 9vh;
-  border: 1px solid #474747;
-  border-radius: 3px;
-  background-color: #292929;
-  padding: 1vh;
-  padding-left: 3vh;
-  padding-right: 3vh;
-  color: white;
-}
-
 .sendButton:hover {
   cursor: pointer;
   border-color: lightblue;
+}
+/* Controls container at the bottom spacing and persistent element placement */
+.controlsContainer {
+  display: flex;
+  gap: 1vh;
+  align-items: center;
+  justify-content: space-between; 
+  padding: 2vh 0;
+  border-top: 1px solid #474747;
+  border-bottom: 1px solid #474747;
+  margin-top: auto; 
+  background-color: #191919; 
+}
+.controlsLeft {
+  display: flex;
+  gap: 1vh;
+  align-items: center;
+}
+.controlsRight {
+  display: flex;
+  gap: 1vh;
+  align-items: center;
 }

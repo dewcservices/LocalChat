@@ -15,6 +15,7 @@ function Summarize() {
   let generator;
 
   const [tab, setTab] = createSignal("text");
+  const [hoveredTab, setHoveredTab] = createSignal(null);
 
   const setupModel = async () => {
 
@@ -152,37 +153,20 @@ function Summarize() {
     <>
       <div class={styles.inputContainer}>
 
-        {/* header row */}
-        <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
-          {selectedModel() === "" ? "Select Model" : selectedModel()}
-        </label>
-        <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
-        <button 
-          class={tab() === "file" ? styles.selectedTab : styles.tab}
-          onClick={() => setTab("file")}
-        >
-          Summarize File
-        </button>
-        <button 
-          class={tab() === "text" ? styles.selectedTab : styles.tab}
-          onClick={() => setTab("text")}
-        >
-          Summarize Text
-        </button>
-
-        {/* dynamic input UI */}
+        {/* Dynamic input UI - moved to top */}
         <Switch>
           <Match when={tab() === "text"}>
-            <textarea id="inputTextArea" 
-              placeholder='Enter text to summarize here...'
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  summarizeTextInput();
-                }
-              }}
-            ></textarea>
-            <button onClick={summarizeTextInput} class={styles.sendButton}>Send</button>
+            <div class={styles.searchBarContainer}>
+              <textarea id="inputTextArea" 
+                placeholder='Enter text to summarize here...'
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    summarizeTextInput();
+                  }
+                }}
+              ></textarea>
+            </div>
           </Match>
           <Match when={tab() === "file"}>
             <div style="margin-top:2vh;margin-left:2vh;">
@@ -190,6 +174,42 @@ function Summarize() {
             </div>
           </Match>
         </Switch>
+
+        {/* Control buttons row - moved to bottom */}
+        <div class={styles.controlsContainer}>
+          <div class={styles.controlsLeft}>
+            <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+              {selectedModel() === "" ? "Select Model" : selectedModel()}
+            </label>
+            <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
+            <button 
+              class={`${tab() === "file" ? styles.selectedTab : styles.tab} ${hoveredTab() === "file" ? styles.highlighted : ''}`}
+              onClick={() => setTab("file")}
+              onMouseEnter={() => setHoveredTab("file")}
+              onMouseLeave={() => setHoveredTab(null)}
+            >
+              Summarize File
+            </button>
+            <button 
+              class={`${tab() === "text" ? styles.selectedTab : styles.tab} ${hoveredTab() === "text" ? styles.highlighted : ''}`}
+              onClick={() => setTab("text")}
+              onMouseEnter={() => setHoveredTab("text")}
+              onMouseLeave={() => setHoveredTab(null)}
+            >
+              Summarize Text
+            </button>
+          </div>
+          <div class={styles.controlsRight}>
+            {tab() === "text" && (
+              <button 
+                onClick={summarizeTextInput} 
+                class={styles.sendButton}
+              >
+                Send
+              </button>
+            )}
+          </div>
+        </div>
 
       </div>
     </>
