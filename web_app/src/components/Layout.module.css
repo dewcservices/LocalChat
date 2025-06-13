@@ -5,7 +5,7 @@
     padding: 0.5em;
     transition: all 0.2s ease;
     border-radius: 6px;
-    margin: 2px 0; /* Add some space between items */
+    margin: 2px 0;
 }
 
 .chatHistoryContainer:hover,
@@ -42,4 +42,110 @@
 .chatHistoryContainer.active.highlighted {
     background-color: grey;
     border: 1px solid lightgrey;
+}
+
+/* action icons container old one looks bad */
+.actionIcons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* icons only visble on hover */
+.chatHistoryContainer:hover .actionIcons {
+    opacity: 1;
+}
+
+/* further icon styling for png sizes */
+.actionIcon {
+    width: 19px;
+    height: 19px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.actionButton:hover .actionIcon {
+    opacity: 1;
+}
+
+/* may add some colouring changes for icons as they are just all black */
+
+/* individual action button styling */
+.actionButton {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.actionButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.actionButton:active {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(0.95);
+}
+
+/* rename container styling, way better but will need to be improved later */
+.renameContainer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+}
+
+.renameInput {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.renameInput:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: lightblue;
+}
+
+.renameActions {
+    display: flex;
+    gap: 4px;
+}
+
+/* cleaner delete all chats button styling, but changes still need to be made */
+.deleteAllButton {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: lightgray;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.deleteAllButton:hover {
+    background-color: rgb(255, 74, 54);
+    border-color: rgb(255, 74, 54);
+    color: lightgray;
+}
+
+.deleteAllButton:active {
+    background-color: red;
+    border-color: red;
 }

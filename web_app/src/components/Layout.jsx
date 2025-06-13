@@ -1,10 +1,15 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, For, Show } from "solid-js";
 import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
 import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
 
+// icon imports for use in chat history
+import pencilIcon from '../assets/pencil.png';
+import trashIcon from '../assets/trash.png';
+import saveIcon from '../assets/save.png';
+import cancelIcon from '../assets/cancel.png';
 
 function Layout(props) {
   // TODO polish deletion of entire chat history
@@ -33,7 +38,7 @@ function Layout(props) {
   });
   
   const deleteChat = (chatId) => {
-    if (!confirm("are you sure you want to remove this history?")) return;
+    if (!confirm("Are you sure you want to delete this chat? This action cannot be undone.")) return;
 
     deleteChatHistory(chatId);
     setChatHistories(getChatHistories());
@@ -44,8 +49,8 @@ function Layout(props) {
   };
 
   const deleteAllChats = () => {
-    if (!confirm("Are you sure you want to remove all chat histories.")) return;
-    if (!confirm("This is a confirmation check to ensure that this is really what you want to do.")) return;
+    if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
+    if (!confirm("Final confirmation: This will permanently delete all your chat data.")) return;
 
     deleteChatHistories();
     navigate('/');
@@ -56,7 +61,7 @@ function Layout(props) {
   const startRenaming = (chatId) => {
     setRenamingId(chatId);
     const chat = chatHistories().find(c => c.chatId === chatId);
-    setNewTitle(chat?.title || chat.chatId);
+    setNewTitle(chat?.chatName || chat.chatId);
   };
 
   // apply and save new title
@@ -93,27 +98,65 @@ function Layout(props) {
                     >
                       {chat.chatName}
                     </A>
-                    <div>
-                      <button onClick={() => startRenaming(chat.chatId)}>Rename</button>
-                      <button onClick={() => deleteChat(chat.chatId)}>Delete</button>
+                    <div class={styles.actionIcons}>
+                      <button 
+                        class={styles.actionButton}
+                        onClick={(clicked) => {
+                          clicked.preventDefault();
+                          clicked.stopPropagation();
+                          startRenaming(chat.chatId);
+                        }}
+                        title="Rename Chat"
+                      >
+                        <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
+                      </button>
+                      <button 
+                        class={styles.actionButton}
+                        onClick={(clicked) => {
+                          clicked.preventDefault();
+                          clicked.stopPropagation();
+                          deleteChat(chat.chatId);
+                        }}
+                        title="Delete Chat"
+                      >
+                        <img src={trashIcon} alt="Delete" class={styles.actionIcon} />
+                      </button>
                     </div>
                   </div>
                 }
               >
-                {/* section handling renaming UI */}
-                <input type="text" value={newTitle()}
-                  onInput={e => setNewTitle(e.currentTarget.value)}
-                  onKeyDown={e => e.key === 'Enter' && applyRename()}
-                  style="margin-right:0.5em; width: 200px;"
-                />
-                <button onClick={applyRename}>Save</button>
-                <button onClick={() => setRenamingId(null)}>Cancel</button>
+                {/* section handling editing options UI */}
+                <div class={styles.renameContainer}>
+                  <input 
+                    type="text" 
+                    value={newTitle()}
+                    onInput={clicked => setNewTitle(clicked.currentTarget.value)}
+                    onKeyDown={clicked => clicked.key === 'Enter' && applyRename()}
+                    class={styles.renameInput}
+                  />
+                  <div class={styles.renameActions}>
+                    <button 
+                      class={styles.actionButton}
+                      onClick={applyRename}
+                      title="Save Changes"
+                    >
+                      <img src={saveIcon} alt="Save" class={styles.actionIcon} />
+                    </button>
+                    <button 
+                      class={styles.actionButton}
+                      onClick={() => setRenamingId(null)}
+                      title="Cancel"
+                    >
+                      <img src={cancelIcon} alt="Cancel" class={styles.actionIcon} />
+                    </button>
+                  </div>
+                </div>
               </Show>
             </div>
           }</For>
           <br/>
 
-          <button onClick={deleteAllChats}>Delete Chat History</button>
+          <button class={styles.deleteAllButton} onClick={deleteAllChats}>Delete All Chats</button>
           <br />
         </div>
         <div class="pageContainer">
