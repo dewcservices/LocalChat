@@ -13,7 +13,6 @@ function QuestionAnswer() {
   const [contextTab, setContextTab] = createSignal("text");
   const [selectedModel, setSelectedModel] = createSignal("");
   
-  // TODO force it to use local models (like summarize)
   let qaPipeline;
   const setupModel = async () => {
 
