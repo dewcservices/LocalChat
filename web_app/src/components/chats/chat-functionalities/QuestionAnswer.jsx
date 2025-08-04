@@ -1,24 +1,95 @@
 import { useContext, createSignal, Match, Switch } from 'solid-js';
 import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transformers';
+
 import styles from './QuestionAnswer.module.css';
 import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
+import { pathJoin } from '../../../utils/PathJoin';
+
 
 function QuestionAnswer() {
+  
   const chatContext = useContext(ChatContext);
   const [contextTab, setContextTab] = createSignal("text");
+  const [selectedModel, setSelectedModel] = createSignal("");
   
   // TODO force it to use local models (like summarize)
-  const model = 'Xenova/distilbert-base-uncased-distilled-squad';
   let qaPipeline;
-  
   const setupModel = async () => {
-    qaPipeline = await pipeline('question-answering', model);
+
+    // disable uploading another model, and change the text to indicate a model is being loaded.
+    document.getElementById("folderInput").disabled = true;
+    const modelUploadLabel = document.getElementById("modelInputLabel");
+    modelUploadLabel.innerText = "Loading Model";
+
+    // configure transformer js environment
+    env.useBrowserCache = true;
+    env.allowRemoteModels = true;
+
+    // inject models into browser cache
+    let cache = await caches.open('transformers-cache');
+
+    let folderElement = document.getElementById("folderInput");
+    let files = [...folderElement.files];
+
+    if (files.length == 0) {
+      alert("Empty model directory was selected, please select again."); // TODO improve UX
+    }
+
+    let configFile = files.find(file => file.name == "browser_config.json");
+
+    if (!configFile) {
+      alert("Unsupported or Malformed Model");
+      return;
+    }
+    
+    let fileText = await configFile.text();
+    fileText = JSON.parse(fileText);
+
+    setSelectedModel(fileText.fileName);
+    console.log(selectedModel());
+
+    for (let file of files) {
+
+      let cacheKey = pathJoin(
+        env.remoteHost, 
+        env.remotePathTemplate
+          .replaceAll('{model}', selectedModel())
+          .replaceAll('{revision}', 'main'),
+        file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
+      );
+
+      let fileReader = new FileReader();
+      fileReader.onload = async () => {
+        let arrayBuffer = fileReader.result;
+        let uint8Array = new Uint8Array(arrayBuffer);
+        
+        //console.log(file.webkitRelativePath, uint8Array);
+        await cache.put(cacheKey, new Response(uint8Array));
+      };
+      fileReader.readAsArrayBuffer(file);
+    }
+
+    // Change model button text to indicate a change in the procedure,
+    // and request an animation frame to show this change.
+    modelUploadLabel.innerText = "Creating pipeline";
+    await new Promise(requestAnimationFrame);
+
+    const device = chatContext.processor();
+
+    qaPipeline = await pipeline('question-answering', selectedModel(), { device: device });
+    console.log("Finished model setup using", device);
+    
+    // Re-enable uploading another model.
+    document.getElementById("folderInput").disabled = false;
+    modelUploadLabel.innerText = selectedModel();
   };
-  
-  setupModel();
  
   const processQuestion = async () => {
+    if (selectedModel() == "") {
+      alert("A model must be selected before answering questions. Please select a model.");
+      return;
+    }
     if (!(qaPipeline instanceof QuestionAnsweringPipeline)) {
       alert("Model is loading... please try again.");
       return;
@@ -54,7 +125,7 @@ function QuestionAnswer() {
     chatContext.addMessage(`Question: ${question}`, true);
     
     let output = await qaPipeline(question, context);
-    chatContext.addMessage(output.answer, false, model);
+    chatContext.addMessage(output.answer, false, selectedModel());
     
     document.getElementById('questionTextarea').value = '';
   };
@@ -102,6 +173,10 @@ function QuestionAnswer() {
                 }
               }}
             />
+            <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+              {selectedModel() === "" ? "Select Model" : selectedModel()}
+            </label>
+            <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
             <button class={styles.sendButton} onClick={processQuestion}>Send</button>
           </div>
         </div>

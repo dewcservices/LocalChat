@@ -22,7 +22,8 @@ function Summarize() {
     // disable uploading another model, and change the text to indicate a model is being loaded.
     document.getElementById("folderInput").disabled = true;
     const modelUploadLabel = document.getElementById("modelInputLabel");
-    modelUploadLabel.classList.add(styles.disabledLabel);
+    modelUploadLabel.classList.add(styles.disabledLabel);  
+      // FIXME: at some point disabledLabel was removed from styles, however, this may require refactoring anyway
     modelUploadLabel.innerText = "Loading Model";
 
     // configure transformer js environment
