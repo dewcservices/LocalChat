@@ -5,40 +5,30 @@ import styles from './ModelTesting.module.css'
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
 
-  let tempModelCount = 0;
-  const addModel = () => {
-    tempModelCount++;
-    setSelectedModels([...selectedModels(), "Model" + tempModelCount]);
-  };
+  const addModel = async (event) => {
+    const files = [...event.target.files];
 
-  const benchmarkModels = async () => {
-    document.getElementById("modelSelectButton").disabled = true;
-    document.getElementById("benchmarkButton").disabled = true;
-    
-    let headerCount = document.getElementById("tableContainer").querySelector("table").querySelector("thead")
-      .querySelector("tr").children.length;
-    let tbody = document.getElementById("tableContainer").querySelector("table").querySelector("tbody");
-
-    for (let i = 0; i < selectedModels().length; i++) {
-      await wait(1000);
-
-      let currentRow = tbody.children[i];
-
-      // Clear existing values;
-      while (currentRow.children.length > 1) {
-        currentRow.removeChild(currentRow.lastChild);
-      }
-
-      // Add temporary random values;
-      for (let j = 1; j < headerCount; j++) {
-        let newCell = document.createElement("th");
-        newCell.innerHTML = Math.round(Math.random() * 100) / 100;
-        currentRow.appendChild(newCell);
-      }
+    // No file added
+    if (files.length == 0) {
+      return;
     }
 
-    document.getElementById("modelSelectButton").disabled = false;
-    document.getElementById("benchmarkButton").disabled = false;
+    const modelName = files[0].webkitRelativePath.split("/")[0];
+    const configFile = files.find(file => file.name == "browser_config.json");
+    
+    if (!configFile) {
+      alert("Unsupported or Malformed Model");
+      return;
+    }
+
+    let fileText = await configFile.text();
+    fileText = JSON.parse(fileText);
+
+    setSelectedModels([...selectedModels(), fileText.fileName]);
+  }
+
+  const benchmarkModels = async () => {
+    selectedModels().forEach(modelName => console.log(modelName));
   };
 
   const clearModels = () => {
@@ -55,7 +45,12 @@ function ModelTesting() {
         <h4>Select models to benchmark:</h4>
 
         <div>
-          <button id="modelSelectButton" class={styles.inputButton} onClick={addModel}>Select Model</button>
+          {/* Select Model/s for benchmarking */}
+          <label for="modelInput" id="modelInputLabel" class={styles.inputButton}>
+            Select Models
+          </label>
+          <input type="file" id="modelInput" class={styles.hidden} webkitdirectory multiple onChange={addModel} />
+                      
           <button id="benchmarkButton" class={styles.inputButton} onClick={benchmarkModels}>Benchmark</button>
           <button id="clearButton" class={styles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
@@ -64,24 +59,10 @@ function ModelTesting() {
           <table class={styles.tableMMLU}>
             <thead>
               <tr>
-                <th>Model</th>
-                <th>Overall Score</th>
-                <th>Benchmark 1</th>
-                <th>Benchmark 2</th>
-                <th>Benchmark 3</th>
-                <th>Benchmark 4</th>
-                <th>Benchmark 5</th>
-                <th>Benchmark 6</th>
-                <th>Benchmark 7</th>
-                <th>Benchmark 8</th>
-                <th>Benchmark 9</th>
-                <th>Benchmark 10</th>
-                <th>Benchmark 11</th>
-                <th>Benchmark 12</th>
-                <th>Benchmark 13</th>
-                <th>Benchmark 14</th>
-                <th>Benchmark 15</th>
-                <th>Benchmark 16</th>
+                <th>Model Name</th>
+                <th>Upload Time</th>
+                <th>Generation Time</th>
+                <th>Sample Output</th>
               </tr>
             </thead>
             <tbody>
