@@ -1,4 +1,6 @@
 import { createSignal } from 'solid-js';
+import { pathJoin } from '../utils/PathJoin';
+import { pipeline, env } from '@huggingface/transformers';
 import styles from './ModelTesting.module.css'
 
 
@@ -21,14 +23,56 @@ function ModelTesting() {
       return;
     }
 
+    // Read config file
     let fileText = await configFile.text();
     fileText = JSON.parse(fileText);
 
-    setSelectedModels([...selectedModels(), fileText.fileName]);
+    // Create model JSON to store model.
+    const model = {
+      name: fileText.fileName,
+      files: files,
+    };
+
+    setSelectedModels([...selectedModels(), model]);
   }
 
   const benchmarkModels = async () => {
-    selectedModels().forEach(modelName => console.log(modelName));
+
+    // configure transformer js environment
+    env.useBrowserCache = true;
+    env.allowRemoteModels = true;
+
+    // inject models into browser cache
+    let cache = await caches.open('transformers-cache');
+
+    for (const model of selectedModels()) {
+      console.log(model.name);
+      // Upload models to browsers cache.
+      for (let file of model.files) {
+  
+        let cacheKey = pathJoin(
+          env.remoteHost, 
+          env.remotePathTemplate
+            .replaceAll('{model}', model.name)
+            .replaceAll('{revision}', 'main'),
+          file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
+        );
+  
+        let fileReader = new FileReader();
+        fileReader.onload = async () => {
+          let arrayBuffer = fileReader.result;
+          let uint8Array = new Uint8Array(arrayBuffer);
+          
+          //console.log(file.webkitRelativePath, uint8Array);
+          await cache.put(cacheKey, new Response(uint8Array));
+        };
+        fileReader.readAsArrayBuffer(file);
+      }
+  
+      // TODO: Add line to config files to say what type of model this is.
+      let generator = await pipeline('summarization', model.name);
+      console.log("finished for" + model.name);
+    }
   };
 
   const clearModels = () => {
@@ -55,6 +99,8 @@ function ModelTesting() {
           <button id="clearButton" class={styles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
 
+        {/* TODO: Add sample input field */}
+
         <div id="tableContainer" class={styles.tableContainer}>
           <table class={styles.tableMMLU}>
             <thead>
@@ -68,7 +114,7 @@ function ModelTesting() {
             <tbody>
               <For each={selectedModels()}>{(model) =>
                 <tr>
-                  <td>{model}</td>
+                  <td>{model.name}</td>
                 </tr>
               }</For>
             </tbody>
