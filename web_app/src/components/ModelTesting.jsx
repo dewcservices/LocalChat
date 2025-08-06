@@ -38,6 +38,8 @@ function ModelTesting() {
 
   const benchmarkModels = async () => {
 
+    const table = document.getElementById("tableContainer").querySelector("table");
+
     // configure transformer js environment
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
@@ -45,8 +47,15 @@ function ModelTesting() {
     // inject models into browser cache
     let cache = await caches.open('transformers-cache');
 
-    for (const model of selectedModels()) {
-      console.log(model.name);
+    const modelList = selectedModels()
+
+    // Loop through each model, injecting the model into the cache, and running a sample prompt.
+    for (let i = 0; i < modelList.length; i++) {
+      const model = modelList[i]
+      //console.log(model.name);
+
+      const startTime = performance.now();
+
       // Upload models to browsers cache.
       for (let file of model.files) {
   
@@ -63,7 +72,6 @@ function ModelTesting() {
           let arrayBuffer = fileReader.result;
           let uint8Array = new Uint8Array(arrayBuffer);
           
-          //console.log(file.webkitRelativePath, uint8Array);
           await cache.put(cacheKey, new Response(uint8Array));
         };
         fileReader.readAsArrayBuffer(file);
@@ -71,7 +79,16 @@ function ModelTesting() {
   
       // TODO: Add line to config files to say what type of model this is.
       let generator = await pipeline('summarization', model.name);
-      console.log("finished for" + model.name);
+
+      const endTime = performance.now();
+      // Get total time it took for the model to be injected, rounded to 2 decimal places.
+      let totalTime = endTime - startTime;
+      totalTime = (totalTime / 1000).toFixed(2) + "s";
+
+      console.log("finished for" + model.name + " " + totalTime);
+
+      table.rows[i+1].cells[1].innerText = totalTime;
+
     }
   };
 
@@ -115,6 +132,9 @@ function ModelTesting() {
               <For each={selectedModels()}>{(model) =>
                 <tr>
                   <td>{model.name}</td>
+                  <td></td> {/* Upload Time Cell */}
+                  <td></td> {/* Generation Time Cell */}
+                  <td></td> {/* Sample Output Cell */}
                 </tr>
               }</For>
             </tbody>
