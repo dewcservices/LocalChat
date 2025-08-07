@@ -41,6 +41,10 @@ function ModelTesting() {
 
     const table = document.getElementById("tableContainer").querySelector("table");
 
+    const tableUploadTimeCol = 1;
+    const tableGenerationTimeCol = 2;
+    const tableMessageCol = 3;
+
     // configure transformer js environment
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
@@ -58,10 +62,10 @@ function ModelTesting() {
 
     // Loop through each model, injecting the model into the cache, and running a sample prompt.
     for (let i = 0; i < modelList.length; i++) {
-      const model = modelList[i]
-      //console.log(model.name);
+      const model = modelList[i];
+      const currentRow = table.rows[i+1];
 
-      table.rows[i+1].cells[1].innerText = "Uploading";
+      currentRow.cells[tableUploadTimeCol].innerText = "Uploading";
 
       let startTime = performance.now();
 
@@ -93,9 +97,9 @@ function ModelTesting() {
       // Get total time it took for the model to be injected, rounded to 2 decimal places.
       let totalTime = endTime - startTime;
       totalTime = (totalTime / 1000).toFixed(2) + "s";
-      table.rows[i+1].cells[1].innerText = totalTime;
+      currentRow.cells[tableUploadTimeCol].innerText = totalTime;
 
-      table.rows[i+1].cells[2].innerText = "Generating";
+      currentRow.cells[tableGenerationTimeCol].innerText = "Generating";
 
       // Ensure that the upload time cell always appears when the upload is finished, and not with the generation time.
       await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
@@ -106,8 +110,8 @@ function ModelTesting() {
       endTime = performance.now();
 
       totalTime = ((endTime - startTime) / 1000).toFixed(2) + "s";
-      table.rows[i+1].cells[2].innerText = totalTime;
-      table.rows[i+1].cells[3].innerText = output[0].summary_text;
+      currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
+      currentRow.cells[tableMessageCol].innerText = output[0].summary_text;
 
       await new Promise(requestAnimationFrame);
     }
@@ -118,7 +122,10 @@ function ModelTesting() {
     tempModelCount = 0;
   };
 
-  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  const removeModel = (modelName) => {
+    setSelectedModels(selectedModels().filter(model => model.name != modelName));
+  }
+
 
   return (
     <>
@@ -141,6 +148,11 @@ function ModelTesting() {
 
         <div id="tableContainer" class={modelTestingStyles.tableContainer}>
           <table class={modelTestingStyles.tableMMLU}>
+            <colgroup>
+              <col/>
+              <col span="2" class={modelTestingStyles.tableColShrink} />
+              <col/>
+            </colgroup>
             <thead>
               <tr>
                 <th>Model Name</th>
@@ -152,7 +164,7 @@ function ModelTesting() {
             <tbody>
               <For each={selectedModels()}>{(model) =>
                 <tr>
-                  <td>{model.name}</td>
+                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
                   <td></td> {/* Upload Time Cell */}
                   <td></td> {/* Generation Time Cell */}
                   <td></td> {/* Sample Output Cell */}

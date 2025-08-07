@@ -49,13 +49,22 @@
   
 .tableMMLU {
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto;
     width: 100%;
     overflow: hidden;
 }
 
 .tableMMLU th, .tableMMLU td {
     border: 1px solid black;
-    width: 6em;
     text-align: center;
+    min-width: 10em;
+}
+
+.tableColShrink {
+    white-space: nowrap;
+}
+
+.modelName:hover {
+    text-decoration:line-through;
+    cursor: pointer;
 }
