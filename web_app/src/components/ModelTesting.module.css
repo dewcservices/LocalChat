@@ -40,7 +40,7 @@
 }
 
 .tableContainer {
-    margin-top: 2em;
+    margin-top: 1em;
     border: 1px solid black;
     overflow-x: auto;
     max-width: 75vw;
@@ -67,4 +67,20 @@
 .modelName:hover {
     text-decoration:line-through;
     cursor: pointer;
+}
+
+.inputArea {
+    flex: 1;
+    width: 100%;
+    min-height: 15vh;
+    font-size: 16px;
+    box-sizing: border-box;
+    resize: none;
+    border-radius: 10px;
+    border: 1px solid #474747;
+    background-color: #292929;
+    color: white;
+    padding: 4px 5px;
+    margin-top: 12px;
+    overflow-y: auto;
 }

@@ -151,9 +151,9 @@ if (download_models) {
     let modelName = model[0][0];
     let firstSlashIndex = modelName.indexOf("/");
 
-    let fileName = {"fileName": modelName.substring(firstSlashIndex + 1)}
+    let modelDetails = {"fileName": modelName.substring(firstSlashIndex + 1), "modelType": modelName.substring(0, firstSlashIndex)}
 
     // Create local chat specific file.
-    fs.writeFile("../dist/models/" + model[0][0] + "/browser_config.json", JSON.stringify(fileName));
+    fs.writeFile("../dist/models/" + model[0][0] + "/browser_config.json", JSON.stringify(modelDetails));
   }
 }

@@ -32,6 +32,7 @@ function ModelTesting() {
     const model = {
       name: fileText.fileName,
       files: files,
+      modelType: fileText.modelType,
     };
 
     setSelectedModels([...selectedModels(), model]);
@@ -52,11 +53,15 @@ function ModelTesting() {
     // inject models into browser cache
     let cache = await caches.open('transformers-cache');
 
-    // TODO: Setup user input for sample input.
-    let userInput = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
-    Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
-    All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
-    Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
+    let userInput = document.getElementById("inputTextArea").value;
+
+    // If no user input was provided, use a default input.
+    if (userInput == "") {
+      userInput = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
+      Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
+      All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
+      Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
+    }
 
     const modelList = selectedModels()
 
@@ -90,8 +95,7 @@ function ModelTesting() {
         fileReader.readAsArrayBuffer(file);
       };
   
-      // TODO: Add line to config files to say what type of model this is.
-      let generator = await pipeline('summarization', model.name);
+      let generator = await pipeline(model.modelType, model.name);
 
       let endTime = performance.now();
       // Get total time it took for the model to be injected, rounded to 2 decimal places.
@@ -143,6 +147,7 @@ function ModelTesting() {
           <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
           <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
+        <textarea id="inputTextArea" class={modelTestingStyles.inputArea} placeholder='Benchmarking Test Input...'></textarea>
 
         {/* TODO: Add sample input field */}
 
