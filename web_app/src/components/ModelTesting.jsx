@@ -1,7 +1,8 @@
 import { createSignal } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
-import styles from './ModelTesting.module.css'
+import modelTestingStyles from './ModelTesting.module.css';
+import chatStyles from './chats/Chat.module.css';
 
 
 function ModelTesting() {
@@ -47,6 +48,12 @@ function ModelTesting() {
     // inject models into browser cache
     let cache = await caches.open('transformers-cache');
 
+    // TODO: Setup user input for sample input.
+    let userInput = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
+    Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
+    All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
+    Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
+
     const modelList = selectedModels()
 
     // Loop through each model, injecting the model into the cache, and running a sample prompt.
@@ -54,7 +61,9 @@ function ModelTesting() {
       const model = modelList[i]
       //console.log(model.name);
 
-      const startTime = performance.now();
+      table.rows[i+1].cells[1].innerText = "Uploading";
+
+      let startTime = performance.now();
 
       // Upload models to browsers cache.
       for (let file of model.files) {
@@ -75,20 +84,32 @@ function ModelTesting() {
           await cache.put(cacheKey, new Response(uint8Array));
         };
         fileReader.readAsArrayBuffer(file);
-      }
+      };
   
       // TODO: Add line to config files to say what type of model this is.
       let generator = await pipeline('summarization', model.name);
 
-      const endTime = performance.now();
+      let endTime = performance.now();
       // Get total time it took for the model to be injected, rounded to 2 decimal places.
       let totalTime = endTime - startTime;
       totalTime = (totalTime / 1000).toFixed(2) + "s";
-
-      console.log("finished for" + model.name + " " + totalTime);
-
       table.rows[i+1].cells[1].innerText = totalTime;
 
+      table.rows[i+1].cells[2].innerText = "Generating";
+
+      // Ensure that the upload time cell always appears when the upload is finished, and not with the generation time.
+      await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
+
+      // Generate a message using a sample output.
+      startTime = performance.now();
+      let output = await generator(userInput, { max_new_tokens: 100});
+      endTime = performance.now();
+
+      totalTime = ((endTime - startTime) / 1000).toFixed(2) + "s";
+      table.rows[i+1].cells[2].innerText = totalTime;
+      table.rows[i+1].cells[3].innerText = output[0].summary_text;
+
+      await new Promise(requestAnimationFrame);
     }
   };
 
@@ -101,25 +122,25 @@ function ModelTesting() {
 
   return (
     <>
-      <div class={styles.modelTesting}>
+      <div class={modelTestingStyles.modelTesting}>
         <h2>Model Testing:</h2>
         <h4>Select models to benchmark:</h4>
 
         <div>
           {/* Select Model/s for benchmarking */}
-          <label for="modelInput" id="modelInputLabel" class={styles.inputButton}>
+          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton}>
             Select Models
           </label>
-          <input type="file" id="modelInput" class={styles.hidden} webkitdirectory multiple onChange={addModel} />
+          <input type="file" id="modelInput" class={modelTestingStyles.hidden} webkitdirectory multiple onChange={addModel} />
                       
-          <button id="benchmarkButton" class={styles.inputButton} onClick={benchmarkModels}>Benchmark</button>
-          <button id="clearButton" class={styles.inputButton} onClick={clearModels}>Clear Models</button>
+          <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
+          <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
 
         {/* TODO: Add sample input field */}
 
-        <div id="tableContainer" class={styles.tableContainer}>
-          <table class={styles.tableMMLU}>
+        <div id="tableContainer" class={modelTestingStyles.tableContainer}>
+          <table class={modelTestingStyles.tableMMLU}>
             <thead>
               <tr>
                 <th>Model Name</th>
