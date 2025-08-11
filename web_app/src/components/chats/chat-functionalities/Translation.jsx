@@ -1,22 +1,23 @@
 import { useContext, createSignal } from 'solid-js';
-import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
+import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
 
-import { ChatContext } from '../ChatContext';
-import styles from './Summarize.module.css';
-import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
+import { ChatContext } from "../ChatContext";
+import styles from './Translation.module.css';
+import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { pathJoin } from '../../../utils/PathJoin';
 
 
-function Summarize() {
+function Translation() {
 
   const chatContext = useContext(ChatContext);
   const [selectedModel, setSelectedModel] = createSignal("");
-
-  let generator;
+  
+  let translator;
 
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
 
+  // TODO load supported languages dynamically from a config file
   const setupModel = async () => {
 
     // disable uploading another model, and change the text to indicate a model is being loaded.
@@ -81,22 +82,22 @@ function Summarize() {
 
     const device = chatContext.processor();
 
-    generator = await pipeline('summarization', selectedModel(), { device: device });
+    translator = await pipeline('translation', selectedModel(), {device: device});
     console.log("Finished model setup using", device);
-    
+
     // Re-enable uploading another model.
     document.getElementById("folderInput").disabled = false;
     modelUploadLabel.classList.remove(styles.disabledLabel);
     modelUploadLabel.innerText = selectedModel();
   };
 
-  const summarizeTextInput = async () => {
-    if (selectedModel() == "") {
-      alert("A model must be selected before summarizing text. Please select a model.");
+  const translateTextInput = async () => {
+    if (selectedModel() === "") {
+      alert("A model must be selected before tranlating text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
-    if (!(generator instanceof SummarizationPipeline)) {
+    if (!(translator instanceof TranslationPipeline)) {
       alert("Model is loading... please try again.");
       return;
     }
@@ -106,23 +107,29 @@ function Summarize() {
 
     if (userMessage == "") return;
 
-    chatContext.addMessage("Summarize: " + userMessage, true);
+    let src_lang_select = document.getElementById('src_lang');
+    let src_lang = src_lang_select.value;
+
+    let tgt_lang_select = document.getElementById('tgt_lang');
+    let tgt_lang = tgt_lang_select.value;
+
+    chatContext.addMessage(`Translate from ${src_lang} to ${tgt_lang}: "${userMessage}"`, true);
     inputTextArea.value = "";
 
-    let messageDate = chatContext.addMessage("Generating Message...", false, selectedModel());  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message", false, selectedModel());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // force a re-render by yielding control back to browser
 
-    let output = await generator(userMessage, { max_new_tokens: 100});  // generate response
-    chatContext.updateMessage(messageDate, output[0].summary_text);  // update temp message to response
+    let output = await translator(userMessage, {src_lang: src_lang, tgt_lang: tgt_lang});
+    chatContext.updateMessage(messageDate, output[0].translation_text);  // update temp message to response
   };
 
-  const summarizeFileInput = async () => {
-    if (selectedModel() == "") {
-      alert("A model must be selected before summarizing text. Please select a model.");
+  const translateFileInput = async () => {
+    if (selectedModel() === "") {
+      alert("A model must be selected before tranlating text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
-    if (!(generator instanceof SummarizationPipeline)) {
+    if (!(translator instanceof TranslationPipeline)) {
       alert("Model is loading... please try again.");
       return;
     }
@@ -142,32 +149,36 @@ function Summarize() {
       fileContent = await parseDocxFileAsync(file);
     }
 
-    chatContext.addMessage("Summarize File: " + file.name, true);
+    let src_lang_select = document.getElementById('src_lang');
+    let src_lang = src_lang_select.value;
+
+    let tgt_lang_select = document.getElementById('tgt_lang');
+    let tgt_lang = tgt_lang_select.value;
+
+    chatContext.addMessage(`Translate File from ${src_lang} to ${tgt_lang}: ${file.name}`, true);
     chatContext.addFile(fileContent, file.name);
 
     let messageDate = chatContext.addMessage("Generating Message", false, selectedModel());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // forces a re-render again by yielding control back to the browser
-    
-    let output = await generator(fileContent, { max_new_tokens: 100});  // generate response
-    chatContext.updateMessage(messageDate, output[0].summary_text);  // update temp message to response
 
-    fileInput.value = null;  // clear file input element
+    let output = await translator(fileContent, {src_lang: src_lang, tgt_lang: tgt_lang});
+    chatContext.updateMessage(messageDate, output[0].translation_text);  // update temp message to response
   };
 
   return (
     <>
       <div class={styles.inputContainer}>
 
-        {/* Dynamic input UI - moved to top */}
+        {/* Dynamic input UI */}
         <Switch>
           <Match when={tab() === "text"}>
             <div class={styles.searchBarContainer}>
               <textarea id="inputTextArea" 
-                placeholder='Enter text to summarize here...'
+                placeholder='Enter text to translate here...'
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    summarizeTextInput();
+                    translateTextInput();
                   }
                 }}
               ></textarea>
@@ -175,7 +186,7 @@ function Summarize() {
           </Match>
           <Match when={tab() === "file"}>
             <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html., .docx" onChange={summarizeFileInput} />
+              <input type="file" id="fileInput" accept=".txt, .html., .docx" />
             </div>
           </Match>
         </Switch>
@@ -183,7 +194,11 @@ function Summarize() {
         {/* Control buttons row - moved to bottom */}
         <div class={styles.controlsContainer}>
           <div class={styles.controlsLeft}>
-            <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+            <label 
+              for="folderInput" 
+              id="modelInputLabel" 
+              class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}
+            >
               {selectedModel() === "" ? "Select Model" : selectedModel()}
             </label>
             <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
@@ -193,7 +208,7 @@ function Summarize() {
               onMouseEnter={() => setHoveredTab("file")}
               onMouseLeave={() => setHoveredTab(null)}
             >
-              Summarize File
+              Translate File
             </button>
             <button 
               class={`${tab() === "text" ? styles.selectedTab : styles.tab} ${hoveredTab() === "text" ? styles.highlighted : ''}`}
@@ -201,18 +216,19 @@ function Summarize() {
               onMouseEnter={() => setHoveredTab("text")}
               onMouseLeave={() => setHoveredTab(null)}
             >
-              Summarize Text
+              Translate Text
             </button>
           </div>
           <div class={styles.controlsRight}>
-            {tab() === "text" && (
-              <button 
-                onClick={summarizeTextInput} 
-                class={styles.sendButton}
-              >
-                Send
-              </button>
-            )}
+            <label for="src_lang">From: </label>
+            <select name="src_lang" id="src_lang">
+              <option value="eng_Latn">English</option>
+            </select> 
+            <label for="tgt_lang">To: </label>
+            <select name="tgt_lang" id="tgt_lang">
+              <option value="jpn_Jpan">Japanese</option>
+            </select>
+            <button onClick={() => {tab() == "text" ? translateTextInput() : translateFileInput()}} class={styles.sendButton}>Send</button>
           </div>
         </div>
 
@@ -221,4 +237,4 @@ function Summarize() {
   );
 }
 
-export default Summarize;
+export default Translation;

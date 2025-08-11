@@ -128,29 +128,41 @@ let model_file_urls = [
     ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/onnx/decoder_model_merged_quantized.onnx","summarization/Xenova/bart-large-cnn/decoder_model_merged_quantized.onnx"],
     ["https://huggingface.co/Xenova/bart-large-cnn/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/bart-large-cnn/encoder_model_quantized.onnx"],
   ],
-  [ // Xenova/distilbart-cnn-6-6
-    ["summarization/Xenova/distilbart-cnn-6-6"],
-    ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/config.json", "summarization/Xenova/distilbart-cnn-6-6/config.json"],
-    ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/generation_config.json", "summarization/Xenova/distilbart-cnn-6-6/generation_config.json"],
-    ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/tokenizer.json", "summarization/Xenova/distilbart-cnn-6-6/tokenizer.json"],
-    ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/tokenizer_config.json", "summarization/Xenova/distilbart-cnn-6-6/tokenizer_config.json"],
-    ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/decoder_model_merged_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/decoder_model_merged_quantized.onnx"],
-    ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/encoder_model_quantized.onnx"],
-  ],
+  // [ // Xenova/distilbart-cnn-6-6
+  //   ["summarization/Xenova/distilbart-cnn-6-6"],
+  //   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/config.json", "summarization/Xenova/distilbart-cnn-6-6/config.json"],
+  //   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/generation_config.json", "summarization/Xenova/distilbart-cnn-6-6/generation_config.json"],
+  //   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/tokenizer.json", "summarization/Xenova/distilbart-cnn-6-6/tokenizer.json"],
+  //   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/tokenizer_config.json", "summarization/Xenova/distilbart-cnn-6-6/tokenizer_config.json"],
+  //   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/decoder_model_merged_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/decoder_model_merged_quantized.onnx"],
+  //   ["https://huggingface.co/Xenova/distilbart-cnn-6-6/resolve/main/onnx/encoder_model_quantized.onnx", "summarization/Xenova/distilbart-cnn-6-6/encoder_model_quantized.onnx"],
+  // ],
   [ // Xenova/distilbert-base-uncased-distilled-squad
     ["question_answer/Xenova/distilbert-base-uncased-distilled-squad"],
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/config.json", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/config.json"],
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/onnx/model_quantized.onnx", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/model_quantized.onnx"],
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/tokenizer.json", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/tokenizer.json"],
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/tokenizer_config.json", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/tokenizer_config.json"]
+  ],
+  [ // Xenova/nllb-200-distilled-600M
+    ["translation/Xenova/nllb-200-distilled-600M"],
+    ["https://huggingface.co/Xenova/nllb-200-distilled-600M/resolve/main/config.json", "translation/Xenova/nllb-200-distilled-600M/config.json"],
+    ["https://huggingface.co/Xenova/nllb-200-distilled-600M/resolve/main/generation_config.json", "translation/Xenova/nllb-200-distilled-600M/generation_config.json"],
+    ["https://huggingface.co/Xenova/nllb-200-distilled-600M/resolve/main/onnx/decoder_model_merged_quantized.onnx", "translation/Xenova/nllb-200-distilled-600M/decoder_model_merged_quantized.onnx"],
+    ["https://huggingface.co/Xenova/nllb-200-distilled-600M/resolve/main/onnx/encoder_model_quantized.onnx", "translation/Xenova/nllb-200-distilled-600M/encoder_model_quantized.onnx"],
+    ["https://huggingface.co/Xenova/nllb-200-distilled-600M/resolve/main/tokenizer.json", "translation/Xenova/nllb-200-distilled-600M/tokenizer.json"],
+    ["https://huggingface.co/Xenova/nllb-200-distilled-600M/resolve/main/tokenizer_config.json", "translation/Xenova/nllb-200-distilled-600M/tokenizer_config.json"]
   ]
 ];
+
 if (download_models) {
+  console.log("\nDownloading Models...");
 
   for (let model of model_file_urls) {
     // Download the model files
     for (let i = 1; i < model.length; i++) {
       const url = model[i];
+      console.log(`Downloading: ${url[0]}`)
       downloadFile(url[0], `../dist/models/${url[1]}`);
     }
 
