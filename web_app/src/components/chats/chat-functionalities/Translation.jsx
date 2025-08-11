@@ -17,6 +17,10 @@ function Translation() {
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
 
+  // a dictionary of the the languages and their codes (e.g. {"English": "eng_Latn", ...}),
+  // provided by browser_config.json
+  const [languages, setLanguages] = createSignal({});
+
   // TODO load supported languages dynamically from a config file
   const setupModel = async () => {
 
@@ -48,18 +52,25 @@ function Translation() {
       return;
     }
     
-    let fileText = await configFile.text();
-    fileText = JSON.parse(fileText);
+    let config = await configFile.text();
+    config = JSON.parse(config);
 
-    setSelectedModel(fileText.fileName);
-    console.log(selectedModel());
+    if (config.task !== "translation") {
+      alert(`Must be a translation model. browser_config.json states that the model is for ${config.task}.`);
+      modelUploadLabel.innerText = "Select Model";
+      document.getElementById("folderInput").disabled = false;
+      return;
+    }
+    setLanguages(config.languages);
+
+    setSelectedModel(config.modelName);
     
     for (let file of files) {
 
       let cacheKey = pathJoin(
         env.remoteHost, 
         env.remotePathTemplate
-          .replaceAll('{model}', selectedModel())
+          .replaceAll('{model}', config.modelName)
           .replaceAll('{revision}', 'main'),
         file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
       );
@@ -82,13 +93,13 @@ function Translation() {
 
     const device = chatContext.processor();
 
-    translator = await pipeline('translation', selectedModel(), {device: device});
+    translator = await pipeline('translation', config.modelName, {device: device});
     console.log("Finished model setup using", device);
 
     // Re-enable uploading another model.
     document.getElementById("folderInput").disabled = false;
     modelUploadLabel.classList.remove(styles.disabledLabel);
-    modelUploadLabel.innerText = selectedModel();
+    modelUploadLabel.innerText = config.modelName;
   };
 
   const translateTextInput = async () => {
@@ -222,13 +233,22 @@ function Translation() {
           <div class={styles.controlsRight}>
             <label for="src_lang">From: </label>
             <select name="src_lang" id="src_lang">
-              <option value="eng_Latn">English</option>
+              <For each={Object.entries(languages())}>{([lang, langCode]) =>
+                <option value={langCode}>{lang}</option>
+              }</For>
             </select> 
             <label for="tgt_lang">To: </label>
             <select name="tgt_lang" id="tgt_lang">
-              <option value="jpn_Jpan">Japanese</option>
+              <For each={Object.entries(languages())}>{([lang, langCode]) =>
+                <option value={langCode}>{lang}</option>
+              }</For>
             </select>
-            <button onClick={() => {tab() == "text" ? translateTextInput() : translateFileInput()}} class={styles.sendButton}>Send</button>
+            <button 
+              onClick={() => {tab() == "text" ? translateTextInput() : translateFileInput()}} 
+              class={styles.sendButton}
+            >
+              Send
+            </button>
           </div>
         </div>
 

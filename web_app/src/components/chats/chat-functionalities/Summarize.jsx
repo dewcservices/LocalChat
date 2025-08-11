@@ -22,7 +22,7 @@ function Summarize() {
     // disable uploading another model, and change the text to indicate a model is being loaded.
     document.getElementById("folderInput").disabled = true;
     const modelUploadLabel = document.getElementById("modelInputLabel");
-    modelUploadLabel.classList.add(styles.disabledLabel);  
+    // modelUploadLabel.classList.add(styles.disabledLabel);  
       // FIXME: at some point disabledLabel was removed from styles, however, this may require refactoring anyway
     modelUploadLabel.innerText = "Loading Model";
 
@@ -47,18 +47,24 @@ function Summarize() {
       return;
     }
     
-    let fileText = await configFile.text();
-    fileText = JSON.parse(fileText);
+    let config = await configFile.text();
+    config = JSON.parse(config);
 
-    setSelectedModel(fileText.fileName);
-    console.log(selectedModel());
+    if (config.task !== "summarization") {
+      alert(`Must be a summarization model. browser_config.json states that the model is for ${config.task}.`);
+      modelUploadLabel.innerText = "Select Model";
+      document.getElementById("folderInput").disabled = false;
+      return;
+    }
+
+    setSelectedModel(config.modelName);
     
     for (let file of files) {
 
       let cacheKey = pathJoin(
         env.remoteHost, 
         env.remotePathTemplate
-          .replaceAll('{model}', selectedModel())
+          .replaceAll('{model}', config.modelName)
           .replaceAll('{revision}', 'main'),
         file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
       );
@@ -81,13 +87,13 @@ function Summarize() {
 
     const device = chatContext.processor();
 
-    generator = await pipeline('summarization', selectedModel(), { device: device });
+    generator = await pipeline('summarization', config.modelName, { device: device });
     console.log("Finished model setup using", device);
     
     // Re-enable uploading another model.
     document.getElementById("folderInput").disabled = false;
-    modelUploadLabel.classList.remove(styles.disabledLabel);
-    modelUploadLabel.innerText = selectedModel();
+    // modelUploadLabel.classList.remove(styles.disabledLabel);
+    modelUploadLabel.innerText = config.modelName;
   };
 
   const summarizeTextInput = async () => {
@@ -183,7 +189,11 @@ function Summarize() {
         {/* Control buttons row - moved to bottom */}
         <div class={styles.controlsContainer}>
           <div class={styles.controlsLeft}>
-            <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+            <label 
+              for="folderInput" 
+              id="modelInputLabel" 
+              class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}
+            >
               {selectedModel() === "" ? "Select Model" : selectedModel()}
             </label>
             <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />

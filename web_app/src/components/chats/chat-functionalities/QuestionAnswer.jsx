@@ -42,18 +42,24 @@ function QuestionAnswer() {
       return;
     }
     
-    let fileText = await configFile.text();
-    fileText = JSON.parse(fileText);
+    let config = await configFile.text();
+    config = JSON.parse(config);
 
-    setSelectedModel(fileText.fileName);
-    console.log(selectedModel());
+    if (config.task !== "question_answer") {
+      alert(`Must be a question & answer model. browser_config.json states that the model is for ${config.task}.`);
+      modelUploadLabel.innerText = "Select Model";
+      document.getElementById("folderInput").disabled = false;
+      return;
+    }
+
+    setSelectedModel(config.modelName);
 
     for (let file of files) {
 
       let cacheKey = pathJoin(
         env.remoteHost, 
         env.remotePathTemplate
-          .replaceAll('{model}', selectedModel())
+          .replaceAll('{model}', config.modelName)
           .replaceAll('{revision}', 'main'),
         file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
       );
@@ -76,12 +82,12 @@ function QuestionAnswer() {
 
     const device = chatContext.processor();
 
-    qaPipeline = await pipeline('question-answering', selectedModel(), { device: device });
+    qaPipeline = await pipeline('question-answering', config.modelName, { device: device });
     console.log("Finished model setup using", device);
     
     // Re-enable uploading another model.
     document.getElementById("folderInput").disabled = false;
-    modelUploadLabel.innerText = selectedModel();
+    modelUploadLabel.innerText = config.modelName;
   };
  
   const processQuestion = async () => {
@@ -172,7 +178,11 @@ function QuestionAnswer() {
                 }
               }}
             />
-            <label for="folderInput" id="modelInputLabel" class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}>
+            <label 
+              for="folderInput" 
+              id="modelInputLabel" 
+              class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}
+            >
               {selectedModel() === "" ? "Select Model" : selectedModel()}
             </label>
             <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
