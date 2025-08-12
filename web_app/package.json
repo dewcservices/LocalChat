@@ -1,0 +1,24 @@
+{
+  "name": "solid_spa",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build-local-chat": "node build/build_local_chat.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.4.2",
+    "@solidjs/router": "^0.15.3",
+    "mammoth": "^1.9.0",
+    "solid-js": "^1.9.5"
+  },
+  "devDependencies": {
+    "follow-redirects": "^1.15.9",
+    "vite": "^6.2.0",
+    "vite-plugin-singlefile": "^2.2.0",
+    "vite-plugin-solid": "^2.11.2"
+  }
+}
