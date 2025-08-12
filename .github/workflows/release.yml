@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'   # e.g., v1.0.0
 
+permissions:
+  contents: write   # ✅ allow creating/updating releases
+
 jobs:
   build:
     runs-on: ubuntu-latest
