@@ -1,0 +1,186 @@
+import { createSignal } from 'solid-js';
+import { pathJoin } from '../utils/PathJoin';
+import { pipeline, env } from '@huggingface/transformers';
+import modelTestingStyles from './ModelTesting.module.css';
+import chatStyles from './chats/Chat.module.css';
+
+
+function ModelTesting() {
+  const [selectedModels, setSelectedModels] = createSignal([]);
+
+  const addModel = async (event) => {
+    const files = [...event.target.files];
+
+    // No file added
+    if (files.length == 0) {
+      return;
+    }
+
+    const modelName = files[0].webkitRelativePath.split("/")[0];
+    const configFile = files.find(file => file.name == "browser_config.json");
+    
+    if (!configFile) {
+      alert("Unsupported or Malformed Model");
+      return;
+    }
+
+    // Read config file
+    let fileText = await configFile.text();
+    fileText = JSON.parse(fileText);
+
+    // Create model JSON to store model.
+    const model = {
+      name: fileText.fileName,
+      files: files,
+      modelType: fileText.modelType,
+    };
+
+    setSelectedModels([...selectedModels(), model]);
+  }
+
+  const benchmarkModels = async () => {
+
+    const table = document.getElementById("tableContainer").querySelector("table");
+
+    const tableUploadTimeCol = 1;
+    const tableGenerationTimeCol = 2;
+    const tableMessageCol = 3;
+
+    // configure transformer js environment
+    env.useBrowserCache = true;
+    env.allowRemoteModels = true;
+
+    // inject models into browser cache
+    let cache = await caches.open('transformers-cache');
+
+    let userInput = document.getElementById("inputTextArea").value;
+
+    // If no user input was provided, use a default input.
+    if (userInput == "") {
+      userInput = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
+      Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
+      All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
+      Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
+    }
+
+    const modelList = selectedModels()
+
+    // Loop through each model, injecting the model into the cache, and running a sample prompt.
+    for (let i = 0; i < modelList.length; i++) {
+      const model = modelList[i];
+      const currentRow = table.rows[i+1];
+
+      currentRow.cells[tableUploadTimeCol].innerText = "Uploading";
+
+      let startTime = performance.now();
+
+      // Upload models to browsers cache.
+      for (let file of model.files) {
+  
+        let cacheKey = pathJoin(
+          env.remoteHost, 
+          env.remotePathTemplate
+            .replaceAll('{model}', model.name)
+            .replaceAll('{revision}', 'main'),
+          file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
+        );
+  
+        let fileReader = new FileReader();
+        fileReader.onload = async () => {
+          let arrayBuffer = fileReader.result;
+          let uint8Array = new Uint8Array(arrayBuffer);
+          
+          await cache.put(cacheKey, new Response(uint8Array));
+        };
+        fileReader.readAsArrayBuffer(file);
+      };
+  
+      let generator = await pipeline(model.modelType, model.name);
+
+      let endTime = performance.now();
+      // Get total time it took for the model to be injected, rounded to 2 decimal places.
+      let totalTime = endTime - startTime;
+      totalTime = (totalTime / 1000).toFixed(2) + "s";
+      currentRow.cells[tableUploadTimeCol].innerText = totalTime;
+
+      currentRow.cells[tableGenerationTimeCol].innerText = "Generating";
+
+      // Ensure that the upload time cell always appears when the upload is finished, and not with the generation time.
+      await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
+
+      // Generate a message using a sample output.
+      startTime = performance.now();
+      let output = await generator(userInput, { max_new_tokens: 100});
+      endTime = performance.now();
+
+      totalTime = ((endTime - startTime) / 1000).toFixed(2) + "s";
+      currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
+      currentRow.cells[tableMessageCol].innerText = output[0].summary_text;
+
+      await new Promise(requestAnimationFrame);
+    }
+  };
+
+  const clearModels = () => {
+    setSelectedModels([]);
+    tempModelCount = 0;
+  };
+
+  const removeModel = (modelName) => {
+    setSelectedModels(selectedModels().filter(model => model.name != modelName));
+  }
+
+
+  return (
+    <>
+      <div class={modelTestingStyles.modelTesting}>
+        <h2>Model Testing:</h2>
+        <h4>Select models to benchmark:</h4>
+
+        <div>
+          {/* Select Model/s for benchmarking */}
+          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton}>
+            Select Models
+          </label>
+          <input type="file" id="modelInput" class={modelTestingStyles.hidden} webkitdirectory multiple onChange={addModel} />
+                      
+          <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
+          <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
+        </div>
+        <textarea id="inputTextArea" class={modelTestingStyles.inputArea} placeholder='Benchmarking Test Input...'></textarea>
+
+        {/* TODO: Add sample input field */}
+
+        <div id="tableContainer" class={modelTestingStyles.tableContainer}>
+          <table class={modelTestingStyles.tableMMLU}>
+            <colgroup>
+              <col/>
+              <col span="2" class={modelTestingStyles.tableColShrink} />
+              <col/>
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Model Name</th>
+                <th>Upload Time</th>
+                <th>Generation Time</th>
+                <th>Sample Output</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={selectedModels()}>{(model) =>
+                <tr>
+                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
+                  <td></td> {/* Upload Time Cell */}
+                  <td></td> {/* Generation Time Cell */}
+                  <td></td> {/* Sample Output Cell */}
+                </tr>
+              }</For>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default ModelTesting;

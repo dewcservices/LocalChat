@@ -1,0 +1,29 @@
+# Logs
+web_app/logs
+web_app/*.log
+web_app/npm-debug.log*
+web_app/yarn-debug.log*
+web_app/yarn-error.log*
+web_app/pnpm-debug.log*
+web_app/lerna-debug.log*
+
+web_app/node_modules
+web_app/dist
+web_app/dist-ssr
+web_app/*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Other
+fileserver
+fileserver.exe
+dist/

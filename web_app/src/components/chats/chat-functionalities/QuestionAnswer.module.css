@@ -1,0 +1,150 @@
+.inputContainer {
+  grid-area: input;
+  display: grid;
+  grid-template-areas:
+    "context question";
+  grid-template-columns: 50% auto;
+  background-color: #191919;
+  padding: 1vh;
+  border-top: 1px solid black;
+  position: relative;
+}
+
+.contextContainer {
+  grid-area: context;
+  border-right: 1px solid black;
+}
+
+.questionContainer {
+  grid-area: question;
+  padding-left: 1vh;
+}
+
+.tab {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  cursor: pointer;
+  border-color: green;
+}
+
+.selectedTab {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #555555; /* light grey background for selected option mimics chat history */
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  border-color: darkgreen;
+  transition: all 0.2s ease;
+}
+
+.selectedTab:hover {
+  cursor: pointer;
+  border-color: green;
+}
+
+.inputContainer textarea {
+  margin-top: 1vh;
+  margin-left: 1vh;
+  width: 95%;
+  height: 17vh;
+  font-size: 16px;
+  box-sizing: border-box;
+  resize: none;
+  border-radius: 10px;
+  border: 1px solid #474747;
+  background-color: #292929;
+  color: white;
+  padding: 12px 20px;
+  overflow-y: auto;
+}
+
+.inputContainer textarea:focus {
+  outline: none;
+  border-color: lightblue;
+}
+
+/* custom scrollbar styling to fit theme and (roughly) fit borders */
+.inputContainer textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inputContainer textarea::-webkit-scrollbar-track {
+  background: #191919;
+  border-radius: 4px;
+}
+
+.inputContainer textarea::-webkit-scrollbar-thumb {
+  background: #474747;
+  border-radius: 4px;
+}
+
+.inputContainer textarea::-webkit-scrollbar-thumb:hover {
+  background: #666666;
+}
+
+.sendButton {
+  position: absolute;
+  bottom: 1vh;
+  right: 4vh;
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+}
+
+.sendButton:hover {
+  cursor: pointer;
+  border-color: lightblue;
+}
+
+.hidden {
+  display: none;
+}
+.unselectedModelButton {
+  position: absolute;
+  bottom: 0.8vh;
+  right: 13vh;
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  border-color: darkred;
+}
+.unselectedModelButton:hover {
+  border-color: firebrick;
+  cursor: pointer;
+}
+.selectedModelButton {
+  position: absolute;
+  bottom: 0.8vh;
+  right: 13vh;
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+  border-color: darkgreen;
+}
+.selectedModelButton:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
