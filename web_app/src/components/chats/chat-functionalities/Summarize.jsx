@@ -59,6 +59,7 @@ function Summarize() {
 
     setSelectedModel(config.modelName);
     
+    // Upload models to browsers cache.
     for (let file of files) {
 
       let cacheKey = pathJoin(
