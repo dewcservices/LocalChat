@@ -45,6 +45,18 @@ function NewChat() {
     navigate(`/chat/${newId}`);
   };
 
+  const newTranslationChat = () => {
+    let newId = newChatId();
+    let currentDate = Date.now();
+
+    createNewChat(newId, 'translation', currentDate);
+    saveMessages(newId, currentDate,
+      [{sender: 'chatbotMessage', date: currentDate, content: "Hi, this is a translation chat, add some text and select a language to translate it to."}]
+    );
+
+    navigate(`/chat/${newId}`);
+  };
+
   return (
     <>
       <div class={styles.newChat}>
@@ -53,7 +65,8 @@ function NewChat() {
           <button onclick={newSummarizeChat}>Summarize Text</button>
           <button onClick={newQuestionAnswerChat}>Ask Question</button>
           <button onclick={newGeneralChat}>General Chat</button>
-          <A href="/models">Model Testing</A>
+          <button onClick={newTranslationChat}>Translate</button>
+          {/* <A href="/models">Model Testing</A> */}
         </div>
       </div>
     </>
