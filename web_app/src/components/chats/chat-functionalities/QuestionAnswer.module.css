@@ -129,6 +129,9 @@
 .modelSelection {
   padding: 0.9vh;
   margin-right: 1vh;
+  background-color: #292929;
+  border-color: #474747;
+  color: white;
 }
 
 .addModelButton {

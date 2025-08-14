@@ -13,6 +13,9 @@
 }
 .modelSelection {
   padding: 1vh;
+  background-color: #292929;
+  border-color: #474747;
+  color: white;
 }
 .addModelButton {
   border: 1px solid #474747;

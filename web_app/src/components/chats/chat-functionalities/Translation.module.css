@@ -155,9 +155,9 @@
   gap: 1vh;
   align-items: center;
 }
-select {
+.selection {
   background-color: #292929;
   border-color: #474747;
   color: white;
-  padding: 3px;
+  padding: 1vh;
 }

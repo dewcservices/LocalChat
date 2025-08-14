@@ -232,13 +232,13 @@ function Translation() {
           </div>
           <div class={styles.controlsRight}>
             <label for="src_lang">From: </label>
-            <select name="src_lang" id="src_lang">
+            <select name="src_lang" id="src_lang" class={styles.selection}>
               <For each={Object.entries(languages())}>{([lang, langCode]) =>
                 <option value={langCode}>{lang}</option>
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
-            <select name="tgt_lang" id="tgt_lang">
+            <select name="tgt_lang" id="tgt_lang" class={styles.selection}>
               <For each={Object.entries(languages())}>{([lang, langCode]) =>
                 <option value={langCode}>{lang}</option>
               }</For>
