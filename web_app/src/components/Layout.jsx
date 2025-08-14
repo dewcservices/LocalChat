@@ -77,9 +77,9 @@ function Layout(props) {
         <div class="sidebarContainer">
 
           <h1>Local Chat</h1>
-          <a href="models">Model Testing</a>
+          <A href="models">Model Testing</A>
           <br/><br/>
-          <a href="/">Create New Chat</a>
+          <A href="/">Create New Chat</A>
           <br/><br/>
 
           <h2>Chat History</h2>
@@ -92,12 +92,12 @@ function Layout(props) {
                 when={renamingId() === chat.chatId}
                 fallback={
                   <div class={styles.chatHistoryEntry}>
-                    <a 
+                    <A 
                       href={`/chat/${chat.chatId}`}
                       title={`Created: ${new Date(chat.creationDate).toUTCString()} | Latest: ${new Date(chat.latestMessageDate).toUTCString()}`}
                     >
                       {chat.chatName}
-                    </a>
+                    </A>
                     <div class={styles.actionIcons}>
                       <button 
                         class={styles.actionButton}

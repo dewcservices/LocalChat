@@ -52,12 +52,12 @@ h1 {
   /* line-height: 1.1; */
 }
 
-a {
+A {
   font-weight: 500;
   color: var(--link-colour);
   text-decoration: inherit;
 }
-a:hover {
+A:hover {
   color: var(--highlight-colour);
 }
 
