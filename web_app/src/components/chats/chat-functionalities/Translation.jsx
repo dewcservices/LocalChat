@@ -212,7 +212,7 @@ function Translation() {
             >
               {selectedModel() === "" ? "Select Model" : selectedModel()}
             </label>
-            <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
+            <input type="file" id="folderInput" className='hidden' webkitdirectory multiple onChange={setupModel} />
             <button 
               class={`${tab() === "file" ? styles.selectedTab : styles.tab} ${hoveredTab() === "file" ? styles.highlighted : ''}`}
               onClick={() => setTab("file")}
