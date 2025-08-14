@@ -10,7 +10,7 @@
 
 .chatHistoryContainer:hover,
 .chatHistoryContainer.highlighted {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--background-tertiary);
     /* this effect is inspired from discords UI */
     margin-left: 4px;
 }
@@ -22,25 +22,24 @@
     width: 100%;
 }
 
-.chatHistoryEntry A {
+.chatHistoryEntry a {
     flex: 1;
     max-width: 150px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     display: inline-block;
-    color: lightblue;
     text-decoration: none;
 }
 
 .chatHistoryContainer.active {
-    background-color: grey;
+    background-color: var(--selected-button-colour);
     border: 1px solid lightgrey;
 }
 
 /* When both active and hovered */
 .chatHistoryContainer.active.highlighted {
-    background-color: grey;
+    background-color: var(--active-colour);
     border: 1px solid lightgrey;
 }
 
@@ -88,11 +87,11 @@
 }
 
 .actionButton:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--selected-button-colour);
 }
 
 .actionButton:active {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--selected-button-colour);
     transform: scale(0.95);
 }
 
@@ -106,19 +105,19 @@
 
 .renameInput {
     flex: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: var(--selected-button-colour);
+    border: 1px solid var(--selected-button-colour);
     border-radius: 4px;
     padding: 4px 8px;
-    color: white;
+    color: var(--text-colour);
     font-size: 14px;
     outline: none;
     transition: all 0.2s ease;
 }
 
 .renameInput:focus {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: lightblue;
+    background: var(--selected-button-colour);
+    border-color: var(--highlight-colour);
 }
 
 .renameActions {
@@ -128,9 +127,8 @@
 
 /* cleaner delete all chats button styling, but changes still need to be made */
 .deleteAllButton {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: lightgray;
+    background: var(--background-tertiary);
+    border: 1px solid var(--selected-button-colour);
     padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
@@ -146,6 +144,6 @@
 }
 
 .deleteAllButton:active {
-    background-color: red;
-    border-color: red;
+    background-color: var(--failure-colour);
+    border-color: black;
 }

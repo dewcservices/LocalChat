@@ -2,8 +2,6 @@ import { createSignal } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
-import chatStyles from './chats/Chat.module.css';
-
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
@@ -151,17 +149,15 @@ function ModelTesting() {
 
         <div>
           {/* Select Model/s for benchmarking */}
-          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton}>
+          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
             Select Models
           </label>
-          <input type="file" id="modelInput" class={modelTestingStyles.hidden} webkitdirectory multiple onChange={addModel} />
+          <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
                       
           <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
           <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
         <textarea id="inputTextArea" class={modelTestingStyles.inputArea} placeholder='Benchmarking Test Input...'></textarea>
-
-        {/* TODO: Add sample input field */}
 
         <div id="tableContainer" class={modelTestingStyles.tableContainer}>
           <table class={modelTestingStyles.tableMMLU}>

@@ -5,11 +5,26 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --background-primary: #191919;
+  --background-secondary: #292929;
+  --background-tertiary: rgba(255, 255, 255, 0.1);
+  --text-colour: white;
+  --link-colour: lightblue;
+  --highlight-colour: lightskyblue;
+  --selected-button-colour: #555555;
+  --active-colour: gray;
+  --button-border-colour: #474747;
+  --disabled-text-colour: black;
+  --disabled-button-colour: #161616;
+  --success-colour: darkgreen;
+  --failure-colour: darkred;
+
+  color: var(--text-colour);
 }
 
 body {
   margin: 0;
-  color: white;
 }
 
 .container {
@@ -22,14 +37,14 @@ body {
 
 .sidebarContainer {
   grid-area: sidebar; 
-  background-color: #292929;
+  background-color: var(--background-secondary);
   border-right: 1px solid black;
   text-align: center;
 }
 
 .pageContainer {
   grid-area: pageArea;  
-  background-color: #191919;
+  background-color: var(--background-primary);
 }
 
 h1 {
@@ -39,10 +54,27 @@ h1 {
 
 a {
   font-weight: 500;
-  color: lightblue;
+  color: var(--link-colour);
   text-decoration: inherit;
 }
 a:hover {
-  color: lightskyblue;
+  color: var(--highlight-colour);
 }
 
+button, .inputButton {
+  border: 1px solid var(--button-border-colour);
+  background-color: var(--background-secondary);
+  color: var(--text-colour);
+  transition: border 0.25s;
+}
+
+button:hover, .inputButton:hover {
+  background-color: var(--background-tertiary);
+  border-color: var(--highlight-colour);
+  cursor: pointer;
+  transition: border 0.25s;
+}
+
+.hidden {
+  display: none;
+}
