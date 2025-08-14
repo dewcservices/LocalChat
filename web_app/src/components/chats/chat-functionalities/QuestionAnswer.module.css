@@ -97,40 +97,6 @@
 .hidden {
   display: none;
 }
-.unselectedModelButton {
-  position: absolute;
-  bottom: 0.8vh;
-  right: 13vh;
-  border: 1px solid #474747;
-  border-radius: 3px;
-  background-color: #292929;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
-  color: white;
-  border-color: darkred;
-}
-.unselectedModelButton:hover {
-  border-color: firebrick;
-  cursor: pointer;
-}
-.selectedModelButton {
-  position: absolute;
-  bottom: 0.8vh;
-  right: 13vh;
-  border: 1px solid #474747;
-  border-radius: 3px;
-  background-color: #292929;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
-  color: white;
-  border-color: darkgreen;
-}
-.selectedModelButton:hover {
-  border-color: lightblue;
-  cursor: pointer;
-}
 
 .controlsLeft {
   grid-area: controlsLeft;
