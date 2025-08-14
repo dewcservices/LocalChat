@@ -4,7 +4,7 @@ import { useParams, useNavigate } from '@solidjs/router';
 import styles from './Chat.module.css';
 import { ChatContext } from './ChatContext';
 import { ChatHistoriesContext } from '../LayoutChatHistoriesContext';
-import { getChatHistory, saveMessages, saveFiles, getChatHistories } from '../../utils/ChatHistory';
+import { getChatHistory, saveMessages, saveFiles, getChatHistories, autoUpdateChatTitle } from '../../utils/ChatHistory';
 
 // Chat Functionalities
 import Summarize from './chat-functionalities/Summarize';
@@ -77,11 +77,17 @@ function Chat() {
     lastMessage?.scrollIntoView({behavior: "smooth"});
   });
 
-  // saves messages to local storage
+  // saves messages to local storage and auto-updates chat title
   createEffect(() => {
     if (messages().length <= 0) return;
     saveMessages(chatHistory().chatId, chatHistory().latestMessageDate, messages());
     saveFiles(chatHistory().chatId, files());
+    
+    // Auto-update chat title after saving messages
+    autoUpdateChatTitle(chatHistory().chatId);
+    
+    // Update the chat histories context to reflect any title changes
+    chatHistoriesContext.setChatHistories(getChatHistories());
   });
 
   const changeProcessor = (newProcessor) => {
