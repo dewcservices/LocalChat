@@ -22,7 +22,7 @@
     width: 100%;
 }
 
-.chatHistoryEntry a {
+.chatHistoryEntry A {
     flex: 1;
     max-width: 150px;
     overflow: hidden;
