@@ -2,7 +2,8 @@
   grid-area: input;
   display: grid;
   grid-template-areas:
-    "context question";
+    "context question"
+    "controlsLeft controlsRight";
   grid-template-columns: 50% auto;
   background-color: #191919;
   padding: 1vh;
@@ -93,24 +94,6 @@
   background: #666666;
 }
 
-.sendButton {
-  position: absolute;
-  bottom: 1vh;
-  right: 4vh;
-  border: 1px solid #474747;
-  border-radius: 3px;
-  background-color: #292929;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
-  color: white;
-}
-
-.sendButton:hover {
-  cursor: pointer;
-  border-color: lightblue;
-}
-
 .hidden {
   display: none;
 }
@@ -146,5 +129,69 @@
 }
 .selectedModelButton:hover {
   border-color: lightblue;
+  cursor: pointer;
+}
+
+.controlsLeft {
+  grid-area: controlsLeft;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.controlsRight {
+  grid-area: controlsRight;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.sendButton {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+}
+.sendButton:hover {
+  cursor: pointer;
+  border-color: lightblue;
+}
+
+.modelSelection {
+  padding: 0.9vh;
+  margin-right: 1vh;
+}
+
+.addModelButton {
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+  transition: all 0.2s ease;
+}
+.addModelButton:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+.noModels {
+  border: 1px solid darkred;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+  transition: all 0.2s ease;
+}
+.noModels:hover {
+  border-color: firebrick;
   cursor: pointer;
 }
