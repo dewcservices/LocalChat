@@ -181,11 +181,12 @@ function QuestionAnswer() {
             <label 
               for="folderInput" 
               id="modelInputLabel" 
+              className='inputButton'
               class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}
             >
               {selectedModel() === "" ? "Select Model" : selectedModel()}
             </label>
-            <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
+            <input type="file" id="folderInput" className='hidden' webkitdirectory multiple onChange={setupModel} />
             <button class={styles.sendButton} onClick={processQuestion}>Send</button>
           </div>
         </div>
