@@ -11,34 +11,37 @@
 .hidden {
   display: none;
 }
-.unselectedModelButton {
+.modelSelection {
+  padding: 1vh;
+}
+.addModelButton {
   border: 1px solid #474747;
   border-radius: 3px;
   background-color: #292929;
-  padding: 1vh;
+  padding: 0.8vh;
   padding-left: 2vh;
   padding-right: 2vh;
-  color: white;
   margin-right: 3vh;
-  border-color: darkred;
+  color: white;
+  transition: all 0.2s ease;
 }
-.unselectedModelButton:hover {
-  border-color: firebrick;
+.addModelButton:hover {
+  border-color: lightblue;
   cursor: pointer;
 }
-.selectedModelButton {
-  border: 1px solid #474747;
+.noModels {
+  border: 1px solid darkred;
   border-radius: 3px;
   background-color: #292929;
-  padding: 1vh;
+  padding: 0.8vh;
   padding-left: 2vh;
   padding-right: 2vh;
-  color: white;
   margin-right: 3vh;
-  border-color: darkgreen;
+  color: white;
+  transition: all 0.2s ease;
 }
-.selectedModelButton:hover {
-  border-color: lightblue;
+.noModels:hover {
+  border-color: firebrick;
   cursor: pointer;
 }
 .tab {
