@@ -2,8 +2,6 @@ import { createSignal } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
-import chatStyles from './chats/Chat.module.css';
-
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
@@ -30,12 +28,15 @@ function ModelTesting() {
 
     // Create model JSON to store model.
     const model = {
-      name: fileText.fileName,
+      name: fileText.modelName,
       files: files,
-      modelType: fileText.modelType,
+      modelType: fileText.task,
     };
 
+    console.log(fileText);
+
     setSelectedModels([...selectedModels(), model]);
+    console.log(selectedModels())
   }
 
   const benchmarkModels = async () => {
@@ -49,9 +50,6 @@ function ModelTesting() {
     // configure transformer js environment
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
-
-    // inject models into browser cache
-    let cache = await caches.open('transformers-cache');
 
     let userInput = document.getElementById("inputTextArea").value;
 
@@ -72,6 +70,10 @@ function ModelTesting() {
 
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading";
 
+      // reset browser cache to clear any previous models
+      caches.delete('transformers-cache');
+      let cache = await caches.open('transformers-cache');
+
       let startTime = performance.now();
 
       // Upload models to browsers cache.
@@ -84,15 +86,24 @@ function ModelTesting() {
             .replaceAll('{revision}', 'main'),
           file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
         );
-  
-        let fileReader = new FileReader();
-        fileReader.onload = async () => {
-          let arrayBuffer = fileReader.result;
-          let uint8Array = new Uint8Array(arrayBuffer);
-          
-          await cache.put(cacheKey, new Response(uint8Array));
-        };
-        fileReader.readAsArrayBuffer(file);
+
+        // Ensure that the models files have been cached properly before moving on.
+        // This prevents the app from seeing no files, and trying to request them from hugging face.
+        await new Promise((resolve, reject) => {
+          let fileReader = new FileReader();
+          fileReader.onload = async () => {
+            let arrayBuffer = fileReader.result;
+            let uint8Array = new Uint8Array(arrayBuffer);
+            
+            try {
+              await cache.put(cacheKey, new Response(uint8Array));
+              resolve();
+            } catch (error) {
+              reject(error);
+            }
+          };
+          fileReader.readAsArrayBuffer(file);
+        });
       };
   
       let generator = await pipeline(model.modelType, model.name);
@@ -123,7 +134,6 @@ function ModelTesting() {
 
   const clearModels = () => {
     setSelectedModels([]);
-    tempModelCount = 0;
   };
 
   const removeModel = (modelName) => {
@@ -139,17 +149,15 @@ function ModelTesting() {
 
         <div>
           {/* Select Model/s for benchmarking */}
-          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton}>
+          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
             Select Models
           </label>
-          <input type="file" id="modelInput" class={modelTestingStyles.hidden} webkitdirectory multiple onChange={addModel} />
+          <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
                       
           <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
           <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
         <textarea id="inputTextArea" class={modelTestingStyles.inputArea} placeholder='Benchmarking Test Input...'></textarea>
-
-        {/* TODO: Add sample input field */}
 
         <div id="tableContainer" class={modelTestingStyles.tableContainer}>
           <table class={modelTestingStyles.tableMMLU}>

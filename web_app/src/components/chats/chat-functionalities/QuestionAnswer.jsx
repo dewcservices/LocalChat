@@ -1,97 +1,86 @@
-import { useContext, createSignal, Match, Switch } from 'solid-js';
+import { useContext, createSignal, onMount, Match, Switch } from 'solid-js';
 import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transformers';
 
 import styles from './QuestionAnswer.module.css';
 import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
-import { pathJoin } from '../../../utils/PathJoin';
+import { getCachedModelsNames, cacheModel } from '../../../utils/ModelCache';
 
 
 function QuestionAnswer() {
   
   const chatContext = useContext(ChatContext);
   const [contextTab, setContextTab] = createSignal("text");
-  const [selectedModel, setSelectedModel] = createSignal("");
+  const [availableModels, setAvailableModels] = createSignal([], {equals: false});
   
   let qaPipeline;
-  const setupModel = async () => {
 
-    // disable uploading another model, and change the text to indicate a model is being loaded.
+  onMount(async () => {
+    setAvailableModels(await getCachedModelsNames('question_answer'));
+  });
+
+  const addModel = async () => {
+
     document.getElementById("folderInput").disabled = true;
-    const modelUploadLabel = document.getElementById("modelInputLabel");
-    modelUploadLabel.innerText = "Loading Model";
+    document.getElementById("sendButton").disabled = true;
 
-    // configure transformer js environment
-    env.useBrowserCache = true;
-    env.allowRemoteModels = true;
-
-    // inject models into browser cache
-    let cache = await caches.open('transformers-cache');
+    let modelUploadLabel = document.getElementById("modelInputLabel");
+    modelUploadLabel.innerText = "Cacheing Model";
 
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
 
+    // TODO improve UX
     if (files.length == 0) {
-      alert("Empty model directory was selected, please select again."); // TODO improve UX
+      alert("Empty model directory was selected, please select again."); 
     }
-
-    let configFile = files.find(file => file.name == "browser_config.json");
-
-    if (!configFile) {
+    else if (!files.find(f => f.name == "browser_config.json")) {
       alert("Unsupported or Malformed Model");
-      return;
     }
+    else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "question_answer") {
+      alert(`Must be a question & answer model. browser_config.json states that the model is for a different task.`);
+    }
+    else {
+      let modelName = await cacheModel(files);
+
+      let models = availableModels().slice();
+      models.push(modelName);
+      setAvailableModels(models);
+    }
+
+    document.getElementById("folderInput").disabled = false;
+    document.getElementById("sendButton").disabled = false;
+    modelUploadLabel.innerText = "Add Model";
+  };
+
+  const loadModel = async (event) => {
+    if (event.target.value == "") return;
+
+    document.getElementById("folderInput").disabled = true;
+    document.getElementById("sendButton").disabled = true;
+    let modelUploadLabel = document.getElementById("modelInputLabel");
     
-    let config = await configFile.text();
-    config = JSON.parse(config);
-
-    if (config.task !== "question_answer") {
-      alert(`Must be a question & answer model. browser_config.json states that the model is for ${config.task}.`);
-      modelUploadLabel.innerText = "Select Model";
-      document.getElementById("folderInput").disabled = false;
-      return;
-    }
-
-    setSelectedModel(config.modelName);
-
-    for (let file of files) {
-
-      let cacheKey = pathJoin(
-        env.remoteHost, 
-        env.remotePathTemplate
-          .replaceAll('{model}', config.modelName)
-          .replaceAll('{revision}', 'main'),
-        file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
-      );
-
-      let fileReader = new FileReader();
-      fileReader.onload = async () => {
-        let arrayBuffer = fileReader.result;
-        let uint8Array = new Uint8Array(arrayBuffer);
-        
-        //console.log(file.webkitRelativePath, uint8Array);
-        await cache.put(cacheKey, new Response(uint8Array));
-      };
-      fileReader.readAsArrayBuffer(file);
-    }
-
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     modelUploadLabel.innerText = "Creating pipeline";
     await new Promise(requestAnimationFrame);
 
-    const device = chatContext.processor();
+    // configure transformer js environment
+    env.useBrowserCache = true;
+    env.allowRemoteModels = true;
 
-    qaPipeline = await pipeline('question-answering', config.modelName, { device: device });
-    console.log("Finished model setup using", device);
-    
-    // Re-enable uploading another model.
+    qaPipeline = await pipeline('question-answering', event.target.value, { device: chatContext.processor() });
+    console.log("Finished model setup using", chatContext.processor());
+
+    modelUploadLabel.innerText = "Add Model";
     document.getElementById("folderInput").disabled = false;
-    modelUploadLabel.innerText = config.modelName;
+    document.getElementById("sendButton").disabled = false;
   };
  
   const processQuestion = async () => {
-    if (selectedModel() == "") {
+    let selectedModel = document.getElementById("modelSelection").value;
+
+    if (selectedModel == "") {
       alert("A model must be selected before answering questions. Please select a model.");
       return;
     }
@@ -111,10 +100,10 @@ function QuestionAnswer() {
       if (file.name.endsWith('.txt')) {
         context = await parseTxtFileAsync(file);
       }
-      if (file.name.endsWith('.html')) {
+      else if (file.name.endsWith('.html')) {
         context = await parseHTMLFileAsync(file);
       }
-      if (file.name.endsWith('.docx')) {
+      else if (file.name.endsWith('.docx')) {
         context = await parseDocxFileAsync(file);
       }
     }
@@ -130,7 +119,7 @@ function QuestionAnswer() {
     chatContext.addMessage(`Question: ${question}`, true);
     
     let output = await qaPipeline(question, context);
-    chatContext.addMessage(output.answer, false, selectedModel());
+    chatContext.addMessage(output.answer, false, selectedModel);
     
     document.getElementById('questionTextarea').value = '';
   };
@@ -138,6 +127,7 @@ function QuestionAnswer() {
   return (
     <>
       <div class={styles.inputContainer}>
+
         <div class={styles.contextContainer}>
           <div class={styles.tabContainer}>
             <button
@@ -178,17 +168,29 @@ function QuestionAnswer() {
                 }
               }}
             />
-            <label 
-              for="folderInput" 
-              id="modelInputLabel" 
-              class={selectedModel() === "" ? styles.unselectedModelButton : styles.selectedModelButton}
-            >
-              {selectedModel() === "" ? "Select Model" : selectedModel()}
-            </label>
-            <input type="file" id="folderInput" class={styles.hidden} webkitdirectory multiple onChange={setupModel} />
-            <button class={styles.sendButton} onClick={processQuestion}>Send</button>
           </div>
         </div>
+
+        <div class={styles.controlsLeft}></div>
+        <div class={styles.controlsRight}>
+          {/* <label for="modelSelection">Model: </label> */}
+          <select id="modelSelection" class={styles.modelSelection} onChange={loadModel}>
+            <option value="">Select Model</option>
+            <For each={availableModels()}>{(modelName) => 
+              <option value={modelName}>{modelName}</option>
+            }</For>
+          </select>
+          <label 
+            for="folderInput" 
+            id="modelInputLabel" 
+            class={availableModels().length == 0 ? styles.noModels : styles.addModelButton}
+          >
+            Add Model
+          </label>
+          <input type="file" id="folderInput" class="hidden" webkitdirectory multiple onChange={addModel} />
+          <button id="sendButton" class={styles.sendButton} onClick={processQuestion}>Send</button>
+        </div>
+
       </div>
     </>
   );
