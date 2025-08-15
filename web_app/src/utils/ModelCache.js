@@ -85,7 +85,7 @@ export async function cacheModel(files) {
     fileReader.readAsArrayBuffer(file);
   }
 
-  cache.put(`${config.modelName}/model_files.json`,
+  await cache.put(pathJoin(env.remoteHost, config.modelName, "model_files.json"),
     new Response((new TextEncoder()).encode(JSON.stringify(modelFiles)))
   );
 
