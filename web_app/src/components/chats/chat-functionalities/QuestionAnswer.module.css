@@ -2,7 +2,8 @@
   grid-area: input;
   display: grid;
   grid-template-areas:
-    "context question";
+    "context question"
+    "controlsLeft controlsRight";
   grid-template-columns: 50% auto;
   background-color: var(--background-primary);
   padding: 1vh;
@@ -20,17 +21,11 @@
   padding-left: 1vh;
 }
 
-.tab, .selectedTab, .sendButton {
+.tab, .selectedTab {
   border-radius: 3px;
   padding: 1vh;
   padding-left: 2vh;
   padding-right: 2vh;
-}
-
-.sendButton {
-  position: absolute;
-  bottom: 1vh;
-  right: 4vh;
 }
 
 .selectedTab {
@@ -78,23 +73,68 @@
   background: #666666;
 }
 
-.unselectedModelButton, .selectedModelButton {
-  position: absolute;
-  bottom: 0.8vh;
-  right: 13vh;
+.controlsLeft {
+  grid-area: controlsLeft;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.controlsRight {
+  grid-area: controlsRight;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.sendButton {
   border: 1px solid var(--button-border-colour);
   border-radius: 3px;
   background-color: var(--background-secondary);
   padding: 1vh;
   padding-left: 2vh;
   padding-right: 2vh;
-  cursor: pointer;
 }
-
 .unselectedModelButton {
   border: 1px solid var(--failure-colour) !important;
 }
 
-.selectedModelButton {
-  border: 1px solid var(--success-colour) !important;
+.modelSelection {
+  padding: 0.9vh;
+  margin-right: 1vh;
+  background-color: var(--background-secondary);
+  border-color: var(--button-border-colour);
+  color: white;
+  border-radius: 3px;
+}
+.modelSelection:hover {
+  cursor: pointer;
+}
+
+.addModelButton {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+}
+.addModelButton:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+.noModels {
+  border: 1px solid var(--failure-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+}
+.noModels:hover {
+  border-color: firebrick;
+  cursor: pointer;
 }

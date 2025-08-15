@@ -75,6 +75,7 @@ function Chat() {
     let lastMessage = messageContainer.children[messages().length - 1];
 
     lastMessage?.scrollIntoView({behavior: "smooth"});
+    messages(); // reactive dependency
   });
 
   // saves messages to local storage
