@@ -8,23 +8,6 @@
   height: 100%;
 }
 
-.unselectedModelButton, .selectedModelButton {
-  cursor: pointer;
-  border-radius: 3px;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
-  margin-right: 3vh;
-}
-
-.unselectedModelButton {
-  border: 1px solid var(--failure-colour) !important;
-}
-
-.selectedModelButton {
-  border: 1px solid var(--success-colour) !important;
-}
-
 .tab, .selectedTab, .sendButton {
   border-radius: 3px;
   padding: 1vh;
@@ -35,6 +18,48 @@
 .tab.highlighted, .selectedTab.highlighted {
   background-color: var(--background-tertiary) !important;
   transform: translateX(2px);
+}
+
+.modelSelection {
+  padding: 1vh;
+  background-color: var(--background-secondary);
+  border-color: var(--button-border-colour);
+  color: white;
+  border-radius: 3px;
+}
+.modelSelection:hover {
+  cursor: pointer;
+}
+
+.addModelButton {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+  transition: all 0.2s ease;
+}
+.addModelButton:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+.noModels {
+  border: 1px solid var(--failure-colour);
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 3vh;
+  color: white;
+  transition: all 0.2s ease;
+}
+.noModels:hover {
+  border-color: firebrick;
+  cursor: pointer;
 }
 
 .selectedTab {

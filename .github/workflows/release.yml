@@ -13,22 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '23.10'
 
-      # 3️⃣ Install dependencies (in ./web_app)
       - name: Install dependencies
         working-directory: ./web_app
         run: npm ci
 
-      # 4️⃣ Build app (in ./web_app)
       - name: Build app
         working-directory: ./web_app
         run: npm run build-local-chat linux
@@ -38,7 +34,6 @@ jobs:
           cd dist
           zip -r ../web_app_${{ github.ref_name }}.zip .
 
-      # 5️⃣ Create GitHub release
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v1

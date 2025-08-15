@@ -9,7 +9,35 @@
   height: 100%;
 }
 
-.unselectedModelButton, .selectedModelButton {
+.addModelButton {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 4vh;
+  color: white;
+}
+.addModelButton:hover {
+  border-color: lightblue;
+  cursor: pointer;
+}
+.noModels {
+  border: 1px solid var(--failure-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  margin-right: 4vh;
+  color: white;
+}
+.noModels:hover {
+  border-color: firebrick;
+  cursor: pointer;
+}
+.tab {
   border: 1px solid var(--button-border-colour);
   border-radius: 3px;
   background-color: var(--background-secondary);
@@ -17,27 +45,20 @@
   padding-left: 2vh;
   padding-right: 2vh;
   color: white;
-  margin-right: 3vh;
 }
-
-.unselectedModelButton {
-  border: 1px solid var(--failure-colour) !important;
-}
-
-.selectedModelButton {
-  border: 1px solid var(--success-colour) !important;
-}
-
-.tab, .selectedTab, .sendButton {
-  border-radius: 3px;
-  padding: 1vh;
-  padding-left: 2vh;
-  padding-right: 2vh;
+.tab.highlighted {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  transform: translateX(2px);
 }
 
 .selectedTab {
-  background-color: var(--selected-button-colour);
-  border-color: var(--success-colour) !important;
+  border: 1px solid var(--success-colour) !important;
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
 }
 
 .tab.highlighted, .selectedTab.highlighted {
@@ -93,7 +114,20 @@
   background: #666666;
 }
 
-/* Controls container at the bottom spacing and persistent element placement */
+.sendButton {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 1vh;
+  padding-left: 2vh;
+  padding-right: 2vh;
+  color: white;
+}
+.sendButton:hover {
+  cursor: pointer;
+  border-color: lightblue;
+}
+
 .controlsContainer {
   display: flex;
   gap: 1vh;
@@ -111,9 +145,15 @@
   align-items: center;
 }
 
-select {
+.selection {
   background-color: var(--background-secondary);
   border-color: var(--button-border-colour);
   color: white;
-  padding: 3px;
+  padding: 0.8vh;
+  width: 13em;
+  overflow: hidden;
+  border-radius: 3px;
+}
+.selection:hover {
+  cursor: pointer;
 }
