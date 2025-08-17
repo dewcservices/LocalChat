@@ -17,21 +17,13 @@
 .newChatButtons A 
 {
   border-radius: 8px;
-  border: 1px solid transparent;
   text-align: center;
   padding: 1.5em;
   font-size: 1.4em;
   font-weight: 500;
   font-family: inherit;
-  color: white;
-  background-color: #292929;
-  cursor: pointer;
-  transition: border-color 0.25s;
 }
-.newChatButtons button:hover, 
-.newChatButtons A:hover {
-  border-color: lightblue;
-}
+
 .newChatButtons button:focus, 
 .newChatButtons button:focus-visible,
 .newChatButtons A:focus,
