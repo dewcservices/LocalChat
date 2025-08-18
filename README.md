@@ -11,6 +11,8 @@ index HTML file with the file protocol.
 
 ![LocalChat-Translation](./docs/figures/LocalChat-Translation.png)
 
+> Note: This app is still in development and contains various incomplete features.
+
 ## Downloading and Running the Application
 
 Download the app from the [release page](https://github.com/dewcservices/LocalChat/releases) and unzip to a location of
