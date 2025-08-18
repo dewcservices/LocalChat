@@ -1,21 +1,38 @@
 # LocalChat
-LocalChat is a AI chatbot that can anaylse, summarise, and answer questions given text-based documents as input.
+LocalChat is a AI chatbot that can anaylse, summarise, translate, and answer questions given text-based documents as 
+input.
 
 The app differentiates itself from other LLM services by running entirely locally within the user's web-browser.
 The app does make any requests over the local-network or the internet - ensuring that your data exists only 
-within your local device.
+within your local device, and that the processing is sandboxed and contained within the browser environement.
 
-Additionally, the app does not require any software dependencies to run. Simply download and run.
+Additionally, the app does not require any software dependencies to run. Simply download the distribution and run the
+index HTML file with the file protocol.
 
-## Running the Application
+![LocalChat-Translation](./docs/figures/LocalChat-Translation.png)
+
+> Note: This app is still in development and contains various incomplete features.
+
+## Downloading and Running the Application
+
+Download the app from the [release page](https://github.com/dewcservices/LocalChat/releases) and unzip to a location of
+your choice. The distribution contains an `index.html` file alongside a `models` folder.
 
 The app runs simply via double-clicking the `index.html` file included within the app distribution. This opens the file
 using the `file:///` protocol, requiring only the browser to run the app. Meaning the app will be sand-boxed within the 
 browser's execution environment.
 
-The app is currently in the early stages of development and does not have a readily available distribution.
+When using the application, models must be loaded in for use. The distribution contains some models out of the box for
+this purpose, however, the app also supports custom models (refer to the GitHub Pages for more details).
 
-Currently, to run the app one must build the distribution from source. 
+> Note: Currently the app works on Chrome and Edge browsers, however, to run on Firefox, one must access the app via a
+> fileserver. Hence, the distribution contains a filerserver executable that runs on localhost:8080. This is not 
+> required to run the app and will not be touched when running the app via the file protocol. For extra insurance, feel
+> free to delete this file.
+
+## Development
+
+The section below is for developers of the project.
 
 ### Building from Source
 
@@ -23,7 +40,7 @@ Prerequisites:
 - Install the Go toolchain - https://go.dev/doc/install
 - Install nvm (node & npm) - [nvm for linux](https://github.com/nvm-sh/nvm) or [nvm for windows](https://github.com/coreybutler/nvm-windows)
 
-Clone the repo to your local device with `git clone https://github.com/andrewtran3643/LocalChat.git`.
+Clone the repo to your local device with `git clone https://github.com/dewcservices/LocalChat.git`.
 
 Cd into the web_app folder, `cd LocalChat/web_app`.
 
