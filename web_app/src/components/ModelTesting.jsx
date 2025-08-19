@@ -6,13 +6,6 @@ import modelTestingStyles from './ModelTesting.module.css';
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
 
-  const defaultUserContext = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
-      Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
-      All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
-      Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
-
-  const defaultUserQuestion = "Why can't LLM's be used in the defense industry and what benifits does this technolgy allow for?";
-
   const defaultUntranslatedText = "Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles.";
   const defaultUntranslatedLanguageCode = "fra_Latn";
   const defaultTranslationTargetLanguageCode = "eng_Latn";
@@ -128,16 +121,18 @@ function ModelTesting() {
 
       // Check which input needs to be provided for different models.
       // Start and end time are kept within each if statement to ensure the minimal time to use the statement isn't included in benchmark.
+
       if (model.modelType == "summarization") {
 
-        let textArea = document.getElementById("summarisationTextArea");
+        const textArea = document.getElementById("summarisationTextArea");
 
-        let userInput = textArea.placeholder;
-
-        if (textArea.value != "") {
-          userInput = textArea.value;
+        // Get input to test
+        let userInput = textArea.value;
+        if (textArea == "") {
+          userInput = textArea.placeholder;
         }
 
+        // Benchmark the model
         startTime = performance.now();
         output = await generator(userInput, { max_new_tokens: 100});
         endTime = performance.now();
@@ -145,10 +140,22 @@ function ModelTesting() {
 
       } else if (model.modelType == "question-answering") {
 
+        const contextTextArea = document.getElementById("QAContextTextArea");
+        const questionTextArea = document.getElementById("QAQuestionTextArea");
+
+        let context = contextTextArea.value;
+        if (contextTextArea == "") {
+          context = contextTextArea.placeholder;
+        }
+
+        let question = questionTextArea.value;
+        if (question == "") {
+          question = questionTextArea.placeholder;
+        }
+
         startTime = performance.now();
-        output = await generator(userInput, defaultUserQuestion);
+        output = await generator(context, question);
         endTime = performance.now();
-        console.log(output)
         output = output.answer;
 
       } else if (model.modelType == "translation") {
@@ -222,11 +229,20 @@ function ModelTesting() {
           classList={{ hidden: subMenuID() !== 1 }}>
             <h3>Summarisation test input field. Leave blank to use default input.</h3>
             <textarea id="summarisationTextArea" class={modelTestingStyles.inputArea}
-            placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data. Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!' />
+            placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.' />
           </div>
 
           <div id="QAOptions" class={modelTestingStyles.optionsSubMenu}
-          classList={{ hidden: subMenuID() !== 2 }}>Dummy</div>
+          classList={{ hidden: subMenuID() !== 2 }}>
+          
+            <div>
+              <textarea id="QAContextTextArea" class={modelTestingStyles.inputArea}
+              placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.' />
+            
+              <textarea id="QAQuestionTextArea" class={modelTestingStyles.inputArea}
+              placeholder="Why can't LLM's be used in the defense industry and what benefits does this technolgy bring?" />
+            </div>
+          </div>
 
           <div id="translationOptions" class={modelTestingStyles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 3 }}>Data</div>

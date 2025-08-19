@@ -103,3 +103,6 @@
     padding: 1em;
 }
 
+.optionsSubMenu div textarea {
+    width: 50%;
+}
