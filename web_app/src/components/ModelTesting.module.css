@@ -98,3 +98,8 @@
 .selectedOptionMenuSubTab {
     background-color: var(--background-tertiary);
 }
+
+.optionsSubMenu {
+    padding: 1em;
+}
+

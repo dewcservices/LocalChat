@@ -66,13 +66,6 @@ function ModelTesting() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
-    let userInput = document.getElementById("inputTextArea").value;
-
-    // If no user input was provided, use a default input.
-    if (userInput == "") {
-      userInput = defaultUserContext;
-    }
-
     const modelList = selectedModels()
 
     // Loop through each model, injecting the model into the cache, and running a sample prompt.
@@ -132,9 +125,18 @@ function ModelTesting() {
       await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
 
       let output = "";
+
       // Check which input needs to be provided for different models.
       // Start and end time are kept within each if statement to ensure the minimal time to use the statement isn't included in benchmark.
       if (model.modelType == "summarization") {
+
+        let textArea = document.getElementById("summarisationTextArea");
+
+        let userInput = textArea.placeholder;
+
+        if (textArea.value != "") {
+          userInput = textArea.value;
+        }
 
         startTime = performance.now();
         output = await generator(userInput, { max_new_tokens: 100});
@@ -207,22 +209,29 @@ function ModelTesting() {
 
         <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? modelTestingStyles.menuOpen : ""}`} id='advancedOptionsMenu'>
           <ul class={modelTestingStyles.optionMenuSubTabs}>
-            <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
-            <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
-            <li><button onClick={() => setSubMenuID(2)} class={subMenuID() == 2 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Translation</button></li>
+            <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>General</button></li>
+            <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
+            <li><button onClick={() => setSubMenuID(2)} class={subMenuID() == 2 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
+            <li><button onClick={() => setSubMenuID(3)} class={subMenuID() == 3 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Translation</button></li>
           </ul>
+
+          <div id="generalOptions" class={modelTestingStyles.optionsSubMenu}
+          classList={{ hidden: subMenuID() !== 0 }}>General Options</div>
+
           <div id="summarisationOptions" class={modelTestingStyles.optionsSubMenu}
-          classList={{ hidden: subMenuID() !== 0 }}>Testing</div>
+          classList={{ hidden: subMenuID() !== 1 }}>
+            <h3>Summarisation test input field. Leave blank to use default input.</h3>
+            <textarea id="summarisationTextArea" class={modelTestingStyles.inputArea}
+            placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data. Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!' />
+          </div>
 
           <div id="QAOptions" class={modelTestingStyles.optionsSubMenu}
-          classList={{ hidden: subMenuID() !== 1 }}>Dummy</div>
+          classList={{ hidden: subMenuID() !== 2 }}>Dummy</div>
 
           <div id="translationOptions" class={modelTestingStyles.optionsSubMenu}
-          classList={{ hidden: subMenuID() !== 2 }}>Data</div>
+          classList={{ hidden: subMenuID() !== 3 }}>Data</div>
 
         </div>
-
-        <textarea id="inputTextArea" class={modelTestingStyles.inputArea} placeholder='Benchmarking Test Input...'></textarea>
 
         <div id="tableContainer" class={modelTestingStyles.tableContainer}>
           <table class={modelTestingStyles.tableMMLU}>
