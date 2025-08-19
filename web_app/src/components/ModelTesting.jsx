@@ -17,6 +17,10 @@ function ModelTesting() {
   const defaultUntranslatedLanguageCode = "fra_Latn";
   const defaultTranslationTargetLanguageCode = "eng_Latn";
 
+  const [menuIsOpen, setMenuIsOpen] = createSignal([]);
+  const [subMenuID, setSubMenuID] = createSignal([]);
+  setSubMenuID(0);
+
   const addModel = async (event) => {
     const files = [...event.target.files];
 
@@ -170,6 +174,15 @@ function ModelTesting() {
     setSelectedModels(selectedModels().filter(model => model.name != modelName));
   }
 
+  const toggleAdvancedOptions = () => {
+    setMenuIsOpen(!menuIsOpen());
+    const btn = document.getElementById("advancedOptionsMenuButton");
+    if (menuIsOpen()) {
+      btn.innerHTML = "Advanced Options<br />⮟"
+    } else {
+      btn.innerHTML = "Advanced Options<br />⮝"
+    }
+  }
 
   return (
     <>
@@ -187,6 +200,28 @@ function ModelTesting() {
           <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
           <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
         </div>
+
+        <div>
+          <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
+        </div>
+
+        <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? modelTestingStyles.menuOpen : ""}`} id='advancedOptionsMenu'>
+          <ul class={modelTestingStyles.optionMenuSubTabs}>
+            <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
+            <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
+            <li><button onClick={() => setSubMenuID(2)} class={subMenuID() == 2 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Translation</button></li>
+          </ul>
+          <div id="summarisationOptions" class={modelTestingStyles.optionsSubMenu}
+          classList={{ hidden: subMenuID() !== 0 }}>Testing</div>
+
+          <div id="QAOptions" class={modelTestingStyles.optionsSubMenu}
+          classList={{ hidden: subMenuID() !== 1 }}>Dummy</div>
+
+          <div id="translationOptions" class={modelTestingStyles.optionsSubMenu}
+          classList={{ hidden: subMenuID() !== 2 }}>Data</div>
+
+        </div>
+
         <textarea id="inputTextArea" class={modelTestingStyles.inputArea} placeholder='Benchmarking Test Input...'></textarea>
 
         <div id="tableContainer" class={modelTestingStyles.tableContainer}>
