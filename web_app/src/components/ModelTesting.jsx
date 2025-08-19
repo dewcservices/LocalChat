@@ -6,6 +6,17 @@ import modelTestingStyles from './ModelTesting.module.css';
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
 
+  const defaultUserContext = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
+      Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
+      All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
+      Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
+
+  const defaultUserQuestion = "Why can't LLM's be used in the defense industry and what benifits does this technolgy allow for?";
+
+  const defaultUntranslatedText = "Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles.";
+  const defaultUntranslatedLanguageCode = "fra_Latn";
+  const defaultTranslationTargetLanguageCode = "eng_Latn";
+
   const addModel = async (event) => {
     const files = [...event.target.files];
 
@@ -55,10 +66,7 @@ function ModelTesting() {
 
     // If no user input was provided, use a default input.
     if (userInput == "") {
-      userInput = `There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence.
-      Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service.
-      All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.
-      Goal: Get a ChatGPT-style language model running in the browser that can answer useful questions about documents on the oldest, slowest computer possible. The older and slower the machine, the better!`;
+      userInput = defaultUserContext;
     }
 
     const modelList = selectedModels()
@@ -119,14 +127,36 @@ function ModelTesting() {
       // Ensure that the upload time cell always appears when the upload is finished, and not with the generation time.
       await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
 
-      // Generate a message using a sample output.
-      startTime = performance.now();
-      let output = await generator(userInput, { max_new_tokens: 100});
-      endTime = performance.now();
+      let output = "";
+      // Check which input needs to be provided for different models.
+      // Start and end time are kept within each if statement to ensure the minimal time to use the statement isn't included in benchmark.
+      if (model.modelType == "summarization") {
+
+        startTime = performance.now();
+        output = await generator(userInput, { max_new_tokens: 100});
+        endTime = performance.now();
+        output = output[0].summary_text;
+
+      } else if (model.modelType == "question-answering") {
+
+        startTime = performance.now();
+        output = await generator(userInput, defaultUserQuestion);
+        endTime = performance.now();
+        console.log(output)
+        output = output.answer;
+
+      } else if (model.modelType == "translation") {
+
+        startTime = performance.now();
+        output = await generator(defaultUntranslatedText, {src_lang: defaultUntranslatedLanguageCode, tgt_lang: defaultTranslationTargetLanguageCode});
+        endTime = performance.now();
+        console.log(output)
+        output = output[0].translation_text;
+      }
 
       totalTime = ((endTime - startTime) / 1000).toFixed(2) + "s";
       currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
-      currentRow.cells[tableMessageCol].innerText = output[0].summary_text;
+      currentRow.cells[tableMessageCol].innerText = output;
 
       await new Promise(requestAnimationFrame);
     }
@@ -168,7 +198,7 @@ function ModelTesting() {
             </colgroup>
             <thead>
               <tr>
-                <th>Model Name</th>
+                <th>Model type | Name</th>
                 <th>Upload Time</th>
                 <th>Generation Time</th>
                 <th>Sample Output</th>
@@ -177,7 +207,7 @@ function ModelTesting() {
             <tbody>
               <For each={selectedModels()}>{(model) =>
                 <tr>
-                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
+                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.modelType + " | " + model.name}</span></td>
                   <td></td> {/* Upload Time Cell */}
                   <td></td> {/* Generation Time Cell */}
                   <td></td> {/* Sample Output Cell */}

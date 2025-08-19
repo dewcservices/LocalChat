@@ -16,7 +16,7 @@ function QuestionAnswer() {
   let qaPipeline;
 
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('question_answer'));
+    setAvailableModels(await getCachedModelsNames('question-answering'));
   });
 
   const addModel = async () => {
@@ -37,7 +37,7 @@ function QuestionAnswer() {
     else if (!files.find(f => f.name == "browser_config.json")) {
       alert("Unsupported or Malformed Model");
     }
-    else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "question_answer") {
+    else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "question-answering") {
       alert(`Must be a question & answer model. browser_config.json states that the model is for a different task.`);
     }
     else {
