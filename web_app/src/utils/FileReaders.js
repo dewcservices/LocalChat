@@ -1,5 +1,28 @@
 import mammoth from "mammoth";
 
+/**
+ * Loads the PDF.js library.
+ * @return {Promise<Object>} the PDF.js library
+ */
+let pdfjsLib;
+async function loadPdfJs() {
+  if (pdfjsLib) return pdfjsLib;
+  
+  try {
+    pdfjsLib = await import('pdfjs-dist/build/pdf.min.mjs');
+    
+    if (pdfjsLib.GlobalWorkerOptions) {
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).href;
+      } catch {
+        // fallback to default worker configuration
+      }
+    }
+    return pdfjsLib;
+  } catch (error) {
+    throw new Error("PDF.js library not available");
+  }
+}
 
 /**
  * Takes a txt file and return the text within it.
@@ -86,7 +109,7 @@ export function parseDocxFileAsync(file) {
   return new Promise((resolve) => {
     let fileReader = new FileReader();
     
-    fileReader.onload = () => {
+    fileReader.onload = (event) => {
       let arrayBuffer = event.target.result;
 
       mammoth.extractRawText({ arrayBuffer })
@@ -95,8 +118,38 @@ export function parseDocxFileAsync(file) {
         })
         .catch(function(err) {
           console.error("Error processing DOCX file:", err);
+          resolve("Error processing DOCX file. Please try converting to .txt format.");
         });
     };
     fileReader.readAsArrayBuffer(file);
   });
+}
+
+/**
+ * Takes a PDF file and extracts raw text using PDF.js.
+ */
+export async function parsePdfFileAsync(file) {
+  if (!file.name.endsWith('.pdf')) {
+    throw new Error("A non PDF file was passed into parsePdfFile().");
+  }
+
+  try {
+    const pdfjs = await loadPdfJs();
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+    
+    let fullText = '';
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(item => item.str).join(' ');
+      fullText += pageText + '\n';
+    }
+    
+    return fullText.trim() || "Failed to extract text from PDF. Please try converting to .txt format.";
+    
+  } catch (error) {
+    console.error("PDF extraction failed:", error);
+    return "Failed to extract text from PDF. Please try converting to .txt format.";
+  }
 }
