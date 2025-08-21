@@ -1,30 +1,25 @@
 import mammoth from "mammoth";
 
-// PDF.js setup - simplified loading
+/**
+ * Loads the PDF.js library.
+ * @return {Promise<Object>} the PDF.js library
+ */
 let pdfjsLib;
-
 async function loadPdfJs() {
   if (pdfjsLib) return pdfjsLib;
   
   try {
-    console.log("Attempting to load local pdfjs-dist...");
-    // Use the correct path for version 5.x
     pdfjsLib = await import('pdfjs-dist/build/pdf.min.mjs');
     
-    // For newer versions, either don't set workerSrc or set it to a valid worker path
     if (pdfjsLib.GlobalWorkerOptions) {
-      // Try to set the worker to the local worker file
       try {
         pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).href;
       } catch {
-        // If that fails, just don't set it (let PDF.js handle it)
-        console.log("Using default worker configuration");
+        // fallback to default worker configuration
       }
     }
-    console.log("Local pdfjs-dist loaded successfully");
     return pdfjsLib;
   } catch (error) {
-    console.log("Local pdfjs-dist not available, error:", error.message);
     throw new Error("PDF.js library not available");
   }
 }
@@ -139,26 +134,18 @@ export async function parsePdfFileAsync(file) {
   }
 
   try {
-    console.log("Starting PDF parsing for:", file.name);
     const pdfjs = await loadPdfJs();
-    console.log("PDF.js loaded, reading file...");
-    
     const arrayBuffer = await file.arrayBuffer();
-    console.log("File read, creating PDF document...");
-    
     const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-    console.log(`PDF loaded successfully, ${pdf.numPages} pages found`);
     
     let fullText = '';
     for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      console.log(`Extracting text from page ${pageNum}...`);
       const page = await pdf.getPage(pageNum);
       const textContent = await page.getTextContent();
       const pageText = textContent.items.map(item => item.str).join(' ');
       fullText += pageText + '\n';
     }
     
-    console.log("Text extraction completed");
     return fullText.trim() || "Failed to extract text from PDF. Please try converting to .txt format.";
     
   } catch (error) {
