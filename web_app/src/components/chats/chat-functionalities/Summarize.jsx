@@ -184,7 +184,7 @@ function Summarize() {
           </Match>
           <Match when={tab() === "file"}>
             <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" onChange={summarizeFileInput} />
+              <input type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
             </div>
           </Match>
         </Switch>
