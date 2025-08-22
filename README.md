@@ -4,7 +4,7 @@ input.
 
 The app differentiates itself from other LLM services by running entirely locally within the user's web-browser.
 The app does make any requests over the local-network or the internet - ensuring that your data exists only 
-within your local device, and that the processing is sandboxed and contained within the browser environement.
+within your local device, and that the processing is sand-boxed and contained within the browser environment.
 
 Additionally, the app does not require any software dependencies to run. Simply download the distribution and run the
 index HTML file with the file protocol.
@@ -46,10 +46,10 @@ Cd into the web_app folder, `cd LocalChat/web_app`.
 
 Run `npm install` to install the npm dependencies.
 
-Run `npm run build-local-chat {target-operating-system}` to build the distribution (where `target-operating-system` is 
-either `linux` or `windows`). This distribution should be found in the root directory of the project, `LocalChat/dist`.
+Run `npm run build-local-chat` to build the distribution. This distribution should be found in the root directory
+of the project, `LocalChat/dist`.
 
-> Optionally, run `npm run build-local-chat {linux|windows} wm` to build the distribution without downloading the models.
+> Optionally, run `npm run build-local-chat wm` to build the distribution without downloading the models.
 
 If using chrome or edge browsers simply double-click the `LocalChat/dist/index.html` file to run the app (this should
 open the app in the browser using the file protocol).
