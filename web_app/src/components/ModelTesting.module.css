@@ -118,3 +118,12 @@
   overflow: hidden;
   border-radius: 3px;
 }
+
+.inputOption {
+    display: block;
+    margin-bottom: 1em;
+}
+
+.inputOption input[type=number] {
+    width: 2.5em;
+}

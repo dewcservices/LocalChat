@@ -8,13 +8,12 @@ function ModelTesting() {
 
   const defaultLanguages = {"Acehnese (Arabic script)":"ace_Arab","Acehnese (Latin script)":"ace_Latn","Mesopotamian Arabic":"acm_Arab","Taâ€™izzi-Adeni Arabic":"acq_Arab","Tunisian Arabic":"aeb_Arab","Afrikaans":"afr_Latn","South Levantine Arabic":"ajp_Arab","Akan":"aka_Latn","Amharic":"amh_Ethi","North Levantine Arabic":"apc_Arab","Modern Standard Arabic":"arb_Arab","Modern Standard Arabic (Romanized)":"arb_Latn","Najdi Arabic":"ars_Arab","Moroccan Arabic":"ary_Arab","Egyptian Arabic":"arz_Arab","Assamese":"asm_Beng","Asturian":"ast_Latn","Awadhi":"awa_Deva","Central Aymara":"ayr_Latn","South Azerbaijani":"azb_Arab","North Azerbaijani":"azj_Latn","Bashkir":"bak_Cyrl","Bambara":"bam_Latn","Balinese":"ban_Latn","Belarusian":"bel_Cyrl","Bemba":"bem_Latn","Bengali":"ben_Beng","Bhojpuri":"bho_Deva","Banjar (Arabic script)":"bjn_Arab","Banjar (Latin script)":"bjn_Latn","Standard Tibetan":"bod_Tibt","Bosnian":"bos_Latn","Buginese":"bug_Latn","Bulgarian":"bul_Cyrl","Catalan":"cat_Latn","Cebuano":"ceb_Latn","Czech":"ces_Latn","Chokwe":"cjk_Latn","Central Kurdish":"ckb_Arab","Crimean Tatar":"crh_Latn","Welsh":"cym_Latn","Danish":"dan_Latn","German":"deu_Latn","Southwestern Dinka":"dik_Latn","Dyula":"dyu_Latn","Dzongkha":"dzo_Tibt","Greek":"ell_Grek","English":"eng_Latn","Esperanto":"epo_Latn","Estonian":"est_Latn","Basque":"eus_Latn","Ewe":"ewe_Latn","Faroese":"fao_Latn","Fijian":"fij_Latn","Finnish":"fin_Latn","Fon":"fon_Latn","French":"fra_Latn","Friulian":"fur_Latn","Nigerian Fulfulde":"fuv_Latn","Scottish Gaelic":"gla_Latn","Irish":"gle_Latn","Galician":"glg_Latn","Guarani":"grn_Latn","Gujarati":"guj_Gujr","Haitian Creole":"hat_Latn","Hausa":"hau_Latn","Hebrew":"heb_Hebr","Hindi":"hin_Deva","Chhattisgarhi":"hne_Deva","Croatian":"hrv_Latn","Hungarian":"hun_Latn","Armenian":"hye_Armn","Igbo":"ibo_Latn","Ilocano":"ilo_Latn","Indonesian":"ind_Latn","Icelandic":"isl_Latn","Italian":"ita_Latn","Javanese":"jav_Latn","Japanese":"jpn_Jpan","Kabyle":"kab_Latn","Jingpho":"kac_Latn","Kamba":"kam_Latn","Kannada":"kan_Knda","Kashmiri (Arabic script)":"kas_Arab","Kashmiri (Devanagari script)":"kas_Deva","Georgian":"kat_Geor","Central Kanuri (Arabic script)":"knc_Arab","Central Kanuri (Latin script)":"knc_Latn","Kazakh":"kaz_Cyrl","KabiyÃ¨":"kbp_Latn","Kabuverdianu":"kea_Latn","Khmer":"khm_Khmr","Kikuyu":"kik_Latn","Kinyarwanda":"kin_Latn","Kyrgyz":"kir_Cyrl","Kimbundu":"kmb_Latn","Northern Kurdish":"kmr_Latn","Kikongo":"kon_Latn","Korean":"kor_Hang","Lao":"lao_Laoo","Ligurian":"lij_Latn","Limburgish":"lim_Latn","Lingala":"lin_Latn","Lithuanian":"lit_Latn","Lombard":"lmo_Latn","Latgalian":"ltg_Latn","Luxembourgish":"ltz_Latn","Luba-Kasai":"lua_Latn","Ganda":"lug_Latn","Luo":"luo_Latn","Mizo":"lus_Latn","Standard Latvian":"lvs_Latn","Magahi":"mag_Deva","Maithili":"mai_Deva","Malayalam":"mal_Mlym","Marathi":"mar_Deva","Minangkabau (Arabic script)":"min_Arab","Minangkabau (Latin script)":"min_Latn","Macedonian":"mkd_Cyrl","Plateau Malagasy":"plt_Latn","Maltese":"mlt_Latn","Meitei (Bengali script)":"mni_Beng","Halh Mongolian":"khk_Cyrl","Mossi":"mos_Latn","Maori":"mri_Latn","Burmese":"mya_Mymr","Dutch":"nld_Latn","Norwegian Nynorsk":"nno_Latn","Norwegian BokmÃ¥l":"nob_Latn","Nepali":"npi_Deva","Northern Sotho":"nso_Latn","Nuer":"nus_Latn","Nyanja":"nya_Latn","Occitan":"oci_Latn","West Central Oromo":"gaz_Latn","Odia":"ory_Orya","Pangasinan":"pag_Latn","Eastern Panjabi":"pan_Guru","Papiamento":"pap_Latn","Western Persian":"pes_Arab","Polish":"pol_Latn","Portuguese":"por_Latn","Dari":"prs_Arab","Southern Pashto":"pbt_Arab","Ayacucho Quechua":"quy_Latn","Romanian":"ron_Latn","Rundi":"run_Latn","Russian":"rus_Cyrl","Sango":"sag_Latn","Sanskrit":"san_Deva","Santali":"sat_Olck","Sicilian":"scn_Latn","Shan":"shn_Mymr","Sinhala":"sin_Sinh","Slovak":"slk_Latn","Slovenian":"slv_Latn","Samoan":"smo_Latn","Shona":"sna_Latn","Sindhi":"snd_Arab","Somali":"som_Latn","Southern Sotho":"sot_Latn","Spanish":"spa_Latn","Tosk Albanian":"als_Latn","Sardinian":"srd_Latn","Serbian":"srp_Cyrl","Swati":"ssw_Latn","Sundanese":"sun_Latn","Swedish":"swe_Latn","Swahili":"swh_Latn","Silesian":"szl_Latn","Tamil":"tam_Taml","Tatar":"tat_Cyrl","Telugu":"tel_Telu","Tajik":"tgk_Cyrl","Tagalog":"tgl_Latn","Thai":"tha_Thai","Tigrinya":"tir_Ethi","Tamasheq (Latin script)":"taq_Latn","Tamasheq (Tifinagh script)":"taq_Tfng","Tok Pisin":"tpi_Latn","Tswana":"tsn_Latn","Tsonga":"tso_Latn","Turkmen":"tuk_Latn","Tumbuka":"tum_Latn","Turkish":"tur_Latn","Twi":"twi_Latn","Central Atlas Tamazight":"tzm_Tfng","Uyghur":"uig_Arab","Ukrainian":"ukr_Cyrl","Umbundu":"umb_Latn","Urdu":"urd_Arab","Northern Uzbek":"uzn_Latn","Venetian":"vec_Latn","Vietnamese":"vie_Latn","Waray":"war_Latn","Wolof":"wol_Latn","Xhosa":"xho_Latn","Eastern Yiddish":"ydd_Hebr","Yoruba":"yor_Latn","Yue Chinese":"yue_Hant","Chinese (Simplified)":"zho_Hans","Chinese (Traditional)":"zho_Hant","Standard Malay":"zsm_Latn","Zulu":"zul_Latn"};
 
-  const defaultUntranslatedText = "Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles.";
-  const defaultUntranslatedLanguageCode = "fra_Latn";
-  const defaultTranslationTargetLanguageCode = "eng_Latn";
-
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
   setSubMenuID(0);
+
+  // Variable to store most recent benchmarking data.
+  const [benchmarkData, setBenchmarkData] = createSignal([]);
 
   const addModel = async (event) => {
     const files = [...event.target.files];
@@ -62,60 +61,94 @@ function ModelTesting() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
-    const modelList = selectedModels()
+    let globalModelRunCount = Math.round(document.getElementById("globalBenchmarkRunCount").value);
+    if (globalModelRunCount <= 1) {
+      globalModelRunCount = 1;
+    }
+
+    const modelList = selectedModels();
+
+    if (modelList.length > 0) {
+      setBenchmarkData([]);
+    }
 
     // Loop through each model, injecting the model into the cache, and running a sample prompt.
     for (let i = 0; i < modelList.length; i++) {
       const model = modelList[i];
       const currentRow = table.rows[i+1];
 
+      let generator;
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading";
 
-      // reset browser cache to clear any previous models
-      caches.delete('transformers-cache');
-      let cache = await caches.open('transformers-cache');
+      // Run the model multiple times based on the global model run count
+      for (let j = 1; j < (globalModelRunCount + 1); j++) {
+        // reset browser cache to clear any previous models
+        caches.delete('transformers-cache');
+        let cache = await caches.open('transformers-cache');
 
-      let startTime = performance.now();
+        let startTime = performance.now();
 
-      // Upload models to browsers cache.
-      for (let file of model.files) {
-  
-        let cacheKey = pathJoin(
-          env.remoteHost, 
-          env.remotePathTemplate
-            .replaceAll('{model}', model.name)
-            .replaceAll('{revision}', 'main'),
-          file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
-        );
+        // Upload models to browsers cache.
+        for (let file of model.files) {
+    
+          let cacheKey = pathJoin(
+            env.remoteHost, 
+            env.remotePathTemplate
+              .replaceAll('{model}', model.name)
+              .replaceAll('{revision}', 'main'),
+            file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
+          );
 
-        // Ensure that the models files have been cached properly before moving on.
-        // This prevents the app from seeing no files, and trying to request them from hugging face.
-        await new Promise((resolve, reject) => {
-          let fileReader = new FileReader();
-          fileReader.onload = async () => {
-            let arrayBuffer = fileReader.result;
-            let uint8Array = new Uint8Array(arrayBuffer);
-            
-            try {
-              await cache.put(cacheKey, new Response(uint8Array));
-              resolve();
-            } catch (error) {
-              reject(error);
-            }
-          };
-          fileReader.readAsArrayBuffer(file);
-        });
-      };
-  
-      let generator = await pipeline(model.modelType, model.name);
+          // Ensure that the models files have been cached properly before moving on.
+          // This prevents the app from seeing no files, and trying to request them from hugging face.
+          await new Promise((resolve, reject) => {
+            let fileReader = new FileReader();
+            fileReader.onload = async () => {
+              let arrayBuffer = fileReader.result;
+              let uint8Array = new Uint8Array(arrayBuffer);
+              
+              try {
+                await cache.put(cacheKey, new Response(uint8Array));
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            };
+            fileReader.readAsArrayBuffer(file);
+          });
+        };
+    
+        generator = await pipeline(model.modelType, model.name);
 
-      let endTime = performance.now();
-      // Get total time it took for the model to be injected, rounded to 2 decimal places.
-      let totalTime = endTime - startTime;
-      totalTime = (totalTime / 1000).toFixed(2) + "s";
+        let endTime = performance.now();
+        // Get total time it took for the model to be injected, rounded to 2 decimal places.
+        let totalTime = endTime - startTime;
+
+        // Get benchmark data
+        let timings = {...benchmarkData()};
+        
+        // Create a new space for this models timings if it doesnt yet exist.
+        if (!timings[model.name]) {
+          timings[model.name] = [];
+        }
+
+        // Add the new benchmark time and set the benchmarking data to this new data.
+        timings[model.name].push(totalTime);
+        setBenchmarkData(timings);
+      }
+
+      let totalGenerationTimes = benchmarkData()[model.name];
+
+      // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
+      let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
+
+      let totalTime = (avgGenerationTime / 1000).toFixed(2) + "s";
       currentRow.cells[tableUploadTimeCol].innerText = totalTime;
 
       currentRow.cells[tableGenerationTimeCol].innerText = "Generating";
+
+      let startTime;
+      let endTime;
 
       // Ensure that the upload time cell always appears when the upload is finished, and not with the generation time.
       await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
@@ -131,7 +164,7 @@ function ModelTesting() {
 
         // Get input to test.
         let userInput = textArea.value;
-        if (textArea == "") {
+        if (userInput == "") {
           userInput = textArea.placeholder;
         }
 
@@ -148,7 +181,7 @@ function ModelTesting() {
 
         // Get context and question user inputs, or use default.
         let context = contextTextArea.value;
-        if (contextTextArea == "") {
+        if (context == "") {
           context = contextTextArea.placeholder;
         }
 
@@ -171,7 +204,7 @@ function ModelTesting() {
 
         // Get user input and languages, or use default.
         let userInput = textArea.value;
-        if (textArea == "") {
+        if (userInput == "") {
           userInput = textArea.placeholder;
         }
 
@@ -181,8 +214,6 @@ function ModelTesting() {
           currentRow.cells[tableGenerationTimeCol].innerText = "N/A";
           currentRow.cells[tableMessageCol].innerText = "Language/s Unavailable";
           continue;
-        } else {
-          console.log("T")
         }
 
         // Benchmark the model
@@ -251,7 +282,13 @@ function ModelTesting() {
           {/* TODO: General Options Sub Menu */}
           <div id="generalOptions" class={modelTestingStyles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 0 }}>
-            General Options
+
+            <h5>Note: Run amount in individual models will override this value.</h5>
+            <div class={modelTestingStyles.inputOption}>
+              <label for="enableGlobalBenchmarkAmount">Run Models X number of times: </label>
+              <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" />
+            </div>
+            
           </div>
 
           {/* Summarisatiion Sub Menu */}
@@ -284,22 +321,22 @@ function ModelTesting() {
             <textarea id="translationTextArea" class={modelTestingStyles.inputArea}
             placeholder="Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles."/>
             
-            <div>
-              <label for="src_lang">From: </label>
-              <select name="src_lang" id="src_lang" class={modelTestingStyles.dropDownMenu}>
-                <option value="fra_Latn">Select Language</option>
-                <For each={Object.entries(defaultLanguages)}>{([lang, langCode]) =>
-                  <option value={langCode}>{lang}</option>
-                }</For>
-              </select> 
-              <label for="tgt_lang">To: </label>
-              <select name="tgt_lang" id="tgt_lang" class={modelTestingStyles.dropDownMenu}>
-                <option value="eng_Latn">Select Language</option>
-                <For each={Object.entries(defaultLanguages)}>{([lang, langCode]) =>
-                  <option value={langCode}>{lang}</option>
-                }</For>
-            </select>
-            </div>
+
+            <label for="src_lang">From: </label>
+            <select name="src_lang" id="src_lang" class={modelTestingStyles.dropDownMenu}>
+              <option value="fra_Latn">Select Language</option>
+              <For each={Object.entries(defaultLanguages)}>{([lang, langCode]) =>
+                <option value={langCode}>{lang}</option>
+              }</For>
+            </select> 
+            <label for="tgt_lang">To: </label>
+            <select name="tgt_lang" id="tgt_lang" class={modelTestingStyles.dropDownMenu}>
+              <option value="eng_Latn">Select Language</option>
+              <For each={Object.entries(defaultLanguages)}>{([lang, langCode]) =>
+                <option value={langCode}>{lang}</option>
+              }</For>
+          </select>
+
           </div>
         </div>
 
@@ -313,8 +350,8 @@ function ModelTesting() {
             <thead>
               <tr>
                 <th>Model Type | Name</th>
-                <th>Upload Time</th>
-                <th>Generation Time</th>
+                <th>Avg Upload Time</th>
+                <th>Avg Generation Time</th>
                 <th>Sample Output</th>
               </tr>
             </thead>
