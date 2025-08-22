@@ -72,13 +72,17 @@ function ModelTesting() {
       setBenchmarkData([]);
     }
 
+    let startTime;
+    let endTime;
+    let totalTime;
+
     // Loop through each model, injecting the model into the cache, and running a sample prompt.
     for (let i = 0; i < modelList.length; i++) {
       const model = modelList[i];
       const currentRow = table.rows[i+1];
 
       let generator;
-      currentRow.cells[tableUploadTimeCol].innerText = "Uploading";
+      currentRow.cells[tableUploadTimeCol].innerText = "Uploading: 0/" + globalModelRunCount;
 
       // Run the model multiple times based on the global model run count
       for (let j = 1; j < (globalModelRunCount + 1); j++) {
@@ -86,7 +90,7 @@ function ModelTesting() {
         caches.delete('transformers-cache');
         let cache = await caches.open('transformers-cache');
 
-        let startTime = performance.now();
+        startTime = performance.now();
 
         // Upload models to browsers cache.
         for (let file of model.files) {
@@ -120,111 +124,135 @@ function ModelTesting() {
     
         generator = await pipeline(model.modelType, model.name);
 
-        let endTime = performance.now();
-        // Get total time it took for the model to be injected, rounded to 2 decimal places.
-        let totalTime = endTime - startTime;
+        endTime = performance.now();
+
+        // Get total time it took for the model to be injected
+        totalTime = endTime - startTime;
 
         // Get benchmark data
         let timings = {...benchmarkData()};
         
         // Create a new space for this models timings if it doesnt yet exist.
-        if (!timings[model.name]) {
-          timings[model.name] = [];
+        if (!timings[model.name + "-Upload"]) {
+          timings[model.name + "-Upload"] = [];
         }
 
         // Add the new benchmark time and set the benchmarking data to this new data.
-        timings[model.name].push(totalTime);
+        timings[model.name + "-Upload"].push(totalTime);
         setBenchmarkData(timings);
+        
+        currentRow.cells[tableUploadTimeCol].innerText = "Uploading: " + j + "/" + globalModelRunCount;
+        await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
       }
 
-      let totalGenerationTimes = benchmarkData()[model.name];
+      let totalUploadTimes = benchmarkData()[model.name + "-Upload"];
 
-      // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
-      let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
+      // Get the average upload time by using the reduce pattern to sum and then divide by total amount.
+      let avgUploadTime = totalUploadTimes.reduce((a, b) => a + b) / totalUploadTimes.length;
 
-      let totalTime = (avgGenerationTime / 1000).toFixed(2) + "s";
+      totalTime = (avgUploadTime / 1000).toFixed(2) + "s";
       currentRow.cells[tableUploadTimeCol].innerText = totalTime;
 
-      currentRow.cells[tableGenerationTimeCol].innerText = "Generating";
-
-      let startTime;
-      let endTime;
+      // Display the text for generating the model in the table cell
+      currentRow.cells[tableGenerationTimeCol].innerText = "Generating 0/" + globalModelRunCount;
 
       // Ensure that the upload time cell always appears when the upload is finished, and not with the generation time.
       await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
 
       let output = "";
 
-      // Check which input needs to be provided for different models.
-      // Start and end time are kept within each if statement to ensure the minimal time to use the statement isn't included in benchmark.
+      // Run generation code multiple times based on the model run count.
+      for (let j = 1; j < (globalModelRunCount + 1); j++) {
 
-      if (model.modelType == "summarization") {
+        // Check which input needs to be provided for different models.
+        // Start and end time are kept within each if statement to ensure the minimal time to use the statement isn't included in benchmark.
+        if (model.modelType == "summarization") {
 
-        const textArea = document.getElementById("summarisationTextArea");
+          const textArea = document.getElementById("summarisationTextArea");
 
-        // Get input to test.
-        let userInput = textArea.value;
-        if (userInput == "") {
-          userInput = textArea.placeholder;
+          // Get input to test.
+          let userInput = textArea.value;
+          if (userInput == "") {
+            userInput = textArea.placeholder;
+          }
+
+          // Benchmark the model.
+          startTime = performance.now();
+          output = await generator(userInput, { max_new_tokens: 100});
+          endTime = performance.now();
+          output = output[0].summary_text;
+
+        } else if (model.modelType == "question-answering") {
+
+          const contextTextArea = document.getElementById("QAContextTextArea");
+          const questionTextArea = document.getElementById("QAQuestionTextArea");
+
+          // Get context and question user inputs, or use default.
+          let context = contextTextArea.value;
+          if (context == "") {
+            context = contextTextArea.placeholder;
+          }
+
+          let question = questionTextArea.value;
+          if (question == "") {
+            question = questionTextArea.placeholder;
+          }
+
+          // Benchmark the model.
+          startTime = performance.now();
+          output = await generator(context, question);
+          endTime = performance.now();
+          output = output.answer;
+
+        } else if (model.modelType == "translation") {
+
+          const textArea = document.getElementById("translationTextArea");
+          const fromLanguageCode = document.getElementById("src_lang").value;
+          const toLanguageCode = document.getElementById("tgt_lang").value;
+
+          // Get user input and languages, or use default.
+          let userInput = textArea.value;
+          if (userInput == "") {
+            userInput = textArea.placeholder;
+          }
+
+          let availableLanguages = model.languages;
+
+          if (!Object.values(availableLanguages).includes(fromLanguageCode) || !Object.values(availableLanguages).includes(toLanguageCode)) {
+            currentRow.cells[tableGenerationTimeCol].innerText = "N/A";
+            currentRow.cells[tableMessageCol].innerText = "Language/s Unavailable";
+            continue;
+          }
+
+          // Benchmark the model
+          startTime = performance.now();
+          output = await generator(userInput, {src_lang: fromLanguageCode, tgt_lang: toLanguageCode});
+          endTime = performance.now();
+          output = output[0].translation_text;
         }
 
-        // Benchmark the model.
-        startTime = performance.now();
-        output = await generator(userInput, { max_new_tokens: 100});
-        endTime = performance.now();
-        output = output[0].summary_text;
-
-      } else if (model.modelType == "question-answering") {
-
-        const contextTextArea = document.getElementById("QAContextTextArea");
-        const questionTextArea = document.getElementById("QAQuestionTextArea");
-
-        // Get context and question user inputs, or use default.
-        let context = contextTextArea.value;
-        if (context == "") {
-          context = contextTextArea.placeholder;
+        // Get benchmark data
+        let timings = {...benchmarkData()};
+        
+        // Create a new space for this models timings if it doesnt yet exist.
+        if (!timings[model.name + "-Generate"]) {
+          timings[model.name + "-Generate"] = [];
         }
 
-        let question = questionTextArea.value;
-        if (question == "") {
-          question = questionTextArea.placeholder;
-        }
+        // Add the new benchmark time and set the benchmarking data to this new data.
+        timings[model.name + "-Generate"].push(endTime - startTime);
+        setBenchmarkData(timings);
 
-        // Benchmark the model.
-        startTime = performance.now();
-        output = await generator(context, question);
-        endTime = performance.now();
-        output = output.answer;
-
-      } else if (model.modelType == "translation") {
-
-        const textArea = document.getElementById("translationTextArea");
-        const fromLanguageCode = document.getElementById("src_lang").value;
-        const toLanguageCode = document.getElementById("tgt_lang").value;
-
-        // Get user input and languages, or use default.
-        let userInput = textArea.value;
-        if (userInput == "") {
-          userInput = textArea.placeholder;
-        }
-
-        let availableLanguages = model.languages;
-
-        if (!Object.values(availableLanguages).includes(fromLanguageCode) || !Object.values(availableLanguages).includes(toLanguageCode)) {
-          currentRow.cells[tableGenerationTimeCol].innerText = "N/A";
-          currentRow.cells[tableMessageCol].innerText = "Language/s Unavailable";
-          continue;
-        }
-
-        // Benchmark the model
-        startTime = performance.now();
-        output = await generator(userInput, {src_lang: fromLanguageCode, tgt_lang: toLanguageCode});
-        endTime = performance.now();
-        console.log(output)
-        output = output[0].translation_text;
+        currentRow.cells[tableGenerationTimeCol].innerText = "Uploading: " + j + "/" + globalModelRunCount;
+        await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
       }
 
-      totalTime = ((endTime - startTime) / 1000).toFixed(2) + "s";
+      let totalGenerationTimes = benchmarkData()[model.name + "-Generate"];
+
+      // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
+      let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
+
+      totalTime = (avgGenerationTime / 1000).toFixed(2) + "s";
       currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
       currentRow.cells[tableMessageCol].innerText = output;
 
