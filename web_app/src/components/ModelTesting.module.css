@@ -9,10 +9,11 @@
     margin-bottom: 1em;
 }
 
-.inputButton:disabled {
-    cursor: auto;
+.inputButton:disabled, label[disabled="disabled"], label[disabled="disabled"]:hover {
+    cursor:default;
     color: var(--disabled-text-colour);
     background-color: var(--disabled-button-colour);
+    border: 1px solid var(--button-border-colour);
 }
 
 .tableContainer {
@@ -34,6 +35,10 @@
     border: 1px solid black;
     text-align: center;
     min-width: 10em;
+}
+
+.currentTableRow {
+    background-color: var(--background-secondary);
 }
 
 .tableColShrink {
