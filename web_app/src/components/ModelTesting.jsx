@@ -53,9 +53,9 @@ function ModelTesting() {
 
     const table = document.getElementById("tableContainer").querySelector("table");
 
-    const tableUploadTimeCol = 1;
-    const tableGenerationTimeCol = 2;
-    const tableMessageCol = 3;
+    const tableUploadTimeCol = 2;
+    const tableGenerationTimeCol = 3;
+    const tableMessageCol = 4;
 
     // configure transformer js environment
     env.useBrowserCache = true;
@@ -75,6 +75,10 @@ function ModelTesting() {
     let startTime;
     let endTime;
     let totalTime;
+
+    document.getElementById("modelInput").disabled = true;
+    document.getElementById("benchmarkButton").disabled = true;
+    document.getElementById("clearButton").disabled = true;
 
     // Loop through each model, injecting the model into the cache, and running a sample prompt.
     for (let i = 0; i < modelList.length; i++) {
@@ -258,6 +262,10 @@ function ModelTesting() {
 
       await new Promise(requestAnimationFrame);
     }
+
+    document.getElementById("modelInput").disabled = false;
+    document.getElementById("benchmarkButton").disabled = false;
+    document.getElementById("clearButton").disabled = false;
   };
 
   const clearModels = () => {
@@ -276,6 +284,10 @@ function ModelTesting() {
     } else {
       btn.innerHTML = "Advanced Options<br />⮝"
     }
+  }
+
+  const copyTable = () => {
+    console.log(benchmarkData());
   }
 
   return (
@@ -372,12 +384,14 @@ function ModelTesting() {
           <table class={modelTestingStyles.tableMMLU}>
             <colgroup>
               <col/>
+              <col/>
               <col span="2" class={modelTestingStyles.tableColShrink} />
               <col/>
             </colgroup>
             <thead>
               <tr>
-                <th>Model Type | Name</th>
+                <th>Model Name</th>
+                <th>Model Type</th>
                 <th>Avg Upload Time</th>
                 <th>Avg Generation Time</th>
                 <th>Sample Output</th>
@@ -386,7 +400,8 @@ function ModelTesting() {
             <tbody>
               <For each={selectedModels()}>{(model) =>
                 <tr>
-                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.modelType + " | " + model.name}</span></td>
+                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
+                  <td><span>{model.modelType}</span></td>
                   <td></td> {/* Upload Time Cell */}
                   <td></td> {/* Generation Time Cell */}
                   <td></td> {/* Sample Output Cell */}
@@ -395,6 +410,7 @@ function ModelTesting() {
             </tbody>
           </table>
         </div>
+        <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
       </div>
     </>
   );

@@ -127,3 +127,8 @@
 .inputOption input[type=number] {
     width: 2.5em;
 }
+
+.copyButton {
+    margin-top: 1em;
+    padding: 1em;
+}
