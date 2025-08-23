@@ -131,8 +131,8 @@ function ModelTesting() {
         endTime = performance.now();
 
         // Get total time it took for the model to be injected
-        totalTime = endTime - startTime;
-
+        totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+        console.log(totalTime)
         // Get benchmark data
         let timings = {...benchmarkData()};
         
@@ -154,8 +154,10 @@ function ModelTesting() {
       // Get the average upload time by using the reduce pattern to sum and then divide by total amount.
       let avgUploadTime = totalUploadTimes.reduce((a, b) => a + b) / totalUploadTimes.length;
 
-      totalTime = (avgUploadTime / 1000).toFixed(2) + "s";
+      totalTime = avgUploadTime.toFixed(2) + "s";
       currentRow.cells[tableUploadTimeCol].innerText = totalTime;
+      currentRow.cells[tableUploadTimeCol].title = totalUploadTimes;
+
 
       // Display the text for generating the model in the table cell
       currentRow.cells[tableGenerationTimeCol].innerText = "Generating 0/" + globalModelRunCount;
@@ -244,7 +246,9 @@ function ModelTesting() {
         }
 
         // Add the new benchmark time and set the benchmarking data to this new data.
-        timings[model.name + "-Generate"].push(endTime - startTime);
+        totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+
+        timings[model.name + "-Generate"].push(totalTime);
         setBenchmarkData(timings);
 
         currentRow.cells[tableGenerationTimeCol].innerText = "Uploading: " + j + "/" + globalModelRunCount;
@@ -256,8 +260,9 @@ function ModelTesting() {
       // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
       let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
 
-      totalTime = (avgGenerationTime / 1000).toFixed(2) + "s";
+      totalTime = (avgGenerationTime).toFixed(2) + "s";
       currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
+      currentRow.cells[tableGenerationTimeCol].title = totalGenerationTimes;
       currentRow.cells[tableMessageCol].innerText = output;
 
       await new Promise(requestAnimationFrame);
@@ -266,6 +271,7 @@ function ModelTesting() {
     document.getElementById("modelInput").disabled = false;
     document.getElementById("benchmarkButton").disabled = false;
     document.getElementById("clearButton").disabled = false;
+
   };
 
   const clearModels = () => {
@@ -287,7 +293,28 @@ function ModelTesting() {
   }
 
   const copyTable = () => {
-    console.log(benchmarkData());
+    const table = document.getElementById("tableContainer").querySelector("table");
+
+    let tableString = "";
+    // Table Structure: Model Name, Model Type, Upload Time, Generation Time, Sample Output.
+
+    tableString += "Model Name\tModel Type\tUpload Times\tGeneration Times\tAVG Upload Time\tAVG Generation Time";
+
+    for (let i = 1; i < table.rows.length; i++) {
+      let row = table.rows[i];
+      
+      tableString += "\n"
+      tableString += row.cells[0].querySelector("span").innerHTML + "\t";  // Model Name
+      tableString += row.cells[1].querySelector("span").innerHTML + "\t";  // Model Type
+      tableString += row.cells[2].title + "\t";  // Upload Times
+      tableString += row.cells[3].title + "\t";  // Generation Times
+      tableString += row.cells[2].innerHTML + "\t";  // AVG Upload Time
+      tableString += row.cells[3].innerHTML + "\t";  // AVG Generation Time
+    }
+
+    console.log(tableString);
+
+    navigator.clipboard.writeText(tableString);
   }
 
   return (
