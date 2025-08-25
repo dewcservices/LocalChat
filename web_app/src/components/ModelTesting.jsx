@@ -2,6 +2,7 @@ import { createSignal, onMount } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
+import { modelBenchmarks } from './modelBenchmarks.js';
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
@@ -378,6 +379,12 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
+  const estimateDevicePerformance = () => {
+    // To get idea of device performance in case direct model performance comparison cannot be used.
+    // Can run a number of operations that are the rough equiavlent of a known models duration time.
+    // TODO: Add this after known model benchmarks have been determined.
+  }
+
   // Change the active processor.
   const changeProcessor = (newProcessor) => {
     if (processor() == newProcessor) return;
@@ -419,6 +426,8 @@ function ModelTesting() {
         <div>
           <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
         </div>
+
+        <button onClick={() => test()}>Click me</button>
 
         <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? modelTestingStyles.menuOpen : ""}`} id='advancedOptionsMenu'>
           <ul class={modelTestingStyles.optionMenuSubTabs}>
