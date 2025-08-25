@@ -6,6 +6,7 @@
     border-radius: 3px;
     margin-right: 1vw;
     padding: 1vh;
+    margin-bottom: 1em;
 }
 
 .inputButton:disabled {
@@ -58,4 +59,76 @@
     padding: 4px 5px;
     margin-top: 12px;
     overflow-y: auto;
+}
+
+.advancedOptionsMenu {
+    border-radius: 5px;
+    border: 1px solid var(--background-primary);
+    background-color: var(--background-secondary);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, border 0.3s ease;
+}
+
+.menuOpen {
+    max-height: 500px;
+    border: 1px solid black;
+}
+
+.optionMenuSubTabs {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+.optionMenuSubTabs li {
+    float: left;
+}
+
+.optionMenuSubTabs li button {
+    display: block;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.selectedOptionMenuSubTab {
+    background-color: var(--background-tertiary);
+}
+
+.optionsSubMenu {
+    padding: 1em;
+}
+
+.optionsSubMenu div textarea {
+    width: 50%;
+}
+
+.dropDownMenu {
+  background-color: var(--background-secondary);
+  border-color: var(--button-border-colour);
+  color: var(--text-colour);
+  padding: 0.8vh;
+  margin-right: 1em;
+  margin-top: 1em;
+  width: 13em;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.inputOption {
+    display: block;
+    margin-bottom: 1em;
+}
+
+.inputOption input[type=number] {
+    width: 2.5em;
+}
+
+.copyButton {
+    margin-top: 1em;
+    padding: 1em;
 }

@@ -149,7 +149,7 @@ let model_file_urls = [
     {
       modelName: "Xenova/distilbert-base-uncased-distilled-squad",
       path: "question_answer/Xenova/distilbert-base-uncased-distilled-squad",
-      task: "question_answer"
+      task: "question-answering"
     },
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/config.json", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/config.json"],
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/onnx/model_quantized.onnx", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/model_quantized.onnx"],
