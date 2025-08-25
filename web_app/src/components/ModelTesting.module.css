@@ -137,3 +137,22 @@
     margin-top: 1em;
     padding: 1em;
 }
+
+.processSelector {
+  margin-top: 1em;
+  border: 1px solid #474747;
+  border-radius: 3px;
+  background-color: #292929;
+  padding: 1em;
+  width: fit-content;
+  display: flex;
+  gap: 1em;
+}
+
+.processSelector .inputButton {
+    margin: 0;
+}
+
+.processorButtonSelected {
+    border-color: var(--highlight-colour);
+}

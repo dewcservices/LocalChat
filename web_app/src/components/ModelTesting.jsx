@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createSignal, onMount } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
@@ -15,6 +15,9 @@ function ModelTesting() {
 
   // Variable to store most recent benchmarking data.
   const [benchmarkData, setBenchmarkData] = createSignal([]);
+
+  const [processor, setProcessor] = createSignal("wasm");
+  setProcessor("wasm");
 
   const addModel = async (event) => {
     const files = [...event.target.files];
@@ -139,7 +142,7 @@ function ModelTesting() {
     
         // Create pipeline for the generator;
         try {
-          generator = await pipeline(model.modelType, model.name);
+          generator = await pipeline(model.modelType, model.name, { device: processor() });
         } catch (error) {
           generator = null;
           console.log(error);
@@ -375,6 +378,27 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
+  // Change the active processor.
+  const changeProcessor = (newProcessor) => {
+    if (processor() == newProcessor) return;
+
+    console.log("Switching to", newProcessor);
+    setProcessor(newProcessor);
+  };
+
+  onMount(async () => {
+    if (!navigator.gpu) return;
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter !== null) {
+        document.getElementById("GPUButton").disabled = false;
+        document.getElementById("GPUButton").title = "Swap to using GPU";
+      }
+    } catch {
+      console.warn("Error detecting GPU, defaulting to using CPU.");
+    }
+  });
+
   return (
     <>
       <div class={modelTestingStyles.modelTesting}>
@@ -412,6 +436,23 @@ function ModelTesting() {
             <div class={modelTestingStyles.inputOption}>
               <label for="enableGlobalBenchmarkAmount">Run Models X number of times: </label>
               <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" />
+
+              <div id="processorSelector" class={modelTestingStyles.processSelector}>
+                <button 
+                  onClick={() => changeProcessor("wasm")}
+                  class={modelTestingStyles.inputButton + " " + `${processor() == "wasm" ? modelTestingStyles.processorButtonSelected : ""}`}
+                  id="CPUButton" title="Swap to using CPU"
+                >
+                  CPU
+                </button>
+                <button 
+                  onClick={() => changeProcessor("webgpu")}
+                  class={modelTestingStyles.inputButton + " " + `${processor() == "webgpu" ? modelTestingStyles.processorButtonSelected : ""}`}
+                  id="GPUButton" disabled title="No GPU Detected"
+                >
+                  GPU
+                </button>
+              </div>
             </div>
             
           </div>
