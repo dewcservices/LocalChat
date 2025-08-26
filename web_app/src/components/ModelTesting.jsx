@@ -212,6 +212,10 @@ function ModelTesting() {
 
         } else if (model.modelType == "translation") {
 
+          // TODO: Implement fix to use language code associated with specific model.
+          console.log("Translation model implementation currently not working");
+          continue;
+
           const textArea = document.getElementById("translationTextArea");
           const fromLanguageCode = document.getElementById("src_lang").value;
           const toLanguageCode = document.getElementById("tgt_lang").value;
