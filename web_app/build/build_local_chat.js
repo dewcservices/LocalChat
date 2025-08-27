@@ -94,7 +94,17 @@ if (os.platform() === "win32") { // compiling on a windows system
   output = execSync(`GOOS=linux GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
   console.log(output);
 
-} else throw new Error(`Cannot build on current operating system: ${os.platform()}`);
+} else if (os.platform() === "darwin") { // compiling on a macOS system
+
+  // windows executable
+  let output = execSync(`GOOS=windows GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
+
+  // linux executable
+  output = execSync(`GOOS=linux GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
+
+} else throw new Error(`Cannot build on current operating system: ${os.platform()}`); 
 
 // bundle the web app
 let output = execSync("npm run build", { encoding: "utf8" });
