@@ -1,6 +1,5 @@
 // This file contains functions to save and load chat histories.
 
-
 /**
  * Deletes all chat histories from the browser's local storage.
  */
@@ -189,4 +188,66 @@ export function autoUpdateChatTitle(chatId) {
       renameChat(chatId, newTitle);
     }
   }
+}
+
+/**
+ * Creates and triggers download of a file with given content
+ * @param {string} content - File content
+ * @param {string} filename - Name for the downloaded file
+ * @param {string} mimeType - MIME type for the file
+ */
+function triggerFileDownload(content, filename, mimeType = 'application/json') {
+  const blob = new Blob([content], { type: mimeType });
+  const downloadUrl = URL.createObjectURL(blob);
+  const downloadLink = document.createElement('a');
+  
+  downloadLink.href = downloadUrl;
+  downloadLink.download = filename;
+  downloadLink.style.display = 'none';
+  
+  // temporarily add to DOM, trigger click, then clean up (DOM used for compatibility with older browsers)
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  
+  // method to invoke url cleanup to free memory
+  URL.revokeObjectURL(downloadUrl);
+}
+
+/**
+ * Exports all chat histories as a JSON file and triggers download
+ */
+export function exportAllChats() {
+  const chatHistories = getChatHistories();
+  
+  if (chatHistories.length === 0) {
+    alert('No chat histories found to export.');
+    return;
+  }
+
+  // get full chat data for all chats
+  const allChats = [];
+  
+  chatHistories.forEach(chatSummary => {
+    const fullChat = getChatHistory(chatSummary.chatId);
+    if (fullChat) {
+      allChats.push(fullChat);
+    }
+  });
+
+  // prepare export data structure
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    totalChats: allChats.length,
+    chats: allChats
+  };
+
+  const exportContent = JSON.stringify(exportData, null, 2);
+  const exportDate = new Date().toISOString().split('T')[0];
+  const filename = `chat-history-export-${exportDate}.json`;
+
+  // Trigger the download using the helper function
+  triggerFileDownload(exportContent, filename);
+  
+  console.log(`Exported ${allChats.length} chat(s) as JSON`);
 }

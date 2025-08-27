@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
-import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats } from "../utils/ChatHistory";
 
 // icon imports for use in chat history
 import pencilIcon from '../assets/pencil.png';
@@ -25,6 +25,9 @@ function Layout(props) {
 
   // hover state for mouse navigation of chats
   const [hoveredChatId, setHoveredChatId] = createSignal(null);
+  
+  // Destructure children from props with a more descriptive name
+  const pageContent = props.children;
   
   // updates the chat history
   createEffect(() => {
@@ -71,6 +74,16 @@ function Layout(props) {
     setRenamingId(null);
   };
 
+  // export all chats as JSON
+  const handleExportChats = () => {
+    try {
+      exportAllChats();
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please check the console for details.');
+    }
+  };
+
   return (
     <>
       <div class="container">
@@ -101,9 +114,9 @@ function Layout(props) {
                     <div class={styles.actionIcons}>
                       <button 
                         class={styles.actionButton}
-                        onClick={(clicked) => {
-                          clicked.preventDefault();
-                          clicked.stopPropagation();
+                        onClick={(clickEvent) => {
+                          clickEvent.preventDefault();
+                          clickEvent.stopPropagation();
                           startRenaming(chat.chatId);
                         }}
                         title="Rename Chat"
@@ -112,9 +125,9 @@ function Layout(props) {
                       </button>
                       <button 
                         class={styles.actionButton}
-                        onClick={(clicked) => {
-                          clicked.preventDefault();
-                          clicked.stopPropagation();
+                        onClick={(clickEvent) => {
+                          clickEvent.preventDefault();
+                          clickEvent.stopPropagation();
                           deleteChat(chat.chatId);
                         }}
                         title="Delete Chat"
@@ -130,8 +143,8 @@ function Layout(props) {
                   <input 
                     type="text" 
                     value={newTitle()}
-                    onInput={clicked => setNewTitle(clicked.currentTarget.value)}
-                    onKeyDown={clicked => clicked.key === 'Enter' && applyRename()}
+                    onInput={inputEvent => setNewTitle(inputEvent.currentTarget.value)}
+                    onKeyDown={keyEvent => keyEvent.key === 'Enter' && applyRename()}
                     class={styles.renameInput}
                   />
                   <div class={styles.renameActions}>
@@ -156,12 +169,23 @@ function Layout(props) {
           }</For>
           <br/>
 
-          <button class={styles.deleteAllButton} onClick={deleteAllChats}>Delete All Chats</button>
+          <div class={styles.buttonContainer}>
+            <button 
+              class={styles.exportButton} 
+              onClick={handleExportChats}
+              disabled={chatHistories().length === 0}
+              title={chatHistories().length === 0 ? "No chats to export" : "Export all chat histories"}
+            >
+              Export All Chats
+            </button>
+            
+            <button class={styles.deleteAllButton} onClick={deleteAllChats}>Delete All Chats</button>
+          </div>
           <br />
         </div>
         <div class="pageContainer">
           <ChatHistoriesContext.Provider value={{ setChatHistories }}>
-            {props.children} {/* nested components are passed in here */}
+            {pageContent} {/* More descriptive name for nested components */}
           </ChatHistoriesContext.Provider>
         </div>
       </div>
