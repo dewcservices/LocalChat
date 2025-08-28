@@ -83,17 +83,8 @@ const deleteAllChats = () => {
   };
 
   // import chats from JSON
-  const handleImportChats = async () => {
-    try {
-      await importAllChats();
-      // Give user time to read the import summary, then auto-refresh
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000); // 2 second delay to read the message
-    } catch (error) {
-      console.error('Import failed:', error);
-      alert('Import failed. Please check the console for details.');
-    }
+  const handleImportChats = () => {
+    importAllChats(true, () => window.location.reload());
   };
 
   return (

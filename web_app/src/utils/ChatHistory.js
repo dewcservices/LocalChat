@@ -64,8 +64,7 @@ export function getChatHistories() {
         });
       }
     } catch (error) {
-      console.warn(`Failed to parse chat data for key "${key}":`, error);
-      // Optionally remove corrupted data
+      //console.warn(`Failed to parse chat data for key "${key}":`, error);
       // localStorage.removeItem(key);
     }
   }
@@ -127,7 +126,7 @@ export function getChatHistory(chatId) {
     let chat = JSON.parse(chatJson);
     return chat;
   } catch (error) {
-    console.error(`Failed to parse chat history for ${chatId}:`, error);
+    //console.error(`Failed to parse chat history for ${chatId}:`, error);
     return [];
   }
 }
@@ -233,7 +232,7 @@ function triggerFileUpload(onFileSelected) {
     document.body.removeChild(fileInput);
   };
   
-  // temp add to DOM and trigger click
+  // temporarily add to DOM and trigger click
   document.body.appendChild(fileInput);
   fileInput.click();
 }
@@ -270,58 +269,75 @@ export function exportAllChats() {
   const exportDate = new Date().toISOString().split('T')[0];
   const filename = `chat-history-export-${exportDate}.json`;
 
-  // Trigger the download using the helper function
+  // trigger the download using the helper function
   triggerFileDownload(exportContent, filename);
   
-  console.log(`Exported ${allChats.length} chat(s) as JSON`);
+  //console.log(`Exported ${allChats.length} chat(s) as JSON`);
 }
 
 /**
  * Imports all chat histories from a JSON file (must be in the same format as export)
+ * @param {boolean} showAlert - Whether to show the built-in alert (default: true)
+ * @param {Function} onComplete - Callback function called after user dismisses the alert
+ * @return {Promise} - Promise that resolves with import stats when import is complete
  */
-export function importAllChats() {
-  triggerFileUpload(async (file) => {
-    try {
-      const fileContent = await file.text();
-      const importData = JSON.parse(fileContent);
-      
-      // validate it's in the correct export format
-      if (!importData.chats || !Array.isArray(importData.chats) || !importData.exportDate) {
-        alert('Invalid file format. Please select a JSON file exported by this system.');
-        return;
-      }
-      
-      let importedCount = 0;
-      let skippedCount = 0;
-      
-      // import each chat
-      importData.chats.forEach(chat => {
-        try {
-          // if chat ID already exists, generate a new one (be careful as it can and will upload duplicates only their chatID will differ)
-          let chatId = chat.chatId;
-          if (localStorage.getItem(chatId)) {
-            chatId = newChatId();
-            chat.chatId = chatId;
+export function importAllChats(showAlert = true, onComplete = null) {
+  return new Promise((resolve, reject) => {
+    triggerFileUpload(async (file) => {
+      try {
+        const fileContent = await file.text();
+        const importData = JSON.parse(fileContent);
+        
+        // validate its in the correct export format
+        if (!importData.chats || !Array.isArray(importData.chats) || !importData.exportDate) {
+          if (showAlert) {
+            alert('Invalid file format. Please select a JSON file exported by this system.');
           }
-          
-          localStorage.setItem(chatId, JSON.stringify(chat));
-          importedCount++;
-
-          // if chat was skipped, log the reason
-        } catch (error) {
-          console.warn(`Failed to import chat ${chat.chatId}:`, error);
-          skippedCount++;
+          reject(new Error('Invalid file format'));
+          return;
         }
-      });
-      
-      // notify the user of their import status summary
-      alert(`Import completed!\nImported: ${importedCount} chats\nSkipped: ${skippedCount} chats`);
-      console.log(`Imported ${importedCount} chat(s) from JSON file`);
-      
-      // if all were too failed, notify the user
-    } catch (error) {
-      alert('Failed to import chat histories. Please check that the file is valid JSON.');
-      console.error('Import error:', error);
-    }
+        
+        let importedCount = 0;
+        let skippedCount = 0;
+        
+        // import each chat
+        importData.chats.forEach(chat => {
+          try {
+            // if chat ID already exists, generate a new one to dynamically assign it
+            let chatId = chat.chatId;
+            if (localStorage.getItem(chatId)) {
+              chatId = newChatId();
+              chat.chatId = chatId;
+            }
+            
+            localStorage.setItem(chatId, JSON.stringify(chat));
+            importedCount++;
+          } catch (error) {
+            //console.warn(`Failed to import chat ${chat.chatId}:`, error);
+            skippedCount++;
+          }
+        });
+        
+        if (showAlert) {
+          alert(`Import completed!\nImported: ${importedCount} chats\nSkipped: ${skippedCount} chats`);
+        }
+        //console.log(`Imported ${importedCount} chat(s) from JSON file`);
+        
+        // call the completion callback after alert is dismissed
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete();
+        }
+        
+        // resolve the promise with the results
+        resolve({ importedCount, skippedCount });
+        
+      } catch (error) {
+        if (showAlert) {
+          alert('Failed to import chat histories. Please check that the file is valid JSON.');
+        }
+        //console.error('Import error:', error);
+        reject(error);
+      }
+    });
   });
 }
