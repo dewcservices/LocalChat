@@ -125,7 +125,38 @@
     gap: 4px;
 }
 
-/* cleaner delete all chats button styling, but changes still need to be made */
+.buttonContainer {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.exportButton {
+    background: var(--background-tertiary);
+    border: 1px solid var(--selected-button-colour);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.exportButton:hover:not(:disabled) {
+    background-color: var(--selected-button-colour);
+    border-color: var(--highlight-colour);
+}
+
+.exportButton:active:not(:disabled) {
+    background-color: var(--selected-button-colour);
+    transform: scale(0.95);
+}
+
+.exportButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .deleteAllButton {
     background: var(--background-tertiary);
     border: 1px solid var(--selected-button-colour);
@@ -134,7 +165,7 @@
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
-    margin-top: 8px;
+    flex: 1;
 }
 
 .deleteAllButton:hover {
@@ -146,4 +177,25 @@
 .deleteAllButton:active {
     background-color: var(--failure-colour);
     border-color: black;
+}
+
+.importButton {
+    background: var(--background-tertiary);
+    border: 1px solid var(--selected-button-colour);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.importButton:hover {
+    background-color: var(--selected-button-colour);
+    border-color: var(--highlight-colour);
+}
+
+.importButton:active {
+    background-color: var(--selected-button-colour);
+    transform: scale(0.95);
 }

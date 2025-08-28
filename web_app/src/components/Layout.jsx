@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
-import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats, importAllChats } from "../utils/ChatHistory";
 
 // icon imports for use in chat history
 import pencilIcon from '../assets/pencil.png';
@@ -19,12 +19,14 @@ function Layout(props) {
   const params = useParams();
   const navigate = useNavigate();
 
-  const [chatHistories, setChatHistories] = createSignal(getChatHistories());
+  const [chatHistories, setChatHistories] = createSignal(getChatHistories(), {equals: false});
   const [renamingId, setRenamingId] = createSignal(null);
   const [newTitle, setNewTitle]  = createSignal("");
 
   // hover state for mouse navigation of chats
   const [hoveredChatId, setHoveredChatId] = createSignal(null);
+  
+  const pageContent = props.children;
   
   // updates the chat history
   createEffect(() => {
@@ -48,14 +50,13 @@ function Layout(props) {
     }
   };
 
-  const deleteAllChats = () => {
-    if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
-    if (!confirm("Final confirmation: This will permanently delete all your chat data.")) return;
+const deleteAllChats = () => {
+  if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
 
-    deleteChatHistories();
-    navigate('/');
-    setChatHistories([]);
-  };
+  deleteChatHistories();
+  navigate('/');
+  setChatHistories([]);
+};
   
   // start renaming mode for a given chat
   const startRenaming = (chatId) => {
@@ -69,6 +70,21 @@ function Layout(props) {
     renameChat(renamingId(), newTitle());
     setChatHistories(getChatHistories());
     setRenamingId(null);
+  };
+
+  // export all chats as JSON
+  const handleExportChats = () => {
+    try {
+      exportAllChats();
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please check the console for details.');
+    }
+  };
+
+  // import chats from JSON
+  const handleImportChats = () => {
+    importAllChats(true, () => window.location.reload());
   };
 
   return (
@@ -101,9 +117,9 @@ function Layout(props) {
                     <div class={styles.actionIcons}>
                       <button 
                         class={styles.actionButton}
-                        onClick={(clicked) => {
-                          clicked.preventDefault();
-                          clicked.stopPropagation();
+                        onClick={(clickEvent) => {
+                          clickEvent.preventDefault();
+                          clickEvent.stopPropagation();
                           startRenaming(chat.chatId);
                         }}
                         title="Rename Chat"
@@ -112,9 +128,9 @@ function Layout(props) {
                       </button>
                       <button 
                         class={styles.actionButton}
-                        onClick={(clicked) => {
-                          clicked.preventDefault();
-                          clicked.stopPropagation();
+                        onClick={(clickEvent) => {
+                          clickEvent.preventDefault();
+                          clickEvent.stopPropagation();
                           deleteChat(chat.chatId);
                         }}
                         title="Delete Chat"
@@ -130,8 +146,8 @@ function Layout(props) {
                   <input 
                     type="text" 
                     value={newTitle()}
-                    onInput={clicked => setNewTitle(clicked.currentTarget.value)}
-                    onKeyDown={clicked => clicked.key === 'Enter' && applyRename()}
+                    onInput={inputEvent => setNewTitle(inputEvent.currentTarget.value)}
+                    onKeyDown={keyEvent => keyEvent.key === 'Enter' && applyRename()}
                     class={styles.renameInput}
                   />
                   <div class={styles.renameActions}>
@@ -156,12 +172,37 @@ function Layout(props) {
           }</For>
           <br/>
 
-          <button class={styles.deleteAllButton} onClick={deleteAllChats}>Delete All Chats</button>
+          <div class={styles.buttonContainer}>
+            <button 
+              class={styles.exportButton} 
+              onClick={handleExportChats}
+              disabled={chatHistories().length === 0}
+              title={chatHistories().length === 0 ? "No chats to export" : "Export all chat histories"}
+            >
+              Export All Chats
+            </button>
+            
+            <button 
+              class={styles.importButton} 
+              onClick={handleImportChats}
+              title="Import chat histories from JSON file"
+            >
+              Import Chats
+            </button>
+            
+            <button 
+              class={styles.deleteAllButton} 
+              onClick={deleteAllChats}
+              title="Delete all chat histories"
+            >
+              Delete All Chats
+            </button>
+          </div>
           <br />
         </div>
         <div class="pageContainer">
           <ChatHistoriesContext.Provider value={{ setChatHistories }}>
-            {props.children} {/* nested components are passed in here */}
+            {pageContent} {/* More descriptive name for nested components */}
           </ChatHistoriesContext.Provider>
         </div>
       </div>

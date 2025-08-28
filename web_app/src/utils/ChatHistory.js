@@ -1,6 +1,5 @@
 // This file contains functions to save and load chat histories.
 
-
 /**
  * Deletes all chat histories from the browser's local storage.
  */
@@ -65,8 +64,7 @@ export function getChatHistories() {
         });
       }
     } catch (error) {
-      console.warn(`Failed to parse chat data for key "${key}":`, error);
-      // Optionally remove corrupted data
+      //console.warn(`Failed to parse chat data for key "${key}":`, error);
       // localStorage.removeItem(key);
     }
   }
@@ -128,7 +126,7 @@ export function getChatHistory(chatId) {
     let chat = JSON.parse(chatJson);
     return chat;
   } catch (error) {
-    console.error(`Failed to parse chat history for ${chatId}:`, error);
+    //console.error(`Failed to parse chat history for ${chatId}:`, error);
     return [];
   }
 }
@@ -189,4 +187,157 @@ export function autoUpdateChatTitle(chatId) {
       renameChat(chatId, newTitle);
     }
   }
+}
+
+/**
+ * Creates and triggers download of a file with given content
+ * @param {string} content - File content
+ * @param {string} filename - Name for the downloaded file
+ * @param {string} mimeType - MIME type for the file
+ */
+function triggerFileDownload(content, filename, mimeType = 'application/json') {
+  const blob = new Blob([content], { type: mimeType });
+  const downloadUrl = URL.createObjectURL(blob);
+  const downloadLink = document.createElement('a');
+  
+  downloadLink.href = downloadUrl;
+  downloadLink.download = filename;
+  downloadLink.style.display = 'none';
+  
+  // temporarily add to DOM, trigger click, then clean up (DOM used for compatibility with older browsers)
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+  
+  // method to invoke url cleanup to free memory
+  URL.revokeObjectURL(downloadUrl);
+}
+
+/**
+ * Creates a hidden file input element and triggers it for file selection
+ * @param {Function} onFileSelected - Callback function to handle selected file
+ */
+function triggerFileUpload(onFileSelected) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.json';
+  fileInput.style.display = 'none';
+  
+  fileInput.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      onFileSelected(file);
+    }
+    // clean up
+    document.body.removeChild(fileInput);
+  };
+  
+  // temporarily add to DOM and trigger click
+  document.body.appendChild(fileInput);
+  fileInput.click();
+}
+
+/**
+ * Exports all chat histories as a JSON file and triggers download
+ */
+export function exportAllChats() {
+  const chatHistories = getChatHistories();
+  
+  if (chatHistories.length === 0) {
+    alert('No chat histories found to export.');
+    return;
+  }
+
+  // get full chat data for all chats
+  const allChats = [];
+  
+  chatHistories.forEach(chatSummary => {
+    const fullChat = getChatHistory(chatSummary.chatId);
+    if (fullChat) {
+      allChats.push(fullChat);
+    }
+  });
+
+  // prepare export data structure
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    totalChats: allChats.length,
+    chats: allChats
+  };
+
+  const exportContent = JSON.stringify(exportData, null, 2);
+  const exportDate = new Date().toISOString().split('T')[0];
+  const filename = `chat-history-export-${exportDate}.json`;
+
+  // trigger the download using the helper function
+  triggerFileDownload(exportContent, filename);
+  
+  //console.log(`Exported ${allChats.length} chat(s) as JSON`);
+}
+
+/**
+ * Imports all chat histories from a JSON file (must be in the same format as export)
+ * @param {boolean} showAlert - Whether to show the built-in alert (default: true)
+ * @param {Function} onComplete - Callback function called after user dismisses the alert
+ * @return {Promise} - Promise that resolves with import stats when import is complete
+ */
+export function importAllChats(showAlert = true, onComplete = null) {
+  return new Promise((resolve, reject) => {
+    triggerFileUpload(async (file) => {
+      try {
+        const fileContent = await file.text();
+        const importData = JSON.parse(fileContent);
+        
+        // validate its in the correct export format
+        if (!importData.chats || !Array.isArray(importData.chats) || !importData.exportDate) {
+          if (showAlert) {
+            alert('Invalid file format. Please select a JSON file exported by this system.');
+          }
+          reject(new Error('Invalid file format'));
+          return;
+        }
+        
+        let importedCount = 0;
+        let skippedCount = 0;
+        
+        // import each chat
+        importData.chats.forEach(chat => {
+          try {
+            // if chat ID already exists, generate a new one to dynamically assign it
+            let chatId = chat.chatId;
+            if (localStorage.getItem(chatId)) {
+              chatId = newChatId();
+              chat.chatId = chatId;
+            }
+            
+            localStorage.setItem(chatId, JSON.stringify(chat));
+            importedCount++;
+          } catch (error) {
+            //console.warn(`Failed to import chat ${chat.chatId}:`, error);
+            skippedCount++;
+          }
+        });
+        
+        if (showAlert) {
+          alert(`Import completed!\nImported: ${importedCount} chats\nSkipped: ${skippedCount} chats`);
+        }
+        //console.log(`Imported ${importedCount} chat(s) from JSON file`);
+        
+        // call the completion callback after alert is dismissed
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete();
+        }
+        
+        // resolve the promise with the results
+        resolve({ importedCount, skippedCount });
+        
+      } catch (error) {
+        if (showAlert) {
+          alert('Failed to import chat histories. Please check that the file is valid JSON.');
+        }
+        //console.error('Import error:', error);
+        reject(error);
+      }
+    });
+  });
 }
