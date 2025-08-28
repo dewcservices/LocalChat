@@ -19,7 +19,7 @@ function Layout(props) {
   const params = useParams();
   const navigate = useNavigate();
 
-  const [chatHistories, setChatHistories] = createSignal(getChatHistories());
+  const [chatHistories, setChatHistories] = createSignal(getChatHistories(), {equals: false});
   const [renamingId, setRenamingId] = createSignal(null);
   const [newTitle, setNewTitle]  = createSignal("");
 
