@@ -73,12 +73,19 @@ function QuestionAnswer() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
-    qaPipeline = await pipeline('question-answering', modelName(), { device: chatContext.processor() });
-    console.log("Finished model setup using", chatContext.processor());
-
-    setAddModelBtnText("Add Model");
-    document.getElementById("folderInput").disabled = false;
-    document.getElementById("sendButton").disabled = false;
+    try {
+      qaPipeline = await pipeline('question-answering', modelName(), { device: chatContext.processor() });
+      console.log("Finished model setup using", chatContext.processor());
+    } catch (e) {
+      console.log(`Error loading model: ${e}`);
+      qaPipeline = null;
+      setModelName('');
+      alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
+    } finally {
+      setAddModelBtnText("Add Model");
+      document.getElementById("folderInput").disabled = false;
+      document.getElementById("sendButton").disabled = false;
+    }
   });
  
   const processQuestion = async () => {
@@ -125,8 +132,13 @@ function QuestionAnswer() {
     chatContext.addMessage(`Context: ${context}`, true);
     chatContext.addMessage(`Question: ${question}`, true);
     
-    let output = await qaPipeline(question, context);
-    chatContext.addMessage(output.answer, false, modelName());
+    try {
+      let output = await qaPipeline(question, context);
+      chatContext.addMessage(output.answer, false, modelName());
+    } catch (e) {
+      chatContext.addMessage(`Error: failed to process question. Please try again.`, false, modelName());
+      console.log(`Error occurred processing question text: ${e}.`);
+    }
     
     document.getElementById('questionTextarea').value = '';
   };
