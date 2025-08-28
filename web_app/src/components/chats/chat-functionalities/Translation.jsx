@@ -50,11 +50,13 @@ function Translation() {
       alert(`Must be a translation model. browser_config.json states that the model is for a different task.`);
     }
     else {
-      let modelName = await cacheModel(files);
+      let model = await cacheModel(files);
 
       let models = availableModels().slice();
-      models.push(modelName);
+      models.push(model);
+
       setAvailableModels(models);
+      setModelName(model);
     }
 
     document.getElementById("folderInput").disabled = false;
@@ -71,7 +73,7 @@ function Translation() {
     
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
-    setAddModelBtnText("Creating Pipeline");
+    setAddModelBtnText("Creating pipeline");
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
