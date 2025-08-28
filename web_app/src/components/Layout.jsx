@@ -26,7 +26,6 @@ function Layout(props) {
   // hover state for mouse navigation of chats
   const [hoveredChatId, setHoveredChatId] = createSignal(null);
   
-  // Destructure children from props with a more descriptive name
   const pageContent = props.children;
   
   // updates the chat history

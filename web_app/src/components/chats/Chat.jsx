@@ -38,7 +38,7 @@ function Chat() {
     chatHistory().latestMessageDate = messageDate;
     setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 
-    // Safe context access - only update if context is available
+    // update if context is available
     if (chatHistoriesContext?.setChatHistories) {
       chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
     }
