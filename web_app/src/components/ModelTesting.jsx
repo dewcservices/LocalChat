@@ -1,12 +1,14 @@
-import { createSignal } from 'solid-js';
+import { createSignal, onMount } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
+import { modelBenchmarks } from './modelBenchmarks.js';
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
 
-  const defaultLanguages = {"Acehnese (Arabic script)":"ace_Arab","Acehnese (Latin script)":"ace_Latn","Mesopotamian Arabic":"acm_Arab","Taâ€™izzi-Adeni Arabic":"acq_Arab","Tunisian Arabic":"aeb_Arab","Afrikaans":"afr_Latn","South Levantine Arabic":"ajp_Arab","Akan":"aka_Latn","Amharic":"amh_Ethi","North Levantine Arabic":"apc_Arab","Modern Standard Arabic":"arb_Arab","Modern Standard Arabic (Romanized)":"arb_Latn","Najdi Arabic":"ars_Arab","Moroccan Arabic":"ary_Arab","Egyptian Arabic":"arz_Arab","Assamese":"asm_Beng","Asturian":"ast_Latn","Awadhi":"awa_Deva","Central Aymara":"ayr_Latn","South Azerbaijani":"azb_Arab","North Azerbaijani":"azj_Latn","Bashkir":"bak_Cyrl","Bambara":"bam_Latn","Balinese":"ban_Latn","Belarusian":"bel_Cyrl","Bemba":"bem_Latn","Bengali":"ben_Beng","Bhojpuri":"bho_Deva","Banjar (Arabic script)":"bjn_Arab","Banjar (Latin script)":"bjn_Latn","Standard Tibetan":"bod_Tibt","Bosnian":"bos_Latn","Buginese":"bug_Latn","Bulgarian":"bul_Cyrl","Catalan":"cat_Latn","Cebuano":"ceb_Latn","Czech":"ces_Latn","Chokwe":"cjk_Latn","Central Kurdish":"ckb_Arab","Crimean Tatar":"crh_Latn","Welsh":"cym_Latn","Danish":"dan_Latn","German":"deu_Latn","Southwestern Dinka":"dik_Latn","Dyula":"dyu_Latn","Dzongkha":"dzo_Tibt","Greek":"ell_Grek","English":"eng_Latn","Esperanto":"epo_Latn","Estonian":"est_Latn","Basque":"eus_Latn","Ewe":"ewe_Latn","Faroese":"fao_Latn","Fijian":"fij_Latn","Finnish":"fin_Latn","Fon":"fon_Latn","French":"fra_Latn","Friulian":"fur_Latn","Nigerian Fulfulde":"fuv_Latn","Scottish Gaelic":"gla_Latn","Irish":"gle_Latn","Galician":"glg_Latn","Guarani":"grn_Latn","Gujarati":"guj_Gujr","Haitian Creole":"hat_Latn","Hausa":"hau_Latn","Hebrew":"heb_Hebr","Hindi":"hin_Deva","Chhattisgarhi":"hne_Deva","Croatian":"hrv_Latn","Hungarian":"hun_Latn","Armenian":"hye_Armn","Igbo":"ibo_Latn","Ilocano":"ilo_Latn","Indonesian":"ind_Latn","Icelandic":"isl_Latn","Italian":"ita_Latn","Javanese":"jav_Latn","Japanese":"jpn_Jpan","Kabyle":"kab_Latn","Jingpho":"kac_Latn","Kamba":"kam_Latn","Kannada":"kan_Knda","Kashmiri (Arabic script)":"kas_Arab","Kashmiri (Devanagari script)":"kas_Deva","Georgian":"kat_Geor","Central Kanuri (Arabic script)":"knc_Arab","Central Kanuri (Latin script)":"knc_Latn","Kazakh":"kaz_Cyrl","KabiyÃ¨":"kbp_Latn","Kabuverdianu":"kea_Latn","Khmer":"khm_Khmr","Kikuyu":"kik_Latn","Kinyarwanda":"kin_Latn","Kyrgyz":"kir_Cyrl","Kimbundu":"kmb_Latn","Northern Kurdish":"kmr_Latn","Kikongo":"kon_Latn","Korean":"kor_Hang","Lao":"lao_Laoo","Ligurian":"lij_Latn","Limburgish":"lim_Latn","Lingala":"lin_Latn","Lithuanian":"lit_Latn","Lombard":"lmo_Latn","Latgalian":"ltg_Latn","Luxembourgish":"ltz_Latn","Luba-Kasai":"lua_Latn","Ganda":"lug_Latn","Luo":"luo_Latn","Mizo":"lus_Latn","Standard Latvian":"lvs_Latn","Magahi":"mag_Deva","Maithili":"mai_Deva","Malayalam":"mal_Mlym","Marathi":"mar_Deva","Minangkabau (Arabic script)":"min_Arab","Minangkabau (Latin script)":"min_Latn","Macedonian":"mkd_Cyrl","Plateau Malagasy":"plt_Latn","Maltese":"mlt_Latn","Meitei (Bengali script)":"mni_Beng","Halh Mongolian":"khk_Cyrl","Mossi":"mos_Latn","Maori":"mri_Latn","Burmese":"mya_Mymr","Dutch":"nld_Latn","Norwegian Nynorsk":"nno_Latn","Norwegian BokmÃ¥l":"nob_Latn","Nepali":"npi_Deva","Northern Sotho":"nso_Latn","Nuer":"nus_Latn","Nyanja":"nya_Latn","Occitan":"oci_Latn","West Central Oromo":"gaz_Latn","Odia":"ory_Orya","Pangasinan":"pag_Latn","Eastern Panjabi":"pan_Guru","Papiamento":"pap_Latn","Western Persian":"pes_Arab","Polish":"pol_Latn","Portuguese":"por_Latn","Dari":"prs_Arab","Southern Pashto":"pbt_Arab","Ayacucho Quechua":"quy_Latn","Romanian":"ron_Latn","Rundi":"run_Latn","Russian":"rus_Cyrl","Sango":"sag_Latn","Sanskrit":"san_Deva","Santali":"sat_Olck","Sicilian":"scn_Latn","Shan":"shn_Mymr","Sinhala":"sin_Sinh","Slovak":"slk_Latn","Slovenian":"slv_Latn","Samoan":"smo_Latn","Shona":"sna_Latn","Sindhi":"snd_Arab","Somali":"som_Latn","Southern Sotho":"sot_Latn","Spanish":"spa_Latn","Tosk Albanian":"als_Latn","Sardinian":"srd_Latn","Serbian":"srp_Cyrl","Swati":"ssw_Latn","Sundanese":"sun_Latn","Swedish":"swe_Latn","Swahili":"swh_Latn","Silesian":"szl_Latn","Tamil":"tam_Taml","Tatar":"tat_Cyrl","Telugu":"tel_Telu","Tajik":"tgk_Cyrl","Tagalog":"tgl_Latn","Thai":"tha_Thai","Tigrinya":"tir_Ethi","Tamasheq (Latin script)":"taq_Latn","Tamasheq (Tifinagh script)":"taq_Tfng","Tok Pisin":"tpi_Latn","Tswana":"tsn_Latn","Tsonga":"tso_Latn","Turkmen":"tuk_Latn","Tumbuka":"tum_Latn","Turkish":"tur_Latn","Twi":"twi_Latn","Central Atlas Tamazight":"tzm_Tfng","Uyghur":"uig_Arab","Ukrainian":"ukr_Cyrl","Umbundu":"umb_Latn","Urdu":"urd_Arab","Northern Uzbek":"uzn_Latn","Venetian":"vec_Latn","Vietnamese":"vie_Latn","Waray":"war_Latn","Wolof":"wol_Latn","Xhosa":"xho_Latn","Eastern Yiddish":"ydd_Hebr","Yoruba":"yor_Latn","Yue Chinese":"yue_Hant","Chinese (Simplified)":"zho_Hans","Chinese (Traditional)":"zho_Hant","Standard Malay":"zsm_Latn","Zulu":"zul_Latn"};
+  const allowedModelTypes = ["summarization","question-answering","translation"];
+  const defaultLanguages = ["Acehnese (Arabic script)","Acehnese (Latin script)","Mesopotamian Arabic","Taâ€™izzi-Adeni Arabic","Tunisian Arabic","Afrikaans","South Levantine Arabic","Akan","Amharic","North Levantine Arabic","Modern Standard Arabic","Modern Standard Arabic (Romanized)","Najdi Arabic","Moroccan Arabic","Egyptian Arabic","Assamese","Asturian","Awadhi","Central Aymara","South Azerbaijani","North Azerbaijani","Bashkir","Bambara","Balinese","Belarusian","Bemba","Bengali","Bhojpuri","Banjar (Arabic script)","Banjar (Latin script)","Standard Tibetan","Bosnian","Buginese","Bulgarian","Catalan","Cebuano","Czech","Chokwe","Central Kurdish","Crimean Tatar","Welsh","Danish","German","Southwestern Dinka","Dyula","Dzongkha","Greek","English","Esperanto","Estonian","Basque","Ewe","Faroese","Fijian","Finnish","Fon","French","Friulian","Nigerian Fulfulde","Scottish Gaelic","Irish","Galician","Guarani","Gujarati","Haitian Creole","Hausa","Hebrew","Hindi","Chhattisgarhi","Croatian","Hungarian","Armenian","Igbo","Ilocano","Indonesian","Icelandic","Italian","Javanese","Japanese","Kabyle","Jingpho","Kamba","Kannada","Kashmiri (Arabic script)","Kashmiri (Devanagari script)","Georgian","Central Kanuri (Arabic script)","Central Kanuri (Latin script)","Kazakh","KabiyÃ¨","Kabuverdianu","Khmer","Kikuyu","Kinyarwanda","Kyrgyz","Kimbundu","Northern Kurdish","Kikongo","Korean","Lao","Ligurian","Limburgish","Lingala","Lithuanian","Lombard","Latgalian","Luxembourgish","Luba-Kasai","Ganda","Luo","Mizo","Standard Latvian","Magahi","Maithili","Malayalam","Marathi","Minangkabau (Arabic script)","Minangkabau (Latin script)","Macedonian","Plateau Malagasy","Maltese","Meitei (Bengali script)","Halh Mongolian","Mossi","Maori","Burmese","Dutch","Norwegian Nynorsk","Norwegian BokmÃ¥l","Nepali","Northern Sotho","Nuer","Nyanja","Occitan","West Central Oromo","Odia","Pangasinan","Eastern Panjabi","Papiamento","Western Persian","Polish","Portuguese","Dari","Southern Pashto","Ayacucho Quechua","Romanian","Rundi","Russian","Sango","Sanskrit","Santali","Sicilian","Shan","Sinhala","Slovak","Slovenian","Samoan","Shona","Sindhi","Somali","Southern Sotho","Spanish","Tosk Albanian","Sardinian","Serbian","Swati","Sundanese","Swedish","Swahili","Silesian","Tamil","Tatar","Telugu","Tajik","Tagalog","Thai","Tigrinya","Tamasheq (Latin script)","Tamasheq (Tifinagh script)","Tok Pisin","Tswana","Tsonga","Turkmen","Tumbuka","Turkish","Twi","Central Atlas Tamazight","Uyghur","Ukrainian","Umbundu","Urdu","Northern Uzbek","Venetian","Vietnamese","Waray","Wolof","Xhosa","Eastern Yiddish","Yoruba","Yue Chinese","Chinese (Simplified)","Chinese (Traditional)","Standard Malay","Zulu"];
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -14,6 +16,9 @@ function ModelTesting() {
 
   // Variable to store most recent benchmarking data.
   const [benchmarkData, setBenchmarkData] = createSignal([]);
+
+  const [processor, setProcessor] = createSignal("wasm");
+  setProcessor("wasm");
 
   const addModel = async (event) => {
     const files = [...event.target.files];
@@ -23,7 +28,6 @@ function ModelTesting() {
       return;
     }
 
-    const modelName = files[0].webkitRelativePath.split("/")[0];
     const configFile = files.find(file => file.name == "browser_config.json");
     
     if (!configFile) {
@@ -35,6 +39,12 @@ function ModelTesting() {
     let fileText = await configFile.text();
     fileText = JSON.parse(fileText);
 
+    // Check if model type is supported for benchmarking
+    if (!allowedModelTypes.find((element) => element == fileText.task)) {
+      alert("Model type '" + fileText.task + "' not supported for benchmarking");
+      return;
+    }
+
     // Create model JSON to store model.
     const model = {
       name: fileText.modelName,
@@ -43,10 +53,10 @@ function ModelTesting() {
       languages: fileText.languages,
     };
 
-    console.log(fileText);
-
     setSelectedModels([...selectedModels(), model]);
-    console.log(selectedModels())
+
+    // Reset the input incase the model is removed and needs to be re-added.
+    event.target.value = "";
   }
 
   const benchmarkModels = async () => {
@@ -77,6 +87,7 @@ function ModelTesting() {
     let totalTime;
 
     document.getElementById("modelInput").disabled = true;
+    document.getElementById("modelInputLabel").setAttribute("disabled","disabled");
     document.getElementById("benchmarkButton").disabled = true;
     document.getElementById("clearButton").disabled = true;
 
@@ -85,14 +96,33 @@ function ModelTesting() {
       const model = modelList[i];
       const currentRow = table.rows[i+1];
 
+      table.rows[i].classList.remove(modelTestingStyles.currentTableRow);
+      currentRow.classList.add(modelTestingStyles.currentTableRow);
+
       let generator;
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading: 0/" + globalModelRunCount;
 
+      // reset browser cache to clear any previous models
+      caches.delete('transformers-cache');
+      let cache = await caches.open('transformers-cache');
+
       // Run the model multiple times based on the global model run count
       for (let j = 1; j < (globalModelRunCount + 1); j++) {
-        // reset browser cache to clear any previous models
-        caches.delete('transformers-cache');
-        let cache = await caches.open('transformers-cache');
+
+        if (generator) {
+
+          if (generator.session) {
+            await generator.session.release();
+          }
+
+          try {
+            await generator.dispose();
+          } catch (error) {
+            console.warn(error);
+          }
+          generator = null;
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
 
         startTime = performance.now();
 
@@ -126,7 +156,15 @@ function ModelTesting() {
           });
         };
     
-        generator = await pipeline(model.modelType, model.name);
+        // Create pipeline for the generator;
+        try {
+          generator = await pipeline(model.modelType, model.name, { device: processor() });
+        } catch (error) {
+          generator = null;
+          console.log(error);
+          continue;
+        }
+        
 
         endTime = performance.now();
 
@@ -150,6 +188,11 @@ function ModelTesting() {
       }
 
       let totalUploadTimes = benchmarkData()[model.name + "-Upload"];
+
+      if (generator == null) {
+        currentRow.cells[tableUploadTimeCol].innerText = "pipeline creation failed";
+        continue;
+      }
 
       // Get the average upload time by using the reduce pattern to sum and then divide by total amount.
       let avgUploadTime = totalUploadTimes.reduce((a, b) => a + b) / totalUploadTimes.length;
@@ -184,7 +227,16 @@ function ModelTesting() {
 
           // Benchmark the model.
           startTime = performance.now();
-          output = await generator(userInput, { max_new_tokens: 100});
+
+          // Generate model output
+          try {
+            output = await generator(userInput, { max_new_tokens: 100});
+          } catch (error) {
+            console.log(error);
+            output == null;
+            continue;
+          }
+          
           endTime = performance.now();
           output = output[0].summary_text;
 
@@ -206,19 +258,34 @@ function ModelTesting() {
 
           // Benchmark the model.
           startTime = performance.now();
-          output = await generator(context, question);
+
+          // Generate model output
+          try {
+            output = await generator(context, question);
+          } catch (error) {
+            console.log(error);
+            output == null;
+            continue;
+          }
+          
           endTime = performance.now();
           output = output.answer;
 
         } else if (model.modelType == "translation") {
 
-          // TODO: Implement fix to use language code associated with specific model.
-          console.log("Translation model implementation currently not working");
-          continue;
-
           const textArea = document.getElementById("translationTextArea");
-          const fromLanguageCode = document.getElementById("src_lang").value;
-          const toLanguageCode = document.getElementById("tgt_lang").value;
+          const fromLanguage = document.getElementById("src_lang").value;
+          const toLanguage = document.getElementById("tgt_lang").value;
+
+          // Get the language codes associated with the chosen languages.
+          let modelFromLanguageCode = model.languages[fromLanguage];
+          let modelToLanguageCode = model.languages[toLanguage];
+
+          if (!modelFromLanguageCode || !modelToLanguageCode) {
+            currentRow.cells[tableGenerationTimeCol].innerText = "N/A";
+            currentRow.cells[tableMessageCol].innerText = "Language/s Unavailable";
+            continue;
+          }
 
           // Get user input and languages, or use default.
           let userInput = textArea.value;
@@ -226,17 +293,18 @@ function ModelTesting() {
             userInput = textArea.placeholder;
           }
 
-          let availableLanguages = model.languages;
-
-          if (!Object.values(availableLanguages).includes(fromLanguageCode) || !Object.values(availableLanguages).includes(toLanguageCode)) {
-            currentRow.cells[tableGenerationTimeCol].innerText = "N/A";
-            currentRow.cells[tableMessageCol].innerText = "Language/s Unavailable";
-            continue;
-          }
-
           // Benchmark the model
           startTime = performance.now();
-          output = await generator(userInput, {src_lang: fromLanguageCode, tgt_lang: toLanguageCode});
+
+          // Generate model output
+          try {
+            output = await generator(userInput, {src_lang: modelFromLanguageCode, tgt_lang: modelToLanguageCode});
+          } catch (error) {
+            console.log(error);
+            output == null;
+            continue;
+          }
+          
           endTime = performance.now();
           output = output[0].translation_text;
         }
@@ -255,24 +323,35 @@ function ModelTesting() {
         timings[model.name + "-Generate"].push(totalTime);
         setBenchmarkData(timings);
 
-        currentRow.cells[tableGenerationTimeCol].innerText = "Uploading: " + j + "/" + globalModelRunCount;
+        currentRow.cells[tableGenerationTimeCol].innerText = "Generating: " + j + "/" + globalModelRunCount;
         await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
       }
 
       let totalGenerationTimes = benchmarkData()[model.name + "-Generate"];
 
-      // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
-      let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
+      if (totalGenerationTimes) {
+        // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
+        let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
 
-      totalTime = (avgGenerationTime).toFixed(2) + "s";
-      currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
-      currentRow.cells[tableGenerationTimeCol].title = totalGenerationTimes;
-      currentRow.cells[tableMessageCol].innerText = output;
+        totalTime = (avgGenerationTime).toFixed(2) + "s";
+        currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
+        currentRow.cells[tableGenerationTimeCol].title = totalGenerationTimes;
+        currentRow.cells[tableMessageCol].innerText = output;
+      } else {
+        currentRow.cells[tableGenerationTimeCol].innerText = "Model Generation Failed";
+      }
+      
+      currentRow.classList.remove(modelTestingStyles.currentTableRow);  
+
+      // Remove the pipeline to prevent any errors when switching to the next model.
+      generator.dispose();
 
       await new Promise(requestAnimationFrame);
     }
 
+    // Undisable the buttons
     document.getElementById("modelInput").disabled = false;
+    document.getElementById("modelInputLabel").removeAttribute("disabled");
     document.getElementById("benchmarkButton").disabled = false;
     document.getElementById("clearButton").disabled = false;
 
@@ -321,6 +400,65 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
+  const estimateDevicePerformance = () => {
+    // To get idea of device performance in case direct model performance comparison cannot be used.
+    // Can run a number of operations that are the rough equiavlent of a known models duration time.
+    // TODO: Add this after known model benchmarks have been determined.
+
+
+    // Summarisation Model Times.
+    // Estimate upload time
+    let startTime = performance.now();
+
+    for (let i = 0; i < 25000; i++) {
+      let sum = 0
+      for (let j = 0; j < 20000; j++) {
+        sum += Math.random() * Math.random();
+      }
+    }
+
+    let endTime = performance.now();
+    let totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+
+    console.log("Upload Time: " + totalTime);
+
+    // Estimate upload time performance
+    startTime = performance.now();
+
+    for (let i = 0; i < 40000; i++) {
+      let sum = 0
+      for (let j = 0; j < 34000; j++) {
+        sum += Math.random() * Math.random();
+      }
+    }
+
+    endTime = performance.now();
+    totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+
+    console.log("Generation Time: " + totalTime);
+  }
+
+  // Change the active processor.
+  const changeProcessor = (newProcessor) => {
+    if (processor() == newProcessor) return;
+
+    console.log("Switching to", newProcessor);
+    setProcessor(newProcessor);
+  };
+
+  onMount(async () => {
+    if (!navigator.gpu) return;
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter !== null) {
+        document.getElementById("GPUButton").disabled = false;
+        document.getElementById("GPUButton").title = "Swap to using GPU";
+      }
+    } catch {
+      console.warn("Error detecting GPU, defaulting to using CPU.");
+    }
+  });
+
   return (
     <>
       <div class={modelTestingStyles.modelTesting}>
@@ -329,13 +467,13 @@ function ModelTesting() {
 
         <div>
           {/* Select Model/s for benchmarking */}
+          <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
           <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
             Select Models
           </label>
-          <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
                       
-          <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels}>Benchmark</button>
-          <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels}>Clear Models</button>
+          <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1}>Benchmark</button>
+          <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1}>Clear Models</button>
         </div>
 
         <div>
@@ -350,7 +488,7 @@ function ModelTesting() {
             <li><button onClick={() => setSubMenuID(3)} class={subMenuID() == 3 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Translation</button></li>
           </ul>
 
-          {/* TODO: General Options Sub Menu */}
+          {/* General Options Sub Menu */}
           <div id="generalOptions" class={modelTestingStyles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 0 }}>
 
@@ -358,6 +496,26 @@ function ModelTesting() {
             <div class={modelTestingStyles.inputOption}>
               <label for="enableGlobalBenchmarkAmount">Run Models X number of times: </label>
               <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" />
+
+              <div id="processorSelector" class={modelTestingStyles.processSelector}>
+                <button 
+                  onClick={() => changeProcessor("wasm")}
+                  class={modelTestingStyles.inputButton + " " + `${processor() == "wasm" ? modelTestingStyles.processorButtonSelected : ""}`}
+                  id="CPUButton" title="Swap to using CPU"
+                >
+                  CPU
+                </button>
+                <button 
+                  onClick={() => changeProcessor("webgpu")}
+                  class={modelTestingStyles.inputButton + " " + `${processor() == "webgpu" ? modelTestingStyles.processorButtonSelected : ""}`}
+                  id="GPUButton" disabled title="No GPU Detected"
+                >
+                  GPU
+                </button>
+              </div>
+
+              <label for="enableShortlist">Recommend models</label>
+              <input type="checkbox" id="enableShortlist"/>
             </div>
             
           </div>
@@ -395,18 +553,18 @@ function ModelTesting() {
 
             <label for="src_lang">From: </label>
             <select name="src_lang" id="src_lang" class={modelTestingStyles.dropDownMenu}>
-              <option value="fra_Latn">Select Language</option>
-              <For each={Object.entries(defaultLanguages)}>{([lang, langCode]) =>
-                <option value={langCode}>{lang}</option>
+              <option value="French">Select Language</option>
+              <For each={defaultLanguages}>{(lang) =>
+                <option value={lang}>{lang}</option>
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
             <select name="tgt_lang" id="tgt_lang" class={modelTestingStyles.dropDownMenu}>
-              <option value="eng_Latn">Select Language</option>
-              <For each={Object.entries(defaultLanguages)}>{([lang, langCode]) =>
-                <option value={langCode}>{lang}</option>
+              <option value="English">Select Language</option>
+              <For each={defaultLanguages}>{(lang) =>
+                <option value={lang}>{lang}</option>
               }</For>
-          </select>
+            </select>
 
           </div>
         </div>
@@ -442,6 +600,30 @@ function ModelTesting() {
           </table>
         </div>
         <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
+
+        <div id="modelReccomendationFeature">
+          <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
+          
+          <label for="model_type_selector">Model Type: </label>
+          <select name="model_type_selector" id="model_type_selector" class={modelTestingStyles.dropDownMenu}>
+            <option>Select Model Type</option>
+            <For each={allowedModelTypes}>{(type) =>
+              <option value={type}>{type}</option>
+            }</For>
+          </select> 
+
+          <br /><br />
+
+          <label for="d">Average Upload Time: </label>
+          <input type="number" id="d" value="0" step={0.01} />
+          <br />
+          <label for="d">Average Generation Time: </label>
+          <input type="number" id="d" value="0" step={0.01} />
+
+          <p>OR:</p>
+
+          <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
+        </div>
       </div>
     </>
   );
