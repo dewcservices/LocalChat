@@ -198,8 +198,8 @@ function QuestionAnswer() {
             onChange={e => setModelName(e.currentTarget.value)}
           >
             <option value="">Select Model</option>
-            <For each={availableModels()}>{(modelName) => 
-              <option value={modelName}>{modelName}</option>
+            <For each={availableModels()}>{(model) => 
+              <option value={model}>{model}</option>
             }</For>
           </select>
           <label 
