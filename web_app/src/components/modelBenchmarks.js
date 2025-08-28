@@ -17,6 +17,7 @@ export const modelBenchmarks = {
     // upload_time: "average upload time in comparison to other models",
     // infer_time: "average inference time in comparison to other models",
     // quality: "",             // TODO: can use ROGUE to determine model quality of output, currently an estimated value is being used.
+
     summarization: [
         {
             name: "Xenova/bart-large-cnn",
@@ -103,11 +104,56 @@ export const modelBenchmarks = {
     ],
     question_awnsering: [
         {
-            name: "",
-            file_size: "",
-            upload_time: "",
-            infer_time: "",
-            quality: "",
+            name: "Xenova/distilbert-base-cased-distilled-squad",
+            file_size: 0.063,
+            upload_time: 1,
+            infer_time: 1,
+            quality: 0,
+        },{
+            name: "Xenova/distilbert-base-uncased-distilled-squad",
+            file_size: 0.064,
+            upload_time: 0.95,
+            infer_time: 1,
+            quality: 0.5,
+        },{
+            name: "Xenova/tomasmcm/intel-dynamic-tinybert-onnx",
+            file_size: 0.064,
+            upload_time: 1.15,
+            infer_time: 1.1,
+            quality: 0.5,
+        },{
+            name: "Xenova/jestevesv/distilbert-base-spanish-uncased-finetuned-qa-mlqa-onnx",
+            file_size: 0.064,
+            upload_time: 1.15,
+            infer_time: 1.5,
+            quality: 0,
+        },{
+            name: "Xenova/onnx-community/bert-multi-english-german-squad2-ONNX",
+            file_size: 0.172,
+            upload_time: 2.6,
+            infer_time: 2,
+            quality: 0,
+        },{
+            name: "Xenova/onnx-community/mdeberta-ru-qa-ONNX",
+            file_size: 0.302,
+            upload_time: 5.4,
+            infer_time: 8.7,
+            quality: 0,
+        },{
+            name: "Xenova/onnx-community/xdoc-base-squad2.0-ONNX",
+            file_size: 0.122,
+            upload_time: 2.1,
+            infer_time: 2.3,
+            quality: 0.5,
+        },{
+            name: "Xenova/onnx-community/xlm-roberta-base-squad2-distilled-ONNX",
+            file_size: 0.282,
+            upload_time: 5,
+            infer_time: 4,
+            quality: 0.5,
         }
     ]
 };
+
+
+
