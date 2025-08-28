@@ -404,6 +404,38 @@ function ModelTesting() {
     // To get idea of device performance in case direct model performance comparison cannot be used.
     // Can run a number of operations that are the rough equiavlent of a known models duration time.
     // TODO: Add this after known model benchmarks have been determined.
+
+
+    // Summarisation Model Times.
+    // Estimate upload time
+    let startTime = performance.now();
+
+    for (let i = 0; i < 25000; i++) {
+      let sum = 0
+      for (let j = 0; j < 20000; j++) {
+        sum += Math.random() * Math.random();
+      }
+    }
+
+    let endTime = performance.now();
+    let totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+
+    console.log("Upload Time: " + totalTime);
+
+    // Estimate upload time performance
+    startTime = performance.now();
+
+    for (let i = 0; i < 40000; i++) {
+      let sum = 0
+      for (let j = 0; j < 34000; j++) {
+        sum += Math.random() * Math.random();
+      }
+    }
+
+    endTime = performance.now();
+    totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+
+    console.log("Generation Time: " + totalTime);
   }
 
   // Change the active processor.
@@ -447,8 +479,6 @@ function ModelTesting() {
         <div>
           <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
         </div>
-
-        {/*<button onClick={() => test()}>Click me</button>*/}
 
         <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? modelTestingStyles.menuOpen : ""}`} id='advancedOptionsMenu'>
           <ul class={modelTestingStyles.optionMenuSubTabs}>
@@ -534,7 +564,7 @@ function ModelTesting() {
               <For each={defaultLanguages}>{(lang) =>
                 <option value={lang}>{lang}</option>
               }</For>
-          </select>
+            </select>
 
           </div>
         </div>
@@ -570,6 +600,30 @@ function ModelTesting() {
           </table>
         </div>
         <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
+
+        <div id="modelReccomendationFeature">
+          <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
+          
+          <label for="model_type_selector">Model Type: </label>
+          <select name="model_type_selector" id="model_type_selector" class={modelTestingStyles.dropDownMenu}>
+            <option>Select Model Type</option>
+            <For each={allowedModelTypes}>{(type) =>
+              <option value={type}>{type}</option>
+            }</For>
+          </select> 
+
+          <br /><br />
+
+          <label for="d">Average Upload Time: </label>
+          <input type="number" id="d" value="0" step={0.01} />
+          <br />
+          <label for="d">Average Generation Time: </label>
+          <input type="number" id="d" value="0" step={0.01} />
+
+          <p>OR:</p>
+
+          <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
+        </div>
       </div>
     </>
   );

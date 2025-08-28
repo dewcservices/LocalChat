@@ -20,11 +20,14 @@ export const modelBenchmarks = {
 
     summarization: [
         {
+            // Baseline model
             name: "Xenova/bart-large-cnn",
             file_size: 0.443,
             upload_time: 1,
             infer_time: 1,
             quality: 7,
+            estimate_upload_time_run_counts: [25000, 20000],
+            estimate_generate_time_run_counts: [40000, 34000],
         },{
             name: "Xenova/distilbart-cnn-6-6",
             file_size: 0.272,
@@ -104,6 +107,7 @@ export const modelBenchmarks = {
     ],
     question_awnsering: [
         {
+            // Baseline Model
             name: "Xenova/distilbert-base-cased-distilled-squad",
             file_size: 0.063,
             upload_time: 1,
