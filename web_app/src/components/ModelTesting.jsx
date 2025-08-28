@@ -323,21 +323,25 @@ function ModelTesting() {
         timings[model.name + "-Generate"].push(totalTime);
         setBenchmarkData(timings);
 
-        currentRow.cells[tableGenerationTimeCol].innerText = "Uploading: " + j + "/" + globalModelRunCount;
+        currentRow.cells[tableGenerationTimeCol].innerText = "Generating: " + j + "/" + globalModelRunCount;
         await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
       }
 
       let totalGenerationTimes = benchmarkData()[model.name + "-Generate"];
 
-      // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
-      let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
+      if (totalGenerationTimes) {
+        // Get the average generation time by using the reduce pattern to sum and then divide by total amount.
+        let avgGenerationTime = totalGenerationTimes.reduce((a, b) => a + b) / totalGenerationTimes.length;
 
-      totalTime = (avgGenerationTime).toFixed(2) + "s";
-      currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
-      currentRow.cells[tableGenerationTimeCol].title = totalGenerationTimes;
-      currentRow.cells[tableMessageCol].innerText = output;
-
-      currentRow.classList.remove(modelTestingStyles.currentTableRow);
+        totalTime = (avgGenerationTime).toFixed(2) + "s";
+        currentRow.cells[tableGenerationTimeCol].innerText = totalTime;
+        currentRow.cells[tableGenerationTimeCol].title = totalGenerationTimes;
+        currentRow.cells[tableMessageCol].innerText = output;
+      } else {
+        currentRow.cells[tableGenerationTimeCol].innerText = "Model Generation Failed";
+      }
+      
+      currentRow.classList.remove(modelTestingStyles.currentTableRow);  
 
       // Remove the pipeline to prevent any errors when switching to the next model.
       generator.dispose();
@@ -479,6 +483,9 @@ function ModelTesting() {
                   GPU
                 </button>
               </div>
+
+              <label for="enableShortlist">Recommend models</label>
+              <input type="checkbox" id="enableShortlist"/>
             </div>
             
           </div>
