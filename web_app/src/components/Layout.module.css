@@ -178,3 +178,24 @@
     background-color: var(--failure-colour);
     border-color: black;
 }
+
+.importButton {
+    background: var(--background-tertiary);
+    border: 1px solid var(--selected-button-colour);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.importButton:hover {
+    background-color: var(--selected-button-colour);
+    border-color: var(--highlight-colour);
+}
+
+.importButton:active {
+    background-color: var(--selected-button-colour);
+    transform: scale(0.95);
+}

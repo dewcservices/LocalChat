@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
-import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats } from "../utils/ChatHistory";
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats, importAllChats } from "../utils/ChatHistory";
 
 // icon imports for use in chat history
 import pencilIcon from '../assets/pencil.png';
@@ -51,14 +51,13 @@ function Layout(props) {
     }
   };
 
-  const deleteAllChats = () => {
-    if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
-    if (!confirm("Final confirmation: This will permanently delete all your chat data.")) return;
+const deleteAllChats = () => {
+  if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
 
-    deleteChatHistories();
-    navigate('/');
-    setChatHistories([]);
-  };
+  deleteChatHistories();
+  navigate('/');
+  setChatHistories([]);
+};
   
   // start renaming mode for a given chat
   const startRenaming = (chatId) => {
@@ -81,6 +80,20 @@ function Layout(props) {
     } catch (error) {
       console.error('Export failed:', error);
       alert('Export failed. Please check the console for details.');
+    }
+  };
+
+  // import chats from JSON
+  const handleImportChats = async () => {
+    try {
+      await importAllChats();
+      // Give user time to read the import summary, then auto-refresh
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // 2 second delay to read the message
+    } catch (error) {
+      console.error('Import failed:', error);
+      alert('Import failed. Please check the console for details.');
     }
   };
 
@@ -179,7 +192,21 @@ function Layout(props) {
               Export All Chats
             </button>
             
-            <button class={styles.deleteAllButton} onClick={deleteAllChats}>Delete All Chats</button>
+            <button 
+              class={styles.importButton} 
+              onClick={handleImportChats}
+              title="Import chat histories from JSON file"
+            >
+              Import Chats
+            </button>
+            
+            <button 
+              class={styles.deleteAllButton} 
+              onClick={deleteAllChats}
+              title="Delete all chat histories"
+            >
+              Delete All Chats
+            </button>
           </div>
           <br />
         </div>

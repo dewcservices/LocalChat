@@ -1,4 +1,4 @@
-import { createSignal, createEffect, useContext, onMount } from 'solid-js';
+import { createSignal, createEffect, useContext, onMount, For, Switch, Match } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 
 import styles from './Chat.module.css';
@@ -38,7 +38,10 @@ function Chat() {
     chatHistory().latestMessageDate = messageDate;
     setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 
-    chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
+    // Safe context access - only update if context is available
+    if (chatHistoriesContext?.setChatHistories) {
+      chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
+    }
 
     return messageDate;
   };
@@ -87,8 +90,10 @@ function Chat() {
     // Auto-update chat title after saving messages
     autoUpdateChatTitle(chatHistory().chatId);
     
-    // Update the chat histories context to reflect any title changes
-    chatHistoriesContext.setChatHistories(getChatHistories());
+    // Update the chat histories context to reflect any title changes - with safety check
+    if (chatHistoriesContext?.setChatHistories) {
+      chatHistoriesContext.setChatHistories(getChatHistories());
+    }
   });
 
   const changeProcessor = (newProcessor) => {
