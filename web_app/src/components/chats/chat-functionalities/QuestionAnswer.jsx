@@ -27,7 +27,7 @@ function QuestionAnswer() {
 
     document.getElementById("folderInput").disabled = true;
     document.getElementById("sendButton").disabled = true;
-    setAddModelBtnText("Cacheing Model");
+    setAddModelBtnText("Caching Model");
 
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];

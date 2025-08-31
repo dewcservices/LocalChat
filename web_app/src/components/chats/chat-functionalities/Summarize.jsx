@@ -30,7 +30,7 @@ function Summarize() {
     document.getElementById("folderInput").disabled = true;
     document.getElementById("sendButton").disabled = true;
 
-    setAddModelBtnText("Cacheing Model");
+    setAddModelBtnText("Caching Model");
 
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
@@ -42,7 +42,7 @@ function Summarize() {
       alert("Unsupported or Malformed Model.")
     }
     else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "summarization") {
-      alert("Must be a summarization model. browser_config.json states that the model is for a different task.");
+      alert("Must be a summarisation model. browser_config.json states that the model is for a different task.");
     }
     else {
       let model = await cacheModel(files);
@@ -87,7 +87,7 @@ function Summarize() {
   const summarizeTextInput = async () => {
 
     if (modelName() == "") {
-      alert("A model must be selected before summarizing text. Please select a model.");
+      alert("A model must be selected before summarising text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
@@ -101,7 +101,7 @@ function Summarize() {
 
     if (userMessage == "") return;
 
-    chatContext.addMessage("Summarize: " + userMessage, true);
+    chatContext.addMessage("Summarise: " + userMessage, true);
     inputTextArea.value = "";
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
@@ -118,7 +118,7 @@ function Summarize() {
   const summarizeFileInput = async () => {
 
     if (modelName() == "") {
-      alert("A model must be selected before summarizing text. Please select a model.");
+      alert("A model must be selected before summarising text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
@@ -153,7 +153,7 @@ function Summarize() {
       return;
     }
 
-    chatContext.addMessage("Summarize File: " + file.name, true);
+    chatContext.addMessage("Summarise File: " + file.name, true);
     chatContext.addFile(fileContent, file.name);
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
@@ -178,7 +178,7 @@ function Summarize() {
           <Match when={tab() === "text"}>
             <div class={styles.searchBarContainer}>
               <textarea id="inputTextArea" 
-                placeholder='Enter text to summarize here...'
+                placeholder='Enter text to summarise here...'
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -206,7 +206,7 @@ function Summarize() {
               onMouseEnter={() => setHoveredTab("file")}
               onMouseLeave={() => setHoveredTab(null)}
             >
-              Summarize File
+              Summarise File
             </button>
             <button 
               class={`${tab() === "text" ? styles.selectedTab : styles.tab} ${hoveredTab() === "text" ? styles.highlighted : ''}`}
@@ -214,7 +214,7 @@ function Summarize() {
               onMouseEnter={() => setHoveredTab("text")}
               onMouseLeave={() => setHoveredTab(null)}
             >
-              Summarize Text
+              Summarise Text
             </button>
           </div>
 

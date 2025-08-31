@@ -34,7 +34,7 @@ function Translation() {
 
     document.getElementById("folderInput").disabled = true;
     document.getElementById("sendButton").disabled = true;
-    setAddModelBtnText("Cacheing Model");
+    setAddModelBtnText("Caching Model");
 
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
@@ -112,7 +112,7 @@ function Translation() {
   const translateTextInput = async () => {
 
     if (modelName() === "") {
-      alert("A model must be selected before tranlating text. Please select a model.");
+      alert("A model must be selected before translating text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
@@ -154,7 +154,7 @@ function Translation() {
   const translateFileInput = async () => {
     
     if (modelName() === "") {
-      alert("A model must be selected before tranlating text. Please select a model.");
+      alert("A model must be selected before translating text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling

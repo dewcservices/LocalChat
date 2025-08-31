@@ -11,6 +11,7 @@ import trashIcon from '../assets/trash.png';
 import saveIcon from '../assets/save.png';
 import cancelIcon from '../assets/cancel.png';
 
+
 function Layout(props) {
   // TODO polish deletion of entire chat history
   //    - ui button is ugly, and needs to be clearer that the button is dangerous
