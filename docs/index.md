@@ -44,3 +44,5 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 - [2025/05/07 Update on Distribution Packaging](dist_packaging_2025-05-07.md)
 - [2025/05/15 Update on PDF Uploading and Rendering](pdf_upload_and_rendering.md)
 - [2025/05/28 Making a model Transformers.js Compatible](model_conversion.md)
+- [2025/08/28 Overview on Supported File Formats](overview_on_supported_file_types.md)
+- [2025/08/28 Update on PDF Parsing Capability and Process Overview](PDF_parsing_update.md)

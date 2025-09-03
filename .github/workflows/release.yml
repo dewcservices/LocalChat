@@ -6,7 +6,7 @@ on:
       - 'v*'   # e.g., v1.0.0
 
 permissions:
-  contents: write   # ✅ allow creating/updating releases
+  contents: write   # allow creating/updating releases
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build app
         working-directory: ./web_app
-        run: npm run build-local-chat linux
+        run: npm run build-local-chat
 
       - name: Create zip file
         run: |
