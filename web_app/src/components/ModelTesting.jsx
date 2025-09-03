@@ -406,6 +406,42 @@ function ModelTesting() {
     // TODO: Add this after known model benchmarks have been determined.
   }
 
+  const getModelTimes = (modelType, uploadTime, inferenceTime) => {
+    const originalModels = modelBenchmarks[modelType];
+
+    const updatedModels = originalModels.map(model => ({
+      ...model,
+      upload_time: model.upload_time * uploadTime,
+      infer_time: model.infer_time * inferenceTime,
+    }));
+
+    return updatedModels
+
+  }
+
+  const recommendModels = () => {
+    // Choose three best models based on devices performance.
+
+    //TODO; add option for estimated model types;
+
+    const benchmarkedModelType = document.getElementById("model_type_selector").value;
+    const benchmarkedModelUploadTime = document.getElementById("average_upload_time").value;
+    const benchmarkedModelGenerationTime = document.getElementById("average_generation_time").value;
+
+    if (benchmarkedModelType == "") {
+      console.log("No model type selected");
+      return;
+    } else if (benchmarkedModelUploadTime == 0 || benchmarkedModelGenerationTime == 0) {
+      console.log("Benchmarking time/s not provided");
+      return;
+    }
+
+    const models = getModelTimes(benchmarkedModelType, benchmarkedModelUploadTime, benchmarkedModelGenerationTime);
+
+    // TODO: Choose best models.
+
+  }
+
   // Change the active processor.
   const changeProcessor = (newProcessor) => {
     if (processor() == newProcessor) return;
@@ -576,7 +612,7 @@ function ModelTesting() {
           
           <label for="model_type_selector">Model Type: </label>
           <select name="model_type_selector" id="model_type_selector" class={modelTestingStyles.dropDownMenu}>
-            <option>Select Model Type</option>
+            <option value="">Select Model Type</option>
             <For each={allowedModelTypes}>{(type) =>
               <option value={type}>{type}</option>
             }</For>
@@ -588,11 +624,11 @@ function ModelTesting() {
 
             <div class={modelTestingStyles.reccomendationInputArea}>
               <div>
-                <label for="d">Average Upload Time: </label>
-                <input type="number" id="d" value="0" step={0.1} min={0}/>
+                <label for="average_upload_time">Average Upload Time: </label>
+                <input type="number" id="average_upload_time" value="0" step={0.1} min={0}/>
 
-                <label for="d">Average Generation Time: </label>
-                <input type="number" id="d" value="0" step={0.1} min={0}/>
+                <label for="average_generation_time">Average Generation Time: </label>
+                <input type="number" id="average_generation_time" value="0" step={0.1} min={0}/>
               </div>
             </div>
 
@@ -601,6 +637,8 @@ function ModelTesting() {
             </div>
 
           </div>
+          <br />
+          <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Reccomend Models</button>
         </div>
       </div>
     </>
