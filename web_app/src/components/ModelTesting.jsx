@@ -1,4 +1,4 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, For, onMount } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
@@ -16,6 +16,8 @@ function ModelTesting() {
 
   // Variable to store most recent benchmarking data.
   const [benchmarkData, setBenchmarkData] = createSignal([]);
+  
+  const [recommenedModels, setRecommendedModels] = createSignal([]);
 
   const [processor, setProcessor] = createSignal("wasm");
   setProcessor("wasm");
@@ -409,13 +411,20 @@ function ModelTesting() {
   const getModelTimes = (modelType, uploadTime, inferenceTime) => {
     const originalModels = modelBenchmarks[modelType];
 
-    const updatedModels = originalModels.map(model => ({
-      ...model,
-      upload_time: model.upload_time * uploadTime,
-      infer_time: model.infer_time * inferenceTime,
-    }));
+    const updatedModels = originalModels
+      .map(model => ({
+        ...model,
+        upload_time: model.upload_time * uploadTime,
+        infer_time: model.infer_time * inferenceTime,
+      }))
+      .sort((a,b) => {
+        if (a.quality !== b.quality) {
+          return b.quality - a.quality;
+        }
+        return a.infer_time - b.infer_time;
+      });
 
-    return updatedModels
+    return updatedModels;
 
   }
 
@@ -424,9 +433,9 @@ function ModelTesting() {
 
     //TODO; add option for estimated model types;
 
-    const benchmarkedModelType = document.getElementById("model_type_selector").value;
-    const benchmarkedModelUploadTime = document.getElementById("average_upload_time").value;
-    const benchmarkedModelGenerationTime = document.getElementById("average_generation_time").value;
+    const benchmarkedModelType = document.getElementById("modelTypeSelector").value;
+    const benchmarkedModelUploadTime = document.getElementById("averageUploadTime").value;
+    const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime").value;
 
     if (benchmarkedModelType == "") {
       console.log("No model type selected");
@@ -438,7 +447,22 @@ function ModelTesting() {
 
     const models = getModelTimes(benchmarkedModelType, benchmarkedModelUploadTime, benchmarkedModelGenerationTime);
 
-    // TODO: Choose best models.
+    console.log(models);
+
+    // Get models with closest performance to 5 seconds, 10 seconds, and 15 seconds.
+    const fiveSecondModel = models
+      .filter(model => model.infer_time <= 5)
+      .sort((a,b) => b.quality - a.quality)[0];
+
+    const tenSecondModel = models
+      .filter(model => model.infer_time <= 10)
+      .sort((a,b) => b.quality - a.quality)[0];
+
+    const fifteenSecondModel = models
+      .filter(model => model.infer_time <= 15)
+      .sort((a,b) => b.quality - a.quality)[0];
+
+    setRecommendedModels([...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null));
 
   }
 
@@ -610,8 +634,8 @@ function ModelTesting() {
         <div id="modelReccomendationFeature" class={modelTestingStyles.recommendationArea}>
           <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
           
-          <label for="model_type_selector">Model Type: </label>
-          <select name="model_type_selector" id="model_type_selector" class={modelTestingStyles.dropDownMenu}>
+          <label for="modelTypeSelector">Model Type: </label>
+          <select name="modelTypeSelector" id="modelTypeSelector" class={modelTestingStyles.dropDownMenu}>
             <option value="">Select Model Type</option>
             <For each={allowedModelTypes}>{(type) =>
               <option value={type}>{type}</option>
@@ -624,11 +648,11 @@ function ModelTesting() {
 
             <div class={modelTestingStyles.reccomendationInputArea}>
               <div>
-                <label for="average_upload_time">Average Upload Time: </label>
-                <input type="number" id="average_upload_time" value="0" step={0.1} min={0}/>
+                <label for="averageUploadTime">Average Upload Time: </label>
+                <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
 
-                <label for="average_generation_time">Average Generation Time: </label>
-                <input type="number" id="average_generation_time" value="0" step={0.1} min={0}/>
+                <label for="averageGenerationTime">Average Generation Time: </label>
+                <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
               </div>
             </div>
 
@@ -639,6 +663,33 @@ function ModelTesting() {
           </div>
           <br />
           <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Reccomend Models</button>
+          <br />
+
+        </div>
+        <div id="recommendedModelContainer" classList={{ hidden: recommenedModels().length == 0}}>
+          <p>These are a selection of recommended models based on your device:</p>
+          <table class={modelTestingStyles.tableMMLU}>
+            <thead>
+              <tr>
+                <th>Model Name</th>
+                <th>File Size</th>
+                <th>Predicted Upload Time</th>
+                <th>Predicted Generation Time</th>
+                <th>Output Quality Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={recommenedModels()}>{(model) =>
+                <tr>
+                  <td>{model.name}</td>
+                  <td>{model.file_size}</td>
+                  <td>{model.upload_time}</td>
+                  <td>{model.infer_time}</td>
+                  <td>{model.quality}</td>
+                </tr>
+              }</For>
+            </tbody>
+          </table>
         </div>
       </div>
     </>
