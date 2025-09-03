@@ -404,38 +404,6 @@ function ModelTesting() {
     // To get idea of device performance in case direct model performance comparison cannot be used.
     // Can run a number of operations that are the rough equiavlent of a known models duration time.
     // TODO: Add this after known model benchmarks have been determined.
-
-
-    // Summarisation Model Times.
-    // Estimate upload time
-    let startTime = performance.now();
-
-    for (let i = 0; i < 25000; i++) {
-      let sum = 0
-      for (let j = 0; j < 20000; j++) {
-        sum += Math.random() * Math.random();
-      }
-    }
-
-    let endTime = performance.now();
-    let totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
-
-    console.log("Upload Time: " + totalTime);
-
-    // Estimate upload time performance
-    startTime = performance.now();
-
-    for (let i = 0; i < 40000; i++) {
-      let sum = 0
-      for (let j = 0; j < 34000; j++) {
-        sum += Math.random() * Math.random();
-      }
-    }
-
-    endTime = performance.now();
-    totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
-
-    console.log("Generation Time: " + totalTime);
   }
 
   // Change the active processor.
@@ -480,7 +448,7 @@ function ModelTesting() {
           <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
         </div>
 
-        <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? modelTestingStyles.menuOpen : ""}`} id='advancedOptionsMenu'>
+        <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? "" : modelTestingStyles.menuClosed}`} id='advancedOptionsMenu'>
           <ul class={modelTestingStyles.optionMenuSubTabs}>
             <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>General</button></li>
             <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
@@ -520,7 +488,7 @@ function ModelTesting() {
             
           </div>
 
-          {/* Summarisatiion Sub Menu */}
+          {/* Summarisation Sub Menu */}
           <div id="summarisationOptions" class={modelTestingStyles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 1 }}>
 
@@ -601,7 +569,9 @@ function ModelTesting() {
         </div>
         <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
 
-        <div id="modelReccomendationFeature">
+        <br /><br /><br />
+
+        <div id="modelReccomendationFeature" class={modelTestingStyles.recommendationArea}>
           <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
           
           <label for="model_type_selector">Model Type: </label>
@@ -614,15 +584,23 @@ function ModelTesting() {
 
           <br /><br />
 
-          <label for="d">Average Upload Time: </label>
-          <input type="number" id="d" value="0" step={0.01} />
-          <br />
-          <label for="d">Average Generation Time: </label>
-          <input type="number" id="d" value="0" step={0.01} />
+          <div class={modelTestingStyles.reccomendationInputFields}>
 
-          <p>OR:</p>
+            <div class={modelTestingStyles.reccomendationInputArea}>
+              <div>
+                <label for="d">Average Upload Time: </label>
+                <input type="number" id="d" value="0" step={0.1} min={0}/>
 
-          <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
+                <label for="d">Average Generation Time: </label>
+                <input type="number" id="d" value="0" step={0.1} min={0}/>
+              </div>
+            </div>
+
+            <div class={modelTestingStyles.reccomendationInputArea}>
+              <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
+            </div>
+
+          </div>
         </div>
       </div>
     </>
