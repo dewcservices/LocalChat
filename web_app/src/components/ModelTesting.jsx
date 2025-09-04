@@ -3,6 +3,7 @@ import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
 import { modelBenchmarks } from './modelBenchmarks.js';
+import { classList } from 'solid-js/web';
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
@@ -433,19 +434,36 @@ function ModelTesting() {
 
     //TODO; add option for estimated model types;
 
-    const benchmarkedModelType = document.getElementById("modelTypeSelector").value;
-    const benchmarkedModelUploadTime = document.getElementById("averageUploadTime").value;
-    const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime").value;
+    const benchmarkedModelType = document.getElementById("modelTypeSelector");
+    const benchmarkedModelUploadTime = document.getElementById("averageUploadTime");
+    const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime");
 
-    if (benchmarkedModelType == "") {
-      console.log("No model type selected");
-      return;
-    } else if (benchmarkedModelUploadTime == 0 || benchmarkedModelGenerationTime == 0) {
-      console.log("Benchmarking time/s not provided");
-      return;
+    if (benchmarkedModelType.value == "") {
+      benchmarkedModelType.classList.add(modelTestingStyles.noInputSelectedPosible);
+      benchmarkedModelType.style.animation = "none";
+      benchmarkedModelType.offsetHeight;
+      benchmarkedModelType.style.animation = null;
+    };
+
+    if (benchmarkedModelUploadTime.value == 0) {
+      benchmarkedModelUploadTime.classList.add(modelTestingStyles.noInputSelectedPosible);
+      benchmarkedModelUploadTime.style.animation = "none";
+      benchmarkedModelUploadTime.offsetHeight;
+      benchmarkedModelUploadTime.style.animation = null;
     }
 
-    const models = getModelTimes(benchmarkedModelType, benchmarkedModelUploadTime, benchmarkedModelGenerationTime);
+    if (benchmarkedModelGenerationTime.value == 0) {
+      benchmarkedModelGenerationTime.classList.add(modelTestingStyles.noInputSelectedPosible);
+      benchmarkedModelGenerationTime.style.animation = "none";
+      benchmarkedModelGenerationTime.offsetHeight;
+      benchmarkedModelGenerationTime.style.animation = null;
+    }
+
+    if (benchmarkedModelType.value == "" || benchmarkedModelUploadTime.value == 0 || benchmarkedModelGenerationTime.value == 0) {
+      return;
+    } 
+
+    const models = getModelTimes(benchmarkedModelType.value, benchmarkedModelUploadTime.value, benchmarkedModelGenerationTime.value);
 
     console.log(models);
 
@@ -541,9 +559,6 @@ function ModelTesting() {
                   GPU
                 </button>
               </div>
-
-              <label for="enableShortlist">Recommend models</label>
-              <input type="checkbox" id="enableShortlist"/>
             </div>
             
           </div>
@@ -631,7 +646,7 @@ function ModelTesting() {
 
         <br /><br /><br />
 
-        <div id="modelReccomendationFeature" class={modelTestingStyles.recommendationArea}>
+        <div id="modelRecommendationFeature" class={modelTestingStyles.recommendationArea}>
           <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
           
           <label for="modelTypeSelector">Model Type: </label>
@@ -644,9 +659,9 @@ function ModelTesting() {
 
           <br /><br />
 
-          <div class={modelTestingStyles.reccomendationInputFields}>
+          <div class={modelTestingStyles.recommendationInputFields}>
 
-            <div class={modelTestingStyles.reccomendationInputArea}>
+            <div class={modelTestingStyles.recommendationInputArea}>
               <div>
                 <label for="averageUploadTime">Average Upload Time: </label>
                 <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
@@ -656,13 +671,13 @@ function ModelTesting() {
               </div>
             </div>
 
-            <div class={modelTestingStyles.reccomendationInputArea}>
+            <div class={modelTestingStyles.recommendationInputArea}>
               <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
             </div>
 
           </div>
           <br />
-          <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Reccomend Models</button>
+          <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Recommend Models</button>
           <br />
 
         </div>

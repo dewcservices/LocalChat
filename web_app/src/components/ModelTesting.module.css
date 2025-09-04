@@ -122,6 +122,7 @@
   width: 13em;
   overflow: hidden;
   border-radius: 3px;
+  cursor: pointer;
 }
 
 .inputOption {
@@ -164,12 +165,12 @@
     padding: 1em;
 }
 
-.reccomendationInputFields {
+.recommendationInputFields {
     display: flex;
     gap: 1em;
 }
 
-.reccomendationInputArea {
+.recommendationInputArea {
     width: 100%;
     border-radius: 5px;
     border: 1px solid black;
@@ -177,13 +178,30 @@
     padding: 1em;
 }
 
-.reccomendationInputArea div {
+.recommendationInputArea div {
     display: grid;
     grid-template-columns: 11em auto;
     gap: 0.5em;
     align-items: center;
 }
 
-.reccomendationInputArea input[type=number] {
+.recommendationInputArea input[type=number] {
     width: 10em;
+    border: 1px solid var(--button-border-colour);
+    border-radius: 2px;
+    color: var(--text-colour);
+    background-color: var(--background-secondary);
+}
+
+.noInputSelectedPosible {
+    animation: inputFailureFlash 1s ease-in-out;
+}
+
+@keyframes inputFailureFlash {
+    0%, 100% {
+        border-color: var(--button-border-colour);
+    }
+    5%, 50% {
+        border-color: var(--failure-colour);
+    }
 }
