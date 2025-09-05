@@ -105,7 +105,7 @@ export const modelBenchmarks = {
             quality: "",    // TODO: need to find method for checking quality of outputs for other model types.
         }
     ],
-    question_awnsering: [
+    "question-answering": [
         {
             // Baseline Model
             name: "Xenova/distilbert-base-cased-distilled-squad",

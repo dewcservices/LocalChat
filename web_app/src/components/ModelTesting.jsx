@@ -1,8 +1,9 @@
-import { createSignal, onMount } from 'solid-js';
+import { createSignal, For, onMount } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
 import { modelBenchmarks } from './modelBenchmarks.js';
+import { classList } from 'solid-js/web';
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
@@ -16,6 +17,8 @@ function ModelTesting() {
 
   // Variable to store most recent benchmarking data.
   const [benchmarkData, setBenchmarkData] = createSignal([]);
+  
+  const [recommenedModels, setRecommendedModels] = createSignal([]);
 
   const [processor, setProcessor] = createSignal("wasm");
   setProcessor("wasm");
@@ -404,38 +407,81 @@ function ModelTesting() {
     // To get idea of device performance in case direct model performance comparison cannot be used.
     // Can run a number of operations that are the rough equiavlent of a known models duration time.
     // TODO: Add this after known model benchmarks have been determined.
+  }
 
+  const getModelTimes = (modelType, uploadTime, inferenceTime) => {
+    const originalModels = modelBenchmarks[modelType];
 
-    // Summarisation Model Times.
-    // Estimate upload time
-    let startTime = performance.now();
+    const updatedModels = originalModels
+      .map(model => ({
+        ...model,
+        upload_time: model.upload_time * uploadTime,
+        infer_time: model.infer_time * inferenceTime,
+      }))
+      .sort((a,b) => {
+        if (a.quality !== b.quality) {
+          return b.quality - a.quality;
+        }
+        return a.infer_time - b.infer_time;
+      });
 
-    for (let i = 0; i < 25000; i++) {
-      let sum = 0
-      for (let j = 0; j < 20000; j++) {
-        sum += Math.random() * Math.random();
-      }
+    return updatedModels;
+
+  }
+
+  const recommendModels = () => {
+    // Choose three best models based on devices performance.
+
+    //TODO; add option for estimated model types;
+
+    const benchmarkedModelType = document.getElementById("modelTypeSelector");
+    const benchmarkedModelUploadTime = document.getElementById("averageUploadTime");
+    const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime");
+
+    if (benchmarkedModelType.value == "") {
+      benchmarkedModelType.classList.add(modelTestingStyles.noInputSelectedPosible);
+      benchmarkedModelType.style.animation = "none";
+      benchmarkedModelType.offsetHeight;
+      benchmarkedModelType.style.animation = null;
+    };
+
+    if (benchmarkedModelUploadTime.value == 0) {
+      benchmarkedModelUploadTime.classList.add(modelTestingStyles.noInputSelectedPosible);
+      benchmarkedModelUploadTime.style.animation = "none";
+      benchmarkedModelUploadTime.offsetHeight;
+      benchmarkedModelUploadTime.style.animation = null;
     }
 
-    let endTime = performance.now();
-    let totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
-
-    console.log("Upload Time: " + totalTime);
-
-    // Estimate upload time performance
-    startTime = performance.now();
-
-    for (let i = 0; i < 40000; i++) {
-      let sum = 0
-      for (let j = 0; j < 34000; j++) {
-        sum += Math.random() * Math.random();
-      }
+    if (benchmarkedModelGenerationTime.value == 0) {
+      benchmarkedModelGenerationTime.classList.add(modelTestingStyles.noInputSelectedPosible);
+      benchmarkedModelGenerationTime.style.animation = "none";
+      benchmarkedModelGenerationTime.offsetHeight;
+      benchmarkedModelGenerationTime.style.animation = null;
     }
 
-    endTime = performance.now();
-    totalTime = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+    if (benchmarkedModelType.value == "" || benchmarkedModelUploadTime.value == 0 || benchmarkedModelGenerationTime.value == 0) {
+      return;
+    } 
 
-    console.log("Generation Time: " + totalTime);
+    const models = getModelTimes(benchmarkedModelType.value, benchmarkedModelUploadTime.value, benchmarkedModelGenerationTime.value);
+
+    console.log(models);
+
+    // Get models with closest performance to 5 seconds, 10 seconds, and 15 seconds.
+    const fiveSecondModel = models
+      .filter(model => model.infer_time <= 5)
+      .sort((a,b) => b.quality - a.quality)[0];
+
+    const tenSecondModel = models
+      .filter(model => model.infer_time <= 10)
+      .sort((a,b) => b.quality - a.quality)[0];
+
+    const fifteenSecondModel = models
+      .filter(model => model.infer_time <= 15)
+      .sort((a,b) => b.quality - a.quality)[0];
+
+    setRecommendedModels([...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null));
+
   }
 
   // Change the active processor.
@@ -480,7 +526,7 @@ function ModelTesting() {
           <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
         </div>
 
-        <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? modelTestingStyles.menuOpen : ""}`} id='advancedOptionsMenu'>
+        <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? "" : modelTestingStyles.menuClosed}`} id='advancedOptionsMenu'>
           <ul class={modelTestingStyles.optionMenuSubTabs}>
             <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>General</button></li>
             <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
@@ -513,14 +559,11 @@ function ModelTesting() {
                   GPU
                 </button>
               </div>
-
-              <label for="enableShortlist">Recommend models</label>
-              <input type="checkbox" id="enableShortlist"/>
             </div>
             
           </div>
 
-          {/* Summarisatiion Sub Menu */}
+          {/* Summarisation Sub Menu */}
           <div id="summarisationOptions" class={modelTestingStyles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 1 }}>
 
@@ -601,12 +644,14 @@ function ModelTesting() {
         </div>
         <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
 
-        <div id="modelReccomendationFeature">
+        <br /><br /><br />
+
+        <div id="modelRecommendationFeature" class={modelTestingStyles.recommendationArea}>
           <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
           
-          <label for="model_type_selector">Model Type: </label>
-          <select name="model_type_selector" id="model_type_selector" class={modelTestingStyles.dropDownMenu}>
-            <option>Select Model Type</option>
+          <label for="modelTypeSelector">Model Type: </label>
+          <select name="modelTypeSelector" id="modelTypeSelector" class={modelTestingStyles.dropDownMenu}>
+            <option value="">Select Model Type</option>
             <For each={allowedModelTypes}>{(type) =>
               <option value={type}>{type}</option>
             }</For>
@@ -614,15 +659,52 @@ function ModelTesting() {
 
           <br /><br />
 
-          <label for="d">Average Upload Time: </label>
-          <input type="number" id="d" value="0" step={0.01} />
+          <div class={modelTestingStyles.recommendationInputFields}>
+
+            <div class={modelTestingStyles.recommendationInputArea}>
+              <div>
+                <label for="averageUploadTime">Average Upload Time: </label>
+                <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
+
+                <label for="averageGenerationTime">Average Generation Time: </label>
+                <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
+              </div>
+            </div>
+
+            <div class={modelTestingStyles.recommendationInputArea}>
+              <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
+            </div>
+
+          </div>
           <br />
-          <label for="d">Average Generation Time: </label>
-          <input type="number" id="d" value="0" step={0.01} />
+          <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Recommend Models</button>
+          <br />
 
-          <p>OR:</p>
-
-          <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
+        </div>
+        <div id="recommendedModelContainer" classList={{ hidden: recommenedModels().length == 0}}>
+          <p>These are a selection of recommended models based on your device:</p>
+          <table class={modelTestingStyles.tableMMLU}>
+            <thead>
+              <tr>
+                <th>Model Name</th>
+                <th>File Size</th>
+                <th>Predicted Upload Time</th>
+                <th>Predicted Generation Time</th>
+                <th>Output Quality Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={recommenedModels()}>{(model) =>
+                <tr>
+                  <td>{model.name}</td>
+                  <td>{model.file_size}</td>
+                  <td>{model.upload_time}</td>
+                  <td>{model.infer_time}</td>
+                  <td>{model.quality}</td>
+                </tr>
+              }</For>
+            </tbody>
+          </table>
         </div>
       </div>
     </>
