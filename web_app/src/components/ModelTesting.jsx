@@ -403,12 +403,6 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
-  const estimateDevicePerformance = () => {
-    // To get idea of device performance in case direct model performance comparison cannot be used.
-    // Can run a number of operations that are the rough equiavlent of a known models duration time.
-    // TODO: Add this after known model benchmarks have been determined.
-  }
-
   const getModelTimes = (modelType, uploadTime, inferenceTime) => {
     const originalModels = modelBenchmarks[modelType];
 
@@ -647,7 +641,7 @@ function ModelTesting() {
         <br /><br /><br />
 
         <div id="modelRecommendationFeature" class={modelTestingStyles.recommendationArea}>
-          <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
+          <p>This is for recommending models based on an estimate of your devices performance. Please enter the times it takes to run the baseline model on your device. The list of baseline models can be found <a title="TODO">TODO: Here</a>.</p>
           
           <label for="modelTypeSelector">Model Type: </label>
           <select name="modelTypeSelector" id="modelTypeSelector" class={modelTestingStyles.dropDownMenu}>
@@ -659,23 +653,16 @@ function ModelTesting() {
 
           <br /><br />
 
-          <div class={modelTestingStyles.recommendationInputFields}>
+          <div class={modelTestingStyles.recommendationInputArea}>
+            <div>
+              <label for="averageUploadTime">Average Upload Time: </label>
+              <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
 
-            <div class={modelTestingStyles.recommendationInputArea}>
-              <div>
-                <label for="averageUploadTime">Average Upload Time: </label>
-                <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
-
-                <label for="averageGenerationTime">Average Generation Time: </label>
-                <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
-              </div>
+              <label for="averageGenerationTime">Average Generation Time: </label>
+              <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
             </div>
-
-            <div class={modelTestingStyles.recommendationInputArea}>
-              <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
-            </div>
-
           </div>
+          
           <br />
           <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Recommend Models</button>
           <br />
