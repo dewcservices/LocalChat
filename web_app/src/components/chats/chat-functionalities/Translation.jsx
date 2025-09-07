@@ -1,26 +1,30 @@
-import { useContext, createSignal, onMount } from 'solid-js';
+import { useContext, createSignal, onMount, createEffect } from 'solid-js';
 import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
 
 import { ChatContext } from "../ChatContext";
 import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModel } from '../../../utils/ModelCache';
-import { A } from '@solidjs/router';
 
 
 function Translation() {
 
   const chatContext = useContext(ChatContext);
-  const [availableModels, setAvailableModels] = createSignal("");
   
   let translator;
-
+  const [modelName, setModelName] = createSignal("");
+  const [availableModels, setAvailableModels] = createSignal([], { equals: false });
+    // list of models that are already loaded into the cache
+  const [languages, setLanguages] = createSignal({});
+    // a dictionary of the the languages and their codes (e.g. {"English": "eng_Latn", ...}),
+    // provided by browser_config.json
+  const [srcLang, setSrcLang] = createSignal("");
+  const [tgtLang, setTgtLang] = createSignal("");
+  
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
 
-  // a dictionary of the the languages and their codes (e.g. {"English": "eng_Latn", ...}),
-  // provided by browser_config.json
-  const [languages, setLanguages] = createSignal({});
+  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model");
 
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('translation'));
@@ -30,11 +34,7 @@ function Translation() {
 
     document.getElementById("folderInput").disabled = true;
     document.getElementById("sendButton").disabled = true;
-
-    let modelUploadLabel = document.getElementById("modelInputLabel");
-    // modelUploadLabel.classList.add(styles.disabledLabel);  
-      // FIXME: at some point disabledLabel was removed from styles, however, this may require refactoring anyway
-    modelUploadLabel.innerText = "Cacheing Model";
+    setAddModelBtnText("Caching Model");
 
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
@@ -50,63 +50,69 @@ function Translation() {
       alert(`Must be a translation model. browser_config.json states that the model is for a different task.`);
     }
     else {
-      let modelName = await cacheModel(files);
+      let model = await cacheModel(files);
 
       let models = availableModels().slice();
-      models.push(modelName);
+      models.push(model);
+
       setAvailableModels(models);
+      setModelName(model);
     }
 
     document.getElementById("folderInput").disabled = false;
     document.getElementById("sendButton").disabled = false;
-    modelUploadLabel.innerText = "Add Model";
+    setAddModelBtnText("Add Model");
   };
 
-  const loadModel = async (event) => {
-    let modelName = event.target.value;
-
-    if (modelName == "") return;
+  // load model upon `processor` or `modelName` signal
+  createEffect(async () => {
+    if (modelName() == "") return;
 
     document.getElementById("folderInput").disabled = true;
     document.getElementById("sendButton").disabled = true;
-    let modelUploadLabel = document.getElementById("modelInputLabel");
     
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
-    modelUploadLabel.innerText = "Creating pipeline";
+    setAddModelBtnText("Creating pipeline");
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
-    translator = await pipeline('translation', modelName, { device: chatContext.processor() });
-    console.log("Finished model setup using", chatContext.processor());
+    try {
+      translator = await pipeline('translation', modelName(), { device: chatContext.processor() });
+      console.log("Finished model setup using", chatContext.processor());
 
-    { // load languages
-      let cache = await caches.open('transformers-cache');
-      let cacheKeys = await cache.keys();
-      let configKey = cacheKeys.filter(k => k.url.includes("browser_config.json") && k.url.includes(modelName))[0];
+      { // load languages
+        let cache = await caches.open('transformers-cache');
+        let cacheKeys = await cache.keys();
+        let configKey = cacheKeys.filter(k => k.url.includes("browser_config.json") && k.url.includes(modelName()))[0];
 
-      let response = await cache.match(configKey);
-      let array = await response.arrayBuffer();
-      let config = JSON.parse((new TextDecoder()).decode(array));
+        let response = await cache.match(configKey);
+        let array = await response.arrayBuffer();
+        let config = JSON.parse((new TextDecoder()).decode(array));
 
-      console.log(config.languages);
-      setLanguages(config.languages);
+        console.log(config.languages);
+        setLanguages(config.languages);
+      }
+    } catch (e) {
+      console.log(`Error loading translation model: ${e}`);
+      translator = null;
+      setLanguages({});
+      setModelName("");
+      alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
+    } finally {
+      setAddModelBtnText("Add Model");
+      document.getElementById("folderInput").disabled = false;
+      document.getElementById("sendButton").disabled = false;
     }
-
-    modelUploadLabel.innerText = "Add Model";
-    document.getElementById("folderInput").disabled = false;
-    document.getElementById("sendButton").disabled = false;
-  };
-
+  });
 
   const translateTextInput = async () => {
-    let selectedModel = document.getElementById("modelSelection").value;
 
-    if (selectedModel === "") {
-      alert("A model must be selected before tranlating text. Please select a model.");
+    if (modelName() === "") {
+      alert("A model must be selected before translating text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
@@ -120,33 +126,35 @@ function Translation() {
 
     if (userMessage == "") return;
 
-    let src_lang = document.getElementById('src_lang').value;
-    if (src_lang == "") {
+    if (srcLang() == "") {
       alert("Please select a language to translate from.")
       return;
     }
 
-    let tgt_lang = document.getElementById('tgt_lang').value;
-    if (tgt_lang == "") {
+    if (tgtLang() == "") {
       alert("Please select a language to translate to.");
       return;
     }
 
-    chatContext.addMessage(`Translate from ${src_lang} to ${tgt_lang}: "${userMessage}"`, true);
+    chatContext.addMessage(`Translate from ${srcLang()} to ${tgtLang()}: "${userMessage}"`, true);
     inputTextArea.value = "";
 
-    let messageDate = chatContext.addMessage("Generating Message", false, selectedModel);  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // force a re-render by yielding control back to browser
 
-    let output = await translator(userMessage, {src_lang: src_lang, tgt_lang: tgt_lang});
-    chatContext.updateMessage(messageDate, output[0].translation_text);  // update temp message to response
+    try {
+      let output = await translator(userMessage, {src_lang: srcLang(), tgt_lang: tgtLang()});
+      chatContext.updateMessage(messageDate, output[0].translation_text);
+    } catch (e) {
+      chatContext.updateMessage(messageDate, 'Error: failed to translate text. Please try again.');
+      console.log(`Error occurred translating text: ${e}.`);
+    }
   };
 
   const translateFileInput = async () => {
-    let selectedModel = document.getElementById("modelSelection").value;
     
-    if (selectedModel === "") {
-      alert("A model must be selected before tranlating text. Please select a model.");
+    if (modelName() === "") {
+      alert("A model must be selected before translating text. Please select a model.");
       return;
     }
     // TODO improve UX around model loading, promise handling, and error handling
@@ -155,14 +163,12 @@ function Translation() {
       return;
     }
 
-    let src_lang = document.getElementById('src_lang').value;
-    if (src_lang == "") {
+    if (srcLang() == "") {
       alert("Please select a language to translate from.")
       return;
     }
 
-    let tgt_lang = document.getElementById('tgt_lang').value;
-    if (tgt_lang == "") {
+    if (tgtLang() == "") {
       alert("Please select a language to translate to.");
       return;
     }
@@ -182,14 +188,19 @@ function Translation() {
       fileContent = await parseDocxFileAsync(file);
     }
 
-    chatContext.addMessage(`Translate File from ${src_lang} to ${tgt_lang}: ${file.name}`, true);
+    chatContext.addMessage(`Translate File from ${srcLang()} to ${tgtLang()}: ${file.name}`, true);
     chatContext.addFile(fileContent, file.name);
 
-    let messageDate = chatContext.addMessage("Generating Message", false, selectedModel);  // temporary message to indicate progress
+    let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // forces a re-render again by yielding control back to the browser
 
-    let output = await translator(fileContent, {src_lang: src_lang, tgt_lang: tgt_lang});
-    chatContext.updateMessage(messageDate, output[0].translation_text);  // update temp message to response
+    try {
+      let output = await translator(fileContent, {src_lang: srcLang(), tgt_lang: tgtLang()});
+      chatContext.updateMessage(messageDate, output[0].translation_text);
+    } catch (e) {
+      chatContext.updateMessage(messageDate, 'Error: failed to translate text. Please try again.');
+      console.log(`Error occurred translating text: ${e}.`);
+    }
   };
 
   return (
@@ -243,32 +254,46 @@ function Translation() {
           <div class={styles.controlsRight}>
             
             <label for="src_lang">From: </label>
-            <select name="src_lang" id="src_lang" class={styles.selection}>
+            <select 
+              name="src_lang" 
+              class={styles.selection}
+              value={srcLang()} 
+              onChange={e => setSrcLang(e.currentTarget.value)}
+            >
               <option value="">Select Language</option>
               <For each={Object.entries(languages())}>{([lang, langCode]) =>
                 <option value={langCode}>{lang}</option>
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
-            <select name="tgt_lang" id="tgt_lang" class={styles.selection} style="margin-right: 4vh;">
+            <select 
+              name="tgt_lang" 
+              class={styles.selection} 
+              style="margin-right: 4vh;"
+              value={tgtLang()} 
+              onChange={e => setTgtLang(e.currentTarget.value)}
+            >
               <option value="">Select Language</option>
               <For each={Object.entries(languages())}>{([lang, langCode]) =>
                 <option value={langCode}>{lang}</option>
               }</For>
             </select>
 
-            <select id="modelSelection" class={styles.selection} onChange={loadModel}>
+            <select 
+              class={styles.selection} 
+              value={modelName()} 
+              onChange={e => setModelName(e.currentTarget.value)}
+            >
               <option value="">Select Model</option>
-              <For each={availableModels()}>{(modelName) => 
-                <option value={modelName}>{modelName}</option>
+              <For each={availableModels()}>{(model) => 
+                <option value={model}>{model}</option>
               }</For>
             </select>
             <label 
               for="folderInput" 
-              id="modelInputLabel" 
               class={availableModels().length == 0 ? styles.noModels : styles.addModelButton}
             >
-              Add Model
+              {addModelBtnText()}
             </label>
             <input type="file" id="folderInput" class="hidden" webkitdirectory multiple onChange={addModel} />
 

@@ -1,21 +1,28 @@
 # What is LocalChat?
 
-LocalChat is an AI chatbot that can analyse, summarise, and answer questions given text-based documents as input.
+LocalChat is an AI chatbot that can analyse, summarise, translate, and answer questions given text-based documents as
+input.
 
-The app differentiates itself from other LLM services by running entirely locally within the user's web-browser. 
-The app does not make any requests over the local-network or the internet - ensuring that your data exists only within
-your local device.
+The app differentiates itself from other LLM services by running entirely locally within the user's web-browser.
+The app does make any requests over the local-network or the internet - ensuring that your data exists only 
+within your local device, and that the processing is sand-boxed and contained within the browser environment.
 
 Additionally, the app does not require any software dependencies to run, making it ideal for use cases where 
 confidentiality is of utmost importance.
 
 This project was started as a university student project in collaboration with DEWC Services.
 
-See the [LocalChat github repo](https://github.com/andrewtran3643/LocalChat) for the code & app.
+![LocalChat Translation Page](./figures/LocalChat-Translation.png)
 
-# What is the purpose of these GitHub Pages?
+For more information see the links below:
 
-These pages serve as a running blog to document the dev teams findings/progress throughout the project.
+- [LocalChat GitHub Repository](https://github.com/dewcservices/LocalChat)
+
+- [Release Information](release_information.md)
+
+# Developer Blogs
+
+The following pages serve as a running blog to document the dev teams findings/progress throughout the project.
 
 The blogs themselves vary between short miscellaneous findings, progress updates, design choices, and more. 
 
@@ -37,3 +44,5 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 - [2025/05/07 Update on Distribution Packaging](dist_packaging_2025-05-07.md)
 - [2025/05/15 Update on PDF Uploading and Rendering](pdf_upload_and_rendering.md)
 - [2025/05/28 Making a model Transformers.js Compatible](model_conversion.md)
+- [2025/08/28 Overview on Supported File Formats](overview_on_supported_file_types.md)
+- [2025/08/28 Update on PDF Parsing Capability and Process Overview](PDF_parsing_update.md)

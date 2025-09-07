@@ -1,10 +1,10 @@
-import { createSignal, createEffect, useContext, onMount } from 'solid-js';
+import { createSignal, createEffect, useContext, onMount, For, Switch, Match } from 'solid-js';
 import { useParams, useNavigate } from '@solidjs/router';
 
 import styles from './Chat.module.css';
 import { ChatContext } from './ChatContext';
 import { ChatHistoriesContext } from '../LayoutChatHistoriesContext';
-import { getChatHistory, saveMessages, saveFiles, getChatHistories } from '../../utils/ChatHistory';
+import { getChatHistory, saveMessages, saveFiles, getChatHistories, autoUpdateChatTitle } from '../../utils/ChatHistory';
 
 // Chat Functionalities
 import Summarize from './chat-functionalities/Summarize';
@@ -38,7 +38,10 @@ function Chat() {
     chatHistory().latestMessageDate = messageDate;
     setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 
-    chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
+    // update if context is available
+    if (chatHistoriesContext?.setChatHistories) {
+      chatHistoriesContext.setChatHistories(getChatHistories());  // update order of layout's chat histories list
+    }
 
     return messageDate;
   };
@@ -78,11 +81,19 @@ function Chat() {
     messages(); // reactive dependency
   });
 
-  // saves messages to local storage
+  // saves messages to local storage and auto-updates chat title
   createEffect(() => {
     if (messages().length <= 0) return;
     saveMessages(chatHistory().chatId, chatHistory().latestMessageDate, messages());
     saveFiles(chatHistory().chatId, files());
+    
+    // Auto-update chat title after saving messages
+    autoUpdateChatTitle(chatHistory().chatId);
+    
+    // Update the chat histories context to reflect any title changes - with safety check
+    if (chatHistoriesContext?.setChatHistories) {
+      chatHistoriesContext.setChatHistories(getChatHistories());
+    }
   });
 
   const changeProcessor = (newProcessor) => {

@@ -71,34 +71,43 @@ async function downloadFile(url, outputPath) {
 
 const args = process.argv.slice(2);
 
-let download_models = args[1] == "wm" ? false : true;
+let download_models = args[0] == "wm" ? false : true;
 
-let target_operating_system = args[0];
-let fileserver_exe_name = "";
-let go_build_command = "";
+// compile the fileservers
+if (os.platform() === "win32") { // compiling on a windows system
 
-// set the go_build_command depending on the current operating system
-if (os.platform().indexOf("win") != -1) {
-  // building on windows
-  go_build_command = `set GOOS=${target_operating_system}&& set GOARCH=amd64&& go build -C ..`;
+  // windows executable
+  let output = execSync(`set GOOS=windows&& set GOARCH=amd64&& go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
 
-} else if (os.platform().indexOf("linux") != -1) {
-  // building on linux
-  go_build_command = `GOOS=${target_operating_system} GOARCH=amd64 go build -C ..`;
+  // linux executable
+  output = execSync(`set GOOS=linux&& set GOARCH=amd64&& go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
 
-} else throw new Error(`Building on unsupported operating system: ${os.platform()}`);
+} else if (os.platform() === "linux") { // compiling on a linux system
 
-// set the executable name based on the target operating system
-if (target_operating_system === "windows") fileserver_exe_name = "fileserver.exe"
-else if (target_operating_system === "linux") fileserver_exe_name = "fileserver"
-else throw new Error(`${target_operating_system} is not a supported operating system build target.`);
+  // windows executable
+  let output = execSync(`GOOS=windows GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
 
-// compile the go fileserver
-let output = execSync(go_build_command, { encoding: "utf8" });
-console.log(output);
+  // linux executable
+  output = execSync(`GOOS=linux GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
+
+} else if (os.platform() === "darwin") { // compiling on a macOS system
+
+  // windows executable
+  let output = execSync(`GOOS=windows GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
+
+  // linux executable
+  output = execSync(`GOOS=linux GOARCH=amd64 go build -C ..`, { encoding: 'utf-8' });
+  console.log(output);
+
+} else throw new Error(`Cannot build on current operating system: ${os.platform()}`); 
 
 // bundle the web app
-output = execSync("npm run build", { encoding: "utf8" });
+let output = execSync("npm run build", { encoding: "utf8" });
 console.log(output);
 
 // create an empty dist directory
@@ -112,8 +121,9 @@ if (!existsSync("../dist")) {
 console.log("Dist folder created successfully.");
 
 // copy the necessary files/directories to the new dist folder
-copyFileSync(`../${fileserver_exe_name}`, `../dist/${fileserver_exe_name}`)
-console.log("Copied fileserver executable into dist successfully.")
+copyFileSync(`../fileserver.exe`, `../dist/fileserver.exe`);
+copyFileSync('../fileserver', '../dist/fileserver');
+console.log("Copied fileserver executables into dist successfully.")
 
 copyDirectory("./dist", "../dist")
 
@@ -149,7 +159,7 @@ let model_file_urls = [
     {
       modelName: "Xenova/distilbert-base-uncased-distilled-squad",
       path: "question_answer/Xenova/distilbert-base-uncased-distilled-squad",
-      task: "question_answer"
+      task: "question-answering"
     },
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/config.json", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/config.json"],
     ["https://huggingface.co/Xenova/distilbert-base-uncased-distilled-squad/resolve/main/onnx/model_quantized.onnx", "question_answer/Xenova/distilbert-base-uncased-distilled-squad/model_quantized.onnx"],
