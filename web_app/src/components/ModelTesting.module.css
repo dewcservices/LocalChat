@@ -180,7 +180,7 @@
     align-items: center;
 }
 
-.recommendationInputArea input[type=number] {
+input[type=number] {
     width: 100%;
     border: 1px solid var(--button-border-colour);
     border-radius: 2px;
