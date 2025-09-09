@@ -479,7 +479,22 @@ function ModelTesting() {
       .filter(model => model.infer_time <= 15)
       .sort((a,b) => b.quality - a.quality)[0];
 
-    setRecommendedModels([...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null));
+    let reccomendations = [...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null);
+
+    // Ensure that more than one model is reccomended.
+    if (reccomendations.length < 3) {
+      for (let model of models) {
+        
+        if (!reccomendations.includes(model)) {
+          reccomendations.push(model);
+        }
+        if (reccomendations.length >= 3) {
+          break;
+        }
+      }
+    }
+
+    setRecommendedModels(reccomendations);
 
   }
 
