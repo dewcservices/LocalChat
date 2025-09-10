@@ -9,7 +9,10 @@ function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
 
   const allowedModelTypes = ["summarization","question-answering","translation"];
-  const defaultLanguages = ["Acehnese (Arabic script)","Acehnese (Latin script)","Mesopotamian Arabic","Taâ€™izzi-Adeni Arabic","Tunisian Arabic","Afrikaans","South Levantine Arabic","Akan","Amharic","North Levantine Arabic","Modern Standard Arabic","Modern Standard Arabic (Romanized)","Najdi Arabic","Moroccan Arabic","Egyptian Arabic","Assamese","Asturian","Awadhi","Central Aymara","South Azerbaijani","North Azerbaijani","Bashkir","Bambara","Balinese","Belarusian","Bemba","Bengali","Bhojpuri","Banjar (Arabic script)","Banjar (Latin script)","Standard Tibetan","Bosnian","Buginese","Bulgarian","Catalan","Cebuano","Czech","Chokwe","Central Kurdish","Crimean Tatar","Welsh","Danish","German","Southwestern Dinka","Dyula","Dzongkha","Greek","English","Esperanto","Estonian","Basque","Ewe","Faroese","Fijian","Finnish","Fon","French","Friulian","Nigerian Fulfulde","Scottish Gaelic","Irish","Galician","Guarani","Gujarati","Haitian Creole","Hausa","Hebrew","Hindi","Chhattisgarhi","Croatian","Hungarian","Armenian","Igbo","Ilocano","Indonesian","Icelandic","Italian","Javanese","Japanese","Kabyle","Jingpho","Kamba","Kannada","Kashmiri (Arabic script)","Kashmiri (Devanagari script)","Georgian","Central Kanuri (Arabic script)","Central Kanuri (Latin script)","Kazakh","KabiyÃ¨","Kabuverdianu","Khmer","Kikuyu","Kinyarwanda","Kyrgyz","Kimbundu","Northern Kurdish","Kikongo","Korean","Lao","Ligurian","Limburgish","Lingala","Lithuanian","Lombard","Latgalian","Luxembourgish","Luba-Kasai","Ganda","Luo","Mizo","Standard Latvian","Magahi","Maithili","Malayalam","Marathi","Minangkabau (Arabic script)","Minangkabau (Latin script)","Macedonian","Plateau Malagasy","Maltese","Meitei (Bengali script)","Halh Mongolian","Mossi","Maori","Burmese","Dutch","Norwegian Nynorsk","Norwegian BokmÃ¥l","Nepali","Northern Sotho","Nuer","Nyanja","Occitan","West Central Oromo","Odia","Pangasinan","Eastern Panjabi","Papiamento","Western Persian","Polish","Portuguese","Dari","Southern Pashto","Ayacucho Quechua","Romanian","Rundi","Russian","Sango","Sanskrit","Santali","Sicilian","Shan","Sinhala","Slovak","Slovenian","Samoan","Shona","Sindhi","Somali","Southern Sotho","Spanish","Tosk Albanian","Sardinian","Serbian","Swati","Sundanese","Swedish","Swahili","Silesian","Tamil","Tatar","Telugu","Tajik","Tagalog","Thai","Tigrinya","Tamasheq (Latin script)","Tamasheq (Tifinagh script)","Tok Pisin","Tswana","Tsonga","Turkmen","Tumbuka","Turkish","Twi","Central Atlas Tamazight","Uyghur","Ukrainian","Umbundu","Urdu","Northern Uzbek","Venetian","Vietnamese","Waray","Wolof","Xhosa","Eastern Yiddish","Yoruba","Yue Chinese","Chinese (Simplified)","Chinese (Traditional)","Standard Malay","Zulu"];
+  
+  const defaultLanguages = ["English","French"];
+  const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
+  let currentLanguageOption = "unionLanguages";
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -60,6 +63,8 @@ function ModelTesting() {
 
     // Reset the input incase the model is removed and needs to be re-added.
     event.target.value = "";
+
+    adjustLanguageVisibility({ target: { id: currentLanguageOption } });
   }
 
   const benchmarkModels = async () => {
@@ -106,7 +111,7 @@ function ModelTesting() {
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading: 0/" + globalModelRunCount;
 
       // reset browser cache to clear any previous models
-      caches.delete('transformers-cache');
+      await caches.delete('transformers-cache');
       let cache = await caches.open('transformers-cache');
 
       // Run the model multiple times based on the global model run count
@@ -403,12 +408,6 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
-  const estimateDevicePerformance = () => {
-    // To get idea of device performance in case direct model performance comparison cannot be used.
-    // Can run a number of operations that are the rough equiavlent of a known models duration time.
-    // TODO: Add this after known model benchmarks have been determined.
-  }
-
   const getModelTimes = (modelType, uploadTime, inferenceTime) => {
     const originalModels = modelBenchmarks[modelType];
 
@@ -431,9 +430,6 @@ function ModelTesting() {
 
   const recommendModels = () => {
     // Choose three best models based on devices performance.
-
-    //TODO; add option for estimated model types;
-
     const benchmarkedModelType = document.getElementById("modelTypeSelector");
     const benchmarkedModelUploadTime = document.getElementById("averageUploadTime");
     const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime");
@@ -480,8 +476,69 @@ function ModelTesting() {
       .filter(model => model.infer_time <= 15)
       .sort((a,b) => b.quality - a.quality)[0];
 
-    setRecommendedModels([...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null));
+    let reccomendations = [...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null);
 
+    // Ensure that more than one model is reccomended.
+    if (reccomendations.length < 3) {
+      for (let model of models) {
+        
+        if (!reccomendations.includes(model)) {
+          reccomendations.push(model);
+        }
+        if (reccomendations.length >= 3) {
+          break;
+        }
+      }
+    }
+
+    setRecommendedModels(reccomendations);
+
+  }
+
+  const adjustLanguageVisibility = (e) => {
+    //console.log(e.target.id);
+    currentLanguageOption = e.target.id;
+
+    let languages = [...defaultLanguages];
+    if (e.target.id == "allLanguages") {
+      for (let i = 0; i < selectedModels().length; i++) {
+
+        if (selectedModels()[i].modelType != "translation") {
+          continue;
+        }
+
+        let modelLanguages = selectedModels()[i].languages;
+
+        for (const [key, value] of Object.entries(modelLanguages)) {
+          if (!languages.includes(key)) {
+            languages.push(key);
+          }
+        }
+      }
+
+    } else if (e.target.id == "unionLanguages") {
+      let firstModel = true;
+      for (let i = 0; i < selectedModels().length; i++) {
+
+        if (selectedModels()[i].modelType != "translation") {
+          continue;
+        }
+
+        let modelLanguages = selectedModels()[i].languages;
+
+        if (firstModel) {
+          languages = Object.keys(modelLanguages);
+          firstModel = false;
+        } else {
+          languages = languages.filter(language => Object.keys(modelLanguages).includes(language));
+        }
+      }
+    }
+ 
+    languages.sort();
+
+    setShownLanguages(languages);
+    //console.log(shownLanguages());
   }
 
   // Change the active processor.
@@ -589,26 +646,32 @@ function ModelTesting() {
           <div id="translationOptions" class={modelTestingStyles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 3 }}>
             <h3>Translation input field and language selection. Ignore to use default input and languages.</h3>
-            <h5>Please Note: Not all models will have the same languages available for translation. If selected languages are not available, no translation will be conducted.</h5>
             <textarea id="translationTextArea" class={modelTestingStyles.inputArea}
             placeholder="Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles."/>
-            
-
+                      
             <label for="src_lang">From: </label>
             <select name="src_lang" id="src_lang" class={modelTestingStyles.dropDownMenu}>
               <option value="French">Select Language</option>
-              <For each={defaultLanguages}>{(lang) =>
+              <For each={shownLanguages()}>{(lang) =>
                 <option value={lang}>{lang}</option>
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
             <select name="tgt_lang" id="tgt_lang" class={modelTestingStyles.dropDownMenu}>
               <option value="English">Select Language</option>
-              <For each={defaultLanguages}>{(lang) =>
+              <For each={shownLanguages()}>{(lang) =>
                 <option value={lang}>{lang}</option>
               }</For>
             </select>
 
+            <div>
+              <p>The options below determine whether the language selection boxes will show languages that all uploaded models have in common, or all models. If the former is selected, some models will fail to benchmark.</p>
+              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={adjustLanguageVisibility} checked />
+              <label for="unionLanguages">Only show common languages.</label>
+              <br />
+              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={adjustLanguageVisibility} />
+              <label for="allLanguages">Show all languages.</label>
+            </div>
           </div>
         </div>
 
@@ -647,7 +710,7 @@ function ModelTesting() {
         <br /><br /><br />
 
         <div id="modelRecommendationFeature" class={modelTestingStyles.recommendationArea}>
-          <p>This is for recommending models based on an estimate of your devices performance. Please either enter the times it takes to run the baseline model on your device, or click the button to roughly simulate the chosen baseline model type. The list of baseline models can be found <a title="TODO">Here</a>.</p>
+          <p>This is for recommending models based on an estimate of your devices performance. Please enter the times it takes to run the baseline model on your device. The list of baseline models can be found <a title="TODO">TODO: Here</a>.</p>
           
           <label for="modelTypeSelector">Model Type: </label>
           <select name="modelTypeSelector" id="modelTypeSelector" class={modelTestingStyles.dropDownMenu}>
@@ -659,23 +722,16 @@ function ModelTesting() {
 
           <br /><br />
 
-          <div class={modelTestingStyles.recommendationInputFields}>
+          <div class={modelTestingStyles.recommendationInputArea}>
+            <div>
+              <label for="averageUploadTime">Average Upload Time: </label>
+              <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
 
-            <div class={modelTestingStyles.recommendationInputArea}>
-              <div>
-                <label for="averageUploadTime">Average Upload Time: </label>
-                <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
-
-                <label for="averageGenerationTime">Average Generation Time: </label>
-                <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
-              </div>
+              <label for="averageGenerationTime">Average Generation Time: </label>
+              <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
             </div>
-
-            <div class={modelTestingStyles.recommendationInputArea}>
-              <button class={modelTestingStyles.inputButton} onClick={() => estimateDevicePerformance()}>Estimate Model Performance</button>
-            </div>
-
           </div>
+          
           <br />
           <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Recommend Models</button>
           <br />

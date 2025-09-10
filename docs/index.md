@@ -46,3 +46,4 @@ The blogs themselves vary between short miscellaneous findings, progress updates
 - [2025/05/28 Making a model Transformers.js Compatible](model_conversion.md)
 - [2025/08/28 Overview on Supported File Formats](overview_on_supported_file_types.md)
 - [2025/08/28 Update on PDF Parsing Capability and Process Overview](PDF_parsing_update.md)
+- [2025/09/06 Review of Model Performance Estimation Method](model_estimation_review.md)
