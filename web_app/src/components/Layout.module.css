@@ -59,22 +59,23 @@
 
 .chatName {
     flex: 1;
-    max-width: 150px;
+    max-width: 200px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     display: inline-block;
-    color: var(--text-colour); /* Ensure proper text color */
+    color: #add8e6;
+    text-align: left;
 }
 
 .chatHistoryContainer.active {
-    background-color: var(--selected-button-colour);
+    background-color: var(--selected-button-color);
     border: 1px solid lightgrey;
 }
 
-/* When both active and hovered */
+/* when both active and hovered */
 .chatHistoryContainer.active.highlighted {
-    background-color: var(--active-colour);
+    background-color: var(--active-color);
     border: 1px solid lightgrey;
 }
 
