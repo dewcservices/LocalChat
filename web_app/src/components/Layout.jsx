@@ -117,6 +117,7 @@ const deleteAllChats = () => {
                 <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${params.id === chat.chatId ? styles.active : ''}`}
                   onMouseEnter={() => setHoveredChatId(chat.chatId)}
                   onMouseLeave={() => setHoveredChatId(null)}
+                  onClick={(event) => handleChatClick(chat.chatId, event)}
                 >
                   <Show
                     when={renamingId() === chat.chatId}
