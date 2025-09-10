@@ -430,9 +430,6 @@ function ModelTesting() {
 
   const recommendModels = () => {
     // Choose three best models based on devices performance.
-
-    //TODO; add option for estimated model types;
-
     const benchmarkedModelType = document.getElementById("modelTypeSelector");
     const benchmarkedModelUploadTime = document.getElementById("averageUploadTime");
     const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime");
@@ -499,7 +496,8 @@ function ModelTesting() {
   }
 
   const adjustLanguageVisibility = (e) => {
-    console.log(e.target.id);
+    //console.log(e.target.id);
+    currentLanguageOption = e.target.id;
 
     let languages = [...defaultLanguages];
     if (e.target.id == "allLanguages") {
@@ -540,7 +538,7 @@ function ModelTesting() {
     languages.sort();
 
     setShownLanguages(languages);
-    console.log(shownLanguages());
+    //console.log(shownLanguages());
   }
 
   // Change the active processor.
