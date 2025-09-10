@@ -64,18 +64,18 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     display: inline-block;
-    color: #add8e6;
+    color: var(--highlight-colour);
     text-align: left;
 }
 
 .chatHistoryContainer.active {
-    background-color: var(--selected-button-color);
+    background-color: var(--selected-button-colour);
     border: 1px solid lightgrey;
 }
 
 /* when both active and hovered */
 .chatHistoryContainer.active.highlighted {
-    background-color: var(--active-color);
+    background-color: var(--active-colour);
     border: 1px solid lightgrey;
 }
 
