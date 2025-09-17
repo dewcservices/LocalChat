@@ -14,6 +14,8 @@ function ModelTesting() {
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
 
+ const [defaultRecommendationTypeID, setDefaultRecommendationType] = createSignal(0);
+
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
   setSubMenuID(0);
@@ -29,6 +31,7 @@ function ModelTesting() {
   const addModel = async (event) => {
     const files = [...event.target.files];
 
+    console.log(files);
     // No file added
     if (files.length == 0) {
       return;
@@ -761,6 +764,47 @@ function ModelTesting() {
               }</For>
             </tbody>
           </table>
+        </div>
+      </div>
+      <div class={modelTestingStyles.modelTesting}>
+        <h2>Model Recommendations</h2>
+
+        <div>
+          <ul class={modelTestingStyles.optionMenuSubTabs}>
+            <li><button onClick={() => setDefaultRecommendationType(0)} class={defaultRecommendationTypeID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
+            <li><button onClick={() => setDefaultRecommendationType(1)} class={defaultRecommendationTypeID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
+            <li><button onClick={() => setDefaultRecommendationType(2)} class={defaultRecommendationTypeID() == 2 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Translation</button></li>
+          </ul>
+
+          {/* Summasization Menu */}
+          <div id="defaultSummarizationTable" class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationTypeID() !== 0 }}>
+            <table class={modelTestingStyles.tableMMLU} > 
+              <thead>
+                <tr>
+                  <th>Model Information</th>
+                  <th>Output Quality</th>
+                  <th>File Size</th>
+                  <th>Runtime<br/>Device 1</th>
+                  <th>Runtime<br/>Device 2</th>
+                  <th>Runtime<br/>Device 3</th>
+                </tr>
+              </thead>
+              <tbody>
+                <For each={modelBenchmarks["summarization"]}>{(model) =>
+                  <tr>
+                    <td>
+                      <b>{model.name}</b><br/>
+                      <span>One line about model</span></td>
+                    <td>{model.quality} / 10</td>
+                    <td>{model.file_size} GB</td> 
+                    <td>Need to</td>
+                    <td>Add actual</td>
+                    <td>Data here</td>
+                  </tr>
+                }</For>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </>

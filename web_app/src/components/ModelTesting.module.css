@@ -25,16 +25,21 @@
 }
   
 .tableMMLU {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     table-layout: auto;
     width: 100%;
-    overflow: hidden;
 }
 
 .tableMMLU th, .tableMMLU td {
     border: 1px solid black;
+    background-color: var(--background-primary);
     text-align: center;
     min-width: 10em;
+}
+
+.tableMMLU tbody tr:first-of-type td {
+    border-top-width: 0 !important;
 }
 
 .currentTableRow {
@@ -86,6 +91,9 @@
     padding: 0;
     overflow: hidden;
     background-color: #333;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    width: fit-content;
 }
 
 .optionMenuSubTabs li {
@@ -97,7 +105,14 @@
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
-    border-radius: 5px;
+}
+
+.optionMenuSubTabs li:first-of-type button {
+    border-top-left-radius: 5px;
+}
+
+.optionMenuSubTabs li:last-child button {
+    border-top-right-radius: 5px;
 }
 
 .selectedOptionMenuSubTab {
@@ -199,4 +214,16 @@ input[type=number] {
     5%, 50% {
         border-color: var(--failure-colour);
     }
+}
+
+.defaultRecommendationMenu {
+    max-height: 35vh;
+    overflow-y: auto;
+}
+
+.defaultRecommendationMenu table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 3px solid black;
 }
