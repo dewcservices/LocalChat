@@ -14,7 +14,9 @@ function ModelTesting() {
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
 
- const [defaultRecommendationTypeID, setDefaultRecommendationType] = createSignal(0);
+  const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
+  const [sortedDefaultModels, setSortedDefaultModels] = createSignal(modelBenchmarks);
+  const [sortingState, setSortingState] = createSignal({type:null,col:null,order:"desc"})
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -544,6 +546,33 @@ function ModelTesting() {
     //console.log(shownLanguages());
   }
 
+  const sortTable = (modelType, columnType) => {
+    setSortedDefaultModels(data => {
+
+      const newData = {...data};
+
+      // Toggle the sorting state if the current column was just sorted for the opposite type, otherwise default to descending.
+      let nextSortingState = "desc";
+      if (sortingState()["col"] == columnType) {
+        nextSortingState = sortingState()["order"] == "desc" ? "asc" : "desc";
+      }
+      setSortingState({type:modelType,col:columnType,order:nextSortingState});
+
+      if (columnType == "Name") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => {
+          if (a.name < b.name) {return nextSortingState == "desc" ? -1 : 1}
+          if (a.name > b.name) {return nextSortingState == "desc" ? 1 : -1}
+        });
+      } else if (columnType == "Quality") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.quality - a.quality : a.quality - b.quality);
+      } else if (columnType == "FileSize") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.file_size - a.file_size : a.file_size - b.file_size);
+      }
+
+      return newData;
+    })
+  }
+
   // Change the active processor.
   const changeProcessor = (newProcessor) => {
     if (processor() == newProcessor) return;
@@ -771,40 +800,44 @@ function ModelTesting() {
 
         <div>
           <ul class={modelTestingStyles.optionMenuSubTabs}>
-            <li><button onClick={() => setDefaultRecommendationType(0)} class={defaultRecommendationTypeID() == 0 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
-            <li><button onClick={() => setDefaultRecommendationType(1)} class={defaultRecommendationTypeID() == 1 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
-            <li><button onClick={() => setDefaultRecommendationType(2)} class={defaultRecommendationTypeID() == 2 ? modelTestingStyles.selectedOptionMenuSubTab : ""}>Translation</button></li>
+            <For each={allowedModelTypes}>{(type) =>
+              <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
+            }</For>
           </ul>
 
-          {/* Summasization Menu */}
-          <div id="defaultSummarizationTable" class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationTypeID() !== 0 }}>
-            <table class={modelTestingStyles.tableMMLU} > 
-              <thead>
-                <tr>
-                  <th>Model Information</th>
-                  <th>Output Quality</th>
-                  <th>File Size</th>
-                  <th>Runtime<br/>Device 1</th>
-                  <th>Runtime<br/>Device 2</th>
-                  <th>Runtime<br/>Device 3</th>
-                </tr>
-              </thead>
-              <tbody>
-                <For each={modelBenchmarks["summarization"]}>{(model) =>
+          <For each={allowedModelTypes}>{(type) =>
+            <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
+              <table class={modelTestingStyles.tableMMLU}>
+                <colgroup>
+                  <col style="width: 20vw;" />
+                </colgroup>
+                <thead>
                   <tr>
-                    <td>
-                      <b>{model.name}</b><br/>
-                      <span>One line about model</span></td>
-                    <td>{model.quality} / 10</td>
-                    <td>{model.file_size} GB</td> 
-                    <td>Need to</td>
-                    <td>Add actual</td>
-                    <td>Data here</td>
+                    <th><button id onClick={() => sortTable(type, "Name")}>Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th><button onClick={() => sortTable(type, "Quality")}>Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th><button onClick={() => sortTable(type, "FileSize")}>File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th><button onClick={() => sortTable(type, "Device1")}>Runtime Device 1 {sortingState().col == "Device1" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th><button onClick={() => sortTable(type, "Device2")}>Runtime Device 2 {sortingState().col == "Device2" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th><button onClick={() => sortTable(type, "Device3")}>Runtime Device 3 {sortingState().col == "Device3" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
                   </tr>
-                }</For>
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  <For each={sortedDefaultModels()[type]}>{(model) =>
+                    <tr>
+                      <td>
+                        <b>{model.name}</b><br/>
+                        <span>One line about model</span></td>
+                      <td>{model.quality} / 10</td>
+                      <td>{model.file_size} GB</td> 
+                      <td>Need to</td>
+                      <td>Add actual</td>
+                      <td>Data here</td>
+                    </tr>
+                  }</For>
+                </tbody>
+              </table>
+            </div>
+          }</For>
         </div>
       </div>
     </>
