@@ -16,7 +16,9 @@ function ModelTesting() {
 
   const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
   const [sortedDefaultModels, setSortedDefaultModels] = createSignal(modelBenchmarks);
-  const [sortingState, setSortingState] = createSignal({type:null,col:null,order:"desc"})
+  const [sortingState, setSortingState] = createSignal({type:null,col:null,subcol:null,order:"desc"})
+
+  const recommendationDevices = ["i7-12700F","i5-1135G7"];
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -546,7 +548,7 @@ function ModelTesting() {
     //console.log(shownLanguages());
   }
 
-  const sortTable = (modelType, columnType) => {
+  const sortTable = (modelType, columnType, deviceType) => {
     setSortedDefaultModels(data => {
 
       const newData = {...data};
@@ -556,7 +558,7 @@ function ModelTesting() {
       if (sortingState()["col"] == columnType) {
         nextSortingState = sortingState()["order"] == "desc" ? "asc" : "desc";
       }
-      setSortingState({type:modelType,col:columnType,order:nextSortingState});
+      setSortingState({type:modelType,col:columnType,subcol:deviceType,order:nextSortingState});
 
       if (columnType == "Name") {
         newData[modelType] = [...newData[modelType]].sort((a, b) => {
@@ -567,6 +569,19 @@ function ModelTesting() {
         newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.quality - a.quality : a.quality - b.quality);
       } else if (columnType == "FileSize") {
         newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.file_size - a.file_size : a.file_size - b.file_size);
+      } else {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => {
+
+          if (a["devices"][columnType] == null && b["devices"][columnType] == null) {
+            return 0;
+          } else if (a["devices"][columnType] == null) {
+            return 1;
+          } else if (b["devices"][columnType] == null) {
+            return -1;
+          } else {
+            return nextSortingState == "desc" ? b["devices"][columnType][deviceType] - a["devices"][columnType][deviceType] : a["devices"][columnType][deviceType] - b["devices"][columnType][deviceType];
+          }
+        });
       }
 
       return newData;
@@ -596,6 +611,68 @@ function ModelTesting() {
 
   return (
     <>
+    <div class={modelTestingStyles.modelTesting}>
+        <h2>Model Recommendations</h2>
+
+        <div>
+          <ul class={modelTestingStyles.optionMenuSubTabs}>
+            <For each={allowedModelTypes}>{(type) =>
+              <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
+            }</For>
+          </ul>
+
+          <For each={allowedModelTypes}>{(type) =>
+            <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
+              <table class={modelTestingStyles.tableMMLU}>
+                <colgroup>
+                  <col style="width: 25vw;" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th rowspan="2"><button id onClick={() => sortTable(type, "Name")}>Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Quality")}>Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "FileSize")}>File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <For each={recommendationDevices}>{(device) => 
+                      <th colspan="2">{device}</th>
+                    }</For>
+                  </tr>
+                  <tr>
+                    <For each={recommendationDevices}>{(device) => 
+                      <>
+                        <th><button onClick={() => sortTable(type, device, "upload")}>Estimated Upload{sortingState().subcol == "upload" && sortingState().col == device && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                        <th><button onClick={() => sortTable(type, device, "inference")}>Estimated Runtime{sortingState().subcol == "inference" && sortingState().col == device && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                      </>
+                    }</For>
+                  </tr>
+                </thead>
+                <tbody>
+                  <For each={sortedDefaultModels()[type]}>{(model) =>
+                    <tr>
+                      <td>
+                        <b>{model.name}</b><br/>
+                        <span>One line about model</span></td>
+                      <td>{model.quality} / 10</td>
+                      <td>{model.file_size} GB</td> 
+                      <For each={recommendationDevices}>{(device) => 
+                        <>
+                          <td>{model.devices[device] == null ? "No data" : model.devices[device].upload + " sec"}</td> 
+                          <td>{model.devices[device] == null ? "No data" : model.devices[device].inference + " sec"}</td> 
+                        </>
+                      }</For>
+                    </tr>
+                  }</For>
+                </tbody>
+              </table>
+            </div>
+          }</For>
+        </div>
+      </div>
+
+
+
+
+
+
       <div class={modelTestingStyles.modelTesting}>
         <h2>Model Testing:</h2>
         <h4>Select models to benchmark:</h4>
@@ -793,51 +870,6 @@ function ModelTesting() {
               }</For>
             </tbody>
           </table>
-        </div>
-      </div>
-      <div class={modelTestingStyles.modelTesting}>
-        <h2>Model Recommendations</h2>
-
-        <div>
-          <ul class={modelTestingStyles.optionMenuSubTabs}>
-            <For each={allowedModelTypes}>{(type) =>
-              <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
-            }</For>
-          </ul>
-
-          <For each={allowedModelTypes}>{(type) =>
-            <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
-              <table class={modelTestingStyles.tableMMLU}>
-                <colgroup>
-                  <col style="width: 20vw;" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th><button id onClick={() => sortTable(type, "Name")}>Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th><button onClick={() => sortTable(type, "Quality")}>Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th><button onClick={() => sortTable(type, "FileSize")}>File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th><button onClick={() => sortTable(type, "Device1")}>Runtime Device 1 {sortingState().col == "Device1" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th><button onClick={() => sortTable(type, "Device2")}>Runtime Device 2 {sortingState().col == "Device2" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th><button onClick={() => sortTable(type, "Device3")}>Runtime Device 3 {sortingState().col == "Device3" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={sortedDefaultModels()[type]}>{(model) =>
-                    <tr>
-                      <td>
-                        <b>{model.name}</b><br/>
-                        <span>One line about model</span></td>
-                      <td>{model.quality} / 10</td>
-                      <td>{model.file_size} GB</td> 
-                      <td>Need to</td>
-                      <td>Add actual</td>
-                      <td>Data here</td>
-                    </tr>
-                  }</For>
-                </tbody>
-              </table>
-            </div>
-          }</For>
         </div>
       </div>
     </>
