@@ -238,6 +238,22 @@ input[type=number] {
 }
 
 .defaultRecommendationMenu thead tr:nth-child(2) th {
-    top: 1.59em;
+    top: 1.55em;
     z-index: 2;
+}
+
+.benchmarkingButtons {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--background-secondary);
+    padding: 1em;
+}
+
+.benchmarkingButtons button, .benchmarkingButtons label {
+    margin: 0;
+}
+
+.benchmarkingButtons .leftButtons, .benchmarkingButtons .rightButtons {
+    display: flex;
+    gap: 10px;
 }
