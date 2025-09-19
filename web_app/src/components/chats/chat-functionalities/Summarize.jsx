@@ -4,7 +4,7 @@ import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers'
 import { ChatContext } from '../ChatContext';
 import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFileAsync } from '../../../utils/FileReaders';
-import { getCachedModelsNames, cacheModel } from '../../../utils/ModelCache';
+import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 
 
 function Summarize() {
@@ -18,7 +18,7 @@ function Summarize() {
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
 
-  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model");
+  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   // Checks the cache for models that can be used for summarization.
   onMount(async () => {
@@ -29,35 +29,46 @@ function Summarize() {
 
     document.getElementById("folderInput").disabled = true;
     document.getElementById("sendButton").disabled = true;
-
     setAddModelBtnText("Caching Model");
 
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
 
-    if (files.length == 0) {
-      alert("Empty model directory was selected, please select again.");
-    }
-    else if (!files.find(f => f.name == "browser_config.json")) {
-      alert("Unsupported or Malformed Model.")
-    }
-    else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "summarization") {
-      alert("Must be a summarisation model. browser_config.json states that the model is for a different task.");
-    }
-    else {
-      let model = await cacheModel(files);
+    try {
+      if (files.length == 0) {
+        alert("Empty model directory was selected, please select again.");
+        return;
+      }
 
-      // add model to list of available models
-      let models = availableModels().slice();
-      models.push(model);
+      let configs = files.filter(f => f.name == "browser_config.json");
+      if (!configs) {
+        alert("Unsupported or Malformed Model (no browser_config.json file found).");
+        return;
+      }
+
+      configs = configs.filter(async f => JSON.parse(await f.text()).task == "summarization");
+      if (!configs) {
+        alert(`No summarization models were provided (each browser_config.json stated a task other than summarization).`);
+        return;
+      }
+
+      let models = await cacheModels(files);
+      models = models.filter(mn => mn.task == "summarization");
+      let modelNames = models.map(mn => mn.modelName);
+
+      // add models to list of available models
+      models = availableModels().slice();
+      for (let modelName of modelNames) {
+        if (!models.includes(modelName)) models.push(modelName);
+      }
 
       setAvailableModels(models);
-      setModelName(model);
+
+    } finally {
+      document.getElementById("folderInput").disabled = false;
+      document.getElementById("sendButton").disabled = false;
+      setAddModelBtnText("Add Model(s)");
     }
-    
-    document.getElementById("folderInput").disabled = false;
-    document.getElementById("sendButton").disabled = false;
-    setAddModelBtnText("Add Model");
   };
 
   // load model upon `modelName` or `processor` signal
@@ -79,7 +90,7 @@ function Summarize() {
     summarizer = await pipeline('summarization', modelName(), { device: chatContext.processor() });
     console.log("Finished model setup using", chatContext.processor());
 
-    setAddModelBtnText("Add Model");
+    setAddModelBtnText("Add Model(s)");
     document.getElementById("folderInput").disabled = false;
     document.getElementById("sendButton").disabled = false;
   });
