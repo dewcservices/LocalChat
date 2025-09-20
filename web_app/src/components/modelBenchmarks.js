@@ -10,6 +10,8 @@
 
 // The exact values from the division doesnt need to be used, only a rough approxamation due to slight differences in the average baseline model values on different devices.
 
+// TODO: Decide if it might be better to have a range of upload and infer times due to device differences.
+
 export const modelBenchmarks = {
 
     // name: "model_name",
@@ -26,8 +28,6 @@ export const modelBenchmarks = {
             upload_time: 1,
             infer_time: 1,
             quality: 7,
-            estimate_upload_time_run_counts: [25000, 20000],
-            estimate_generate_time_run_counts: [40000, 34000],
         },{
             name: "Xenova/distilbart-cnn-6-6",
             file_size: 0.272,
@@ -98,11 +98,24 @@ export const modelBenchmarks = {
     ],
     translation: [
         {
-            name: "",
-            file_size: "",
-            upload_time: "",
-            infer_time: "",
-            quality: "",    // TODO: need to find method for checking quality of outputs for other model types.
+            // Baseline Model
+            name: "Xenova/nllb-200-distilled-600M",
+            file_size: 0.896,
+            upload_time: 1,
+            infer_time: 1,
+            quality: 9,    // TODO: need to find method for checking quality of outputs for other model types.
+        },{
+            name: "Xenova/mbart-large-50-many-to-many-mmt",
+            file_size: 0.848,
+            upload_time: 1.05,
+            infer_time: 0.95,
+            quality: 7,
+        },{
+            name: "Xenova/m2m100_418M",
+            file_size: 0.61,
+            upload_time: 0.9,
+            infer_time: 0.75,
+            quality: 8,
         }
     ],
     "question-answering": [

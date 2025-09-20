@@ -2,25 +2,22 @@
 
 ## Upcoming Releases
 
-### v0.0.6
-The core focus of this version is to provide model testing and comparison functionality. This will allow users to
-run various models against a prompt so that the user can see, the execution times of each model alongside the outputs.
-Making it easier for the user to decide which model to use. Furthermore, users will be able to export this data to csv 
-format.
-
-Additionally, this aims to fix/improve various other miscellaneous items:
-- A known issue is that toggling between the CPU/GPU options will not reload the current pipeline to use the 
-  corresponding option. Only upon changing of the model, will the pipeline be updated to use the corresponding option.
-- Editing the chat history elements so that clicking anyway on the element will take you to the chat, rather than, just
-  the text.
-- An option to export and import chat history. Allowing users to move between different devices or browsers.
-- The ability to upload PDF documents.
-- Various other UI/UX changes.
-- General error handling improvements.
-
-The team will also begin looking into the prospect of running more powerful models within the browser.
+### v0.0.7
+The team is now focusing on:
+- A model recommendation tool to add to the 'Model Testing' page.
+- Getting web-workers to work with the single-file packaging and file protocol (as to enable a responsive UI).
+- A settings page that will allow users to set default models, translation languages, and the importing/exporting of chats.
 
 ## Released
+
+### [v0.0.6](https://github.com/dewcservices/LocalChat/releases/tag/v0.0.6)
+- Additions:
+  - A model comparison tool. This can be accessed via the 'Model Testing' link in the side bar. This tool allows users 
+    to run multiple models against the same prompt to see which responses they prefer, but also the average response times
+    of each model. This is essentially an alpha release and is still being built out. Future directions include a 
+    recommendation system, and improvements to the UI/UX of the page.
+  - An option to export and import chat histories.
+  - Ability to upload PDF documents.
 
 ### [v0.0.5](https://github.com/dewcservices/LocalChat/releases/tag/v0.0.5)
 - Core functionality includes:

@@ -4,7 +4,7 @@ import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transform
 import styles from './QuestionAnswer.module.css';
 import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
-import { getCachedModelsNames, cacheModel } from '../../../utils/ModelCache';
+import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 
 
 function QuestionAnswer() {
@@ -17,7 +17,7 @@ function QuestionAnswer() {
     // list of models that are already loaded into the cache
 
   const [contextTab, setContextTab] = createSignal("text");
-  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model");
+  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('question-answering'));
@@ -32,29 +32,41 @@ function QuestionAnswer() {
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
 
-    // TODO improve UX
-    if (files.length == 0) {
-      alert("Empty model directory was selected, please select again."); 
-    }
-    else if (!files.find(f => f.name == "browser_config.json")) {
-      alert("Unsupported or Malformed Model");
-    }
-    else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "question-answering") {
-      alert(`Must be a question & answer model. browser_config.json states that the model is for a different task.`);
-    }
-    else {
-      let model = await cacheModel(files);
+    try {
+      if (files.length == 0) {
+        alert("Empty model directory was selected, please select again.");
+        return;
+      }
 
-      let models = availableModels().slice();
-      models.push(model);
+      let configs = files.filter(f => f.name == "browser_config.json");
+      if (!configs) {
+        alert("Unsupported or Malformed Model (no browser_config.json file found).");
+        return;
+      }
+
+      configs = configs.filter(async f => JSON.parse(await f.text()).task == "question-answering");
+      if (!configs) {
+        alert(`No question-answering models were provided (each browser_config.json stated a task other than question-answering).`);
+        return;
+      }
+
+      let models = await cacheModels(files);
+      models = models.filter(mn => mn.task == "question-answering");
+      let modelNames = models.map(mn => mn.modelName);
+
+      // add models to list of available models
+      models = availableModels().slice();
+      for (let modelName of modelNames) {
+        if (!models.includes(modelName)) models.push(modelName);
+      }
 
       setAvailableModels(models);
-      setModelName(model);
-    }
 
-    document.getElementById("folderInput").disabled = false;
-    document.getElementById("sendButton").disabled = false;
-    setAddModelBtnText("Add Model");
+    } finally {
+      document.getElementById("folderInput").disabled = false;
+      document.getElementById("sendButton").disabled = false;
+      setAddModelBtnText("Add Model(s)");
+    }
   };
 
   // load model upon `modelName` or `processor` signal
@@ -82,7 +94,7 @@ function QuestionAnswer() {
       setModelName('');
       alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
     } finally {
-      setAddModelBtnText("Add Model");
+      setAddModelBtnText("Add Model(s)");
       document.getElementById("folderInput").disabled = false;
       document.getElementById("sendButton").disabled = false;
     }

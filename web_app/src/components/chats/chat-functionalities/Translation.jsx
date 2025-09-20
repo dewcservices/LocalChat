@@ -4,7 +4,7 @@ import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
 import { ChatContext } from "../ChatContext";
 import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
-import { getCachedModelsNames, cacheModel } from '../../../utils/ModelCache';
+import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 
 
 function Translation() {
@@ -24,7 +24,7 @@ function Translation() {
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
 
-  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model");
+  const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('translation'));
@@ -39,29 +39,41 @@ function Translation() {
     let folderElement = document.getElementById("folderInput");
     let files = [...folderElement.files];
 
-    // TODO improve UX
-    if (files.length == 0) {
-      alert("Empty model directory was selected, please select again.");
-    }
-    else if (!files.find(f => f.name == "browser_config.json")) {
-      alert("Unsupported or Malformed Model");
-    }
-    else if (JSON.parse(await files.find(f => f.name == "browser_config.json").text()).task != "translation") {
-      alert(`Must be a translation model. browser_config.json states that the model is for a different task.`);
-    }
-    else {
-      let model = await cacheModel(files);
+    try {
+      if (files.length == 0) {
+        alert("Empty model directory was selected, please select again.");
+        return;
+      }
 
-      let models = availableModels().slice();
-      models.push(model);
+      let configs = files.filter(f => f.name == "browser_config.json");
+      if (!configs) {
+        alert("Unsupported or Malformed Model (no browser_config.json file found).");
+        return;
+      }
+
+      configs = configs.filter(async f => JSON.parse(await f.text()).task == "translation");
+      if (!configs) {
+        alert(`No translation models were provided (each browser_config.json stated a task other than translation).`);
+        return;
+      }
+
+      let models = await cacheModels(files);
+      models = models.filter(mn => mn.task == "translation");
+      let modelNames = models.map(mn => mn.modelName);
+
+      // add models to list of available models
+      models = availableModels().slice();
+      for (let modelName of modelNames) {
+        if (!models.includes(modelName)) models.push(modelName);
+      }
 
       setAvailableModels(models);
-      setModelName(model);
-    }
 
-    document.getElementById("folderInput").disabled = false;
-    document.getElementById("sendButton").disabled = false;
-    setAddModelBtnText("Add Model");
+    } finally { // runs even when returns out of try block
+      document.getElementById("folderInput").disabled = false;
+      document.getElementById("sendButton").disabled = false;
+      setAddModelBtnText("Add Model(s)");
+    }
   };
 
   // load model upon `processor` or `modelName` signal
@@ -103,7 +115,7 @@ function Translation() {
       setModelName("");
       alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
     } finally {
-      setAddModelBtnText("Add Model");
+      setAddModelBtnText("Add Model(s)");
       document.getElementById("folderInput").disabled = false;
       document.getElementById("sendButton").disabled = false;
     }
