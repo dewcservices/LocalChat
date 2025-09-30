@@ -1,7 +1,7 @@
-/* New outer container for chat histories with separate background */
+/* outer wrapper container for chat histories */
 .chatHistoryOuterContainer {
     background: var(--background-secondary, #2a2d33);
-    border: 1px solid var(--selected-button-colour, #404040);
+    border: 1px solid var(--selected-button-color, #404040);
     border-radius: 8px;
     padding: 12px;
     margin: 8px 0 16px 0;
@@ -46,11 +46,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.4em 0.6em; /* Reduced vertical padding to fit more chats */
+    padding: 0.4em 0.6em;
     transition: all 0.2s ease;
     border-radius: 6px;
-    margin: 1px 0; /* Reduced margin to fit more chats */
-    cursor: pointer; /* Make it clear the whole container is clickable */
+    margin: 1px 0; 
+    cursor: pointer;
 }
 
 .chatHistoryContainer:hover,
@@ -76,8 +76,8 @@
     display: inline-block;
     color: var(--highlight-colour);
     text-align: left;
-    font-size: 14px; /* Slightly smaller font to fit more chats */
-    line-height: 1.2; /* Tighter line height */
+    font-size: 14px;
+    line-height: 1.2;
 }
 
 .chatHistoryContainer.active {
@@ -107,7 +107,7 @@
 
 /* further icon styling for png sizes */
 .actionIcon {
-    width: 17px; /* Slightly smaller icons to save space */
+    width: 17px;
     height: 17px;
     opacity: 0.7;
     transition: opacity 0.2s ease;
@@ -124,13 +124,13 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 3px; /* Reduced padding to save space */
+    padding: 3px;
     border-radius: 4px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px; /* Slightly smaller buttons */
+    width: 22px;
     height: 22px;
 }
 
@@ -177,7 +177,7 @@
     display: flex;
     gap: 8px;
     padding-top: 16px;
-    height: 60px; /* Fixed height for button area */
+    height: 60px;
 }
 
 .exportButton {
