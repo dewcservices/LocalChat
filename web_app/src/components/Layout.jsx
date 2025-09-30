@@ -111,8 +111,6 @@ const deleteAllChats = () => {
           <br/><br/>
 
           <h2>Chat History</h2>
-          
-          {/* New separate container for chat histories */}
           <div class={styles.chatHistoryOuterContainer}>
             <div class={styles.chatHistoryWrapper}>
               <div class={styles.chatHistoryScrollContainer}>
