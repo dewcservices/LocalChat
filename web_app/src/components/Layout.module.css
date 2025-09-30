@@ -1,13 +1,23 @@
+/* New outer container for chat histories with separate background */
+.chatHistoryOuterContainer {
+    background: var(--background-secondary, #2a2d33);
+    border: 1px solid var(--selected-button-colour, #404040);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* css wrapper to contain scrollable area and buttons at a fixed position */
 .chatHistoryWrapper {
     display: flex;
     flex-direction: column;
-    height: 250px;
+    height: 500px;
 }
 
 /* scrollable container for chat history */
 .chatHistoryScrollContainer {
-    height: 200px;
+    height: 480px; 
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 4px;
@@ -36,10 +46,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5em;
+    padding: 0.4em 0.6em; /* Reduced vertical padding to fit more chats */
     transition: all 0.2s ease;
     border-radius: 6px;
-    margin: 2px 0;
+    margin: 1px 0; /* Reduced margin to fit more chats */
     cursor: pointer; /* Make it clear the whole container is clickable */
 }
 
@@ -66,6 +76,8 @@
     display: inline-block;
     color: var(--highlight-colour);
     text-align: left;
+    font-size: 14px; /* Slightly smaller font to fit more chats */
+    line-height: 1.2; /* Tighter line height */
 }
 
 .chatHistoryContainer.active {
@@ -95,8 +107,8 @@
 
 /* further icon styling for png sizes */
 .actionIcon {
-    width: 19px;
-    height: 19px;
+    width: 17px; /* Slightly smaller icons to save space */
+    height: 17px;
     opacity: 0.7;
     transition: opacity 0.2s ease;
 }
@@ -112,14 +124,14 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 3px; /* Reduced padding to save space */
     border-radius: 4px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 22px; /* Slightly smaller buttons */
+    height: 22px;
 }
 
 .actionButton:hover {
