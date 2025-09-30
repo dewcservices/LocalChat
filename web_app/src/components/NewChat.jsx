@@ -68,6 +68,19 @@ function NewChat() {
           <button onClick={newTranslationChat}>Translate</button>
           {/* <A href="/models">Model Testing</A> */}
         </div>
+        
+        {/* Documentation link */}
+        <div class={styles.documentationContainer}>
+          <a 
+            href="https://github.com/dewcservices/LocalChat/blob/main/docs/index.md" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class={styles.documentationLink}
+          >
+            📚 Documentation
+          </a>
+          <span class={styles.internetNote}> (only accessible with internet access)</span>
+        </div>
       </div>
     </>
   );
