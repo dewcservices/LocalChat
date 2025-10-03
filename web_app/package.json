@@ -14,7 +14,7 @@
     "@solidjs/router": "^0.15.3",
     "mammoth": "^1.9.0",
     "pdfjs-dist": "^5.4.54",
-    "solid-js": "^1.9.5"
+    "solid-js": "^1.9.9"
   },
   "devDependencies": {
     "follow-redirects": "^1.15.9",
