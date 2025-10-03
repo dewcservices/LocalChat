@@ -107,6 +107,8 @@ const deleteAllChats = () => {
           <h1>Local Chat</h1>
           <A href="models">Model Testing</A>
           <br/><br/>
+          <A href="/settings">Settings</A>
+          <br/><br/>
           <A href="/">Create New Chat</A>
           <br/><br/>
 
