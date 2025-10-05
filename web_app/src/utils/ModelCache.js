@@ -1,4 +1,4 @@
-// This file contains functions relating to model cacheing.
+// This file contains functions relating to model caching.
 //
 // TranformersJS caches models downloaded from the internet. This allows the user to upload models from their
 // local filesystem. Injecting them into where TransformersJS would expect them, preventing the need for TransformersJS
@@ -43,37 +43,48 @@ export async function getCachedModelsNames(task) {
 }
 
 /**
- * Caches a model.
+ * Caches model(s).
  * @param {*} files 
- * @returns the model name
+ * @returns an array of objects {modelName, task}
  */
-export async function cacheModel(files) {
+export async function cacheModels(files) {
   let cache = await caches.open('transformers-cache');
 
-  let config = files.find(f => f.name == "browser_config.json")
-  config = JSON.parse(await config.text());
+  let configs = files.filter(f => f.name == "browser_config.json")
 
-  // This will be saved into the cache, this is a record of the initial files that were uploaded for the model.
-  // This is used upon chat load when reading the cache for available models. More specifically, to validate that
-  // all the required files for the model is still cached.
-  let modelFiles = {
-    modelName: config.modelName,
-    task: config.task,
-    cacheKeys: []
-  };
+  let modelFilesDict = {};
 
-  // Upload models to browsers cache.
+  for (let config of configs) {
+
+    let filePath = config.webkitRelativePath;
+    let modelFolder = filePath.substring(0, filePath.lastIndexOf('/'));
+
+    config = JSON.parse(await config.text());
+
+    // These will be saved into the cache, these are records of the initial files that were uploaded for the given model.
+    // This is used upon chat load when reading the cache for available models. More specifically, to validate that
+    // all the required files for the model is still cached.
+    modelFilesDict[modelFolder] = {
+      modelName: config.modelName,
+      task: config.task,
+      cacheKeys: []
+    };
+  }
+
   for (let file of files) {
+
+    let filePath = file.webkitRelativePath;
+    let modelFolder = filePath.substring(0, filePath.lastIndexOf('/'));
 
     let cacheKey = pathJoin(
       env.remoteHost, 
       env.remotePathTemplate
-        .replaceAll('{model}', config.modelName)
+        .replaceAll('{model}', modelFilesDict[modelFolder].modelName)
         .replaceAll('{revision}', 'main'),
-      file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
+      file.name.endsWith(".onnx") ? `onnx/${file.name}` : file.name
     );
 
-    modelFiles.cacheKeys.push(cacheKey);
+    modelFilesDict[modelFolder].cacheKeys.push(cacheKey);
 
     let fileReader = new FileReader();
     fileReader.onload = async () => {
@@ -85,9 +96,19 @@ export async function cacheModel(files) {
     fileReader.readAsArrayBuffer(file);
   }
 
-  await cache.put(pathJoin(env.remoteHost, config.modelName, "model_files.json"),
-    new Response((new TextEncoder()).encode(JSON.stringify(modelFiles)))
-  );
+  for (let [modelFolder, modelFiles] of Object.entries(modelFilesDict)) {
+    await cache.put(
+      pathJoin(env.remoteHost, modelFiles.modelName, "model_files.json"),
+      new Response((new TextEncoder()).encode(JSON.stringify(modelFiles)))
+    );
+  }
 
-  return config.modelName;
+  let modelNames = Object.values(modelFilesDict);
+  modelNames = modelNames.map(modelFiles => {
+    return {modelName: modelFiles.modelName, task: modelFiles.task};
+  });
+
+  console.log(modelNames);
+
+  return modelNames;
 }
