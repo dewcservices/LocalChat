@@ -129,6 +129,15 @@ const deleteAllChats = () => {
                             class={styles.chatName}
                             title={`Created: ${new Date(chat.creationDate).toUTCString()} | Latest: ${new Date(chat.latestMessageDate).toUTCString()}`}
                           >
+                            <Show when={chat.chatType === 'summarize'}>
+                              <span class={styles.chatTypeIcon}>📄</span>
+                            </Show>
+                            <Show when={chat.chatType === 'question-answer'}>
+                              <span class={styles.chatTypeIcon}>❓</span>
+                            </Show>
+                            <Show when={chat.chatType === 'translation'}>
+                              <span class={styles.chatTypeIcon}>🌐</span>
+                            </Show>
                             {chat.chatName}
                           </A>
                           <div class={styles.actionIcons}>

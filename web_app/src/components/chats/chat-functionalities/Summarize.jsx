@@ -112,7 +112,7 @@ function Summarize() {
 
     if (userMessage == "") return;
 
-    chatContext.addMessage("Summarise: " + userMessage, true);
+    chatContext.addMessage(userMessage, true);
     inputTextArea.value = "";
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
@@ -164,7 +164,7 @@ function Summarize() {
       return;
     }
 
-    chatContext.addMessage("Summarise File: " + file.name, true);
+    chatContext.addMessage(file.name, true);
     chatContext.addFile(fileContent, file.name);
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress

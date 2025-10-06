@@ -164,12 +164,8 @@ export function generateChatTitle(messages) {
   
   if (!firstUserMessage || !firstUserMessage.content) return 'New Chat';
   
-  // Create a title from first 6 words of the first message
-  const words = firstUserMessage.content.trim().split(' ');
-  const title = words.slice(0, 6).join(' ');
-  
-  // Add ellipsis if message was longer
-  return words.length > 6 ? title + '...' : title;
+  // return the full first message content (CSS will handle truncation)
+  return firstUserMessage.content.trim();
 }
 
 /**

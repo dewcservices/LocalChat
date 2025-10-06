@@ -67,6 +67,12 @@
     width: 100%;
 }
 
+.chatTypeIcon {
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .chatName {
     flex: 1;
     max-width: 200px;
