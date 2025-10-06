@@ -138,6 +138,9 @@ const deleteAllChats = () => {
                             <Show when={chat.chatType === 'translation'}>
                               <span class={styles.chatTypeIcon}>🌐</span>
                             </Show>
+                            <Show when={chat.chatType === 'general'}>
+                              <span class={styles.chatTypeIcon}>💬</span>
+                            </Show>
                             {chat.chatName}
                           </A>
                           <div class={styles.actionIcons}>
