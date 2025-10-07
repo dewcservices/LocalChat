@@ -1,16 +1,37 @@
 import { createSignal } from "solid-js";
 import { A } from "@solidjs/router";
 import styles from './Settings.module.css';
+import { exportAllChats, importAllChats, getChatHistories } from '../utils/ChatHistory';
 
 function Settings() {
   const [activeSection, setActiveSection] = createSignal('default-models');
+  const [chatCount, setChatCount] = createSignal(getChatHistories().length);
 
   const sections = [
     { id: 'default-models', label: 'Default Models' },
-    { id: 'sub-heading-2', label: 'Sub Heading 2' },
+    { id: 'chat-management', label: 'Chat Management' },
     { id: 'colour-settings', label: 'Colour Settings' },
     { id: 'data-management', label: 'Data Management' },
   ];
+
+  // Export all chats
+  const handleExportChats = () => {
+    try {
+      exportAllChats();
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please check the console for details.');
+    }
+  };
+
+  // Import chats
+  const handleImportChats = () => {
+    importAllChats(true, () => {
+      // Refresh chat count after import
+      setChatCount(getChatHistories().length);
+      alert('Import complete! You may need to navigate back to the chat to see your imported conversations.');
+    });
+  };
 
   // Function to clear all data
   const handleClearAllData = () => {
@@ -95,12 +116,50 @@ function Settings() {
             </div>
           )}
 
-          {/* Sub Heading 2 Section */}
-          {activeSection() === 'sub-heading-2' && (
+          {/* Chat Management Section */}
+          {activeSection() === 'chat-management' && (
             <div class={styles.sectionView}>
-              <h2 class={styles.sectionHeading}>Sub Heading 2</h2>
+              <h2 class={styles.sectionHeading}>Chat Management</h2>
               <div class={styles.sectionContent}>
-                <p class={styles.placeholder}>Sub heading 2 settings will go here...</p>
+                <p class={styles.descriptionText}>
+                  Export your chat histories to back them up, or import previously exported chats.
+                </p>
+                
+                <div class={styles.chatStats}>
+                  <div class={styles.statItem}>
+                    <span class={styles.statLabel}>Total Chats:</span>
+                    <span class={styles.statValue}>{chatCount()}</span>
+                  </div>
+                </div>
+
+                <div class={styles.managementActions}>
+                  <div class={styles.actionCard}>
+                    <h3 class={styles.actionTitle}>Export Chats</h3>
+                    <p class={styles.actionDescription}>
+                      Download all your chat histories as a JSON file. This creates a backup that you can import later.
+                    </p>
+                    <button 
+                      class={styles.exportButton}
+                      onClick={handleExportChats}
+                      disabled={chatCount() === 0}
+                    >
+                      {chatCount() === 0 ? 'No Chats to Export' : 'Export All Chats'}
+                    </button>
+                  </div>
+
+                  <div class={styles.actionCard}>
+                    <h3 class={styles.actionTitle}>Import Chats</h3>
+                    <p class={styles.actionDescription}>
+                      Import chat histories from a previously exported JSON file. Existing chats will be preserved.
+                    </p>
+                    <button 
+                      class={styles.importButton}
+                      onClick={handleImportChats}
+                    >
+                      Import Chats
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
-import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats, importAllChats } from "../utils/ChatHistory";
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
 
 // icon imports for use in chat history
 import pencilIcon from '../assets/pencil.png';
@@ -71,21 +71,6 @@ const deleteAllChats = () => {
     renameChat(renamingId(), newTitle());
     setChatHistories(getChatHistories());
     setRenamingId(null);
-  };
-
-  // export all chats as JSON
-  const handleExportChats = () => {
-    try {
-      exportAllChats();
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Export failed. Please check the console for details.');
-    }
-  };
-
-  // import chats from JSON
-  const handleImportChats = () => {
-    importAllChats(true, () => window.location.reload());
   };
 
   // handle clicking on the entire chat container
@@ -193,23 +178,6 @@ const deleteAllChats = () => {
           <br/>
 
           <div class={styles.buttonContainer}>
-            <button 
-              class={styles.exportButton} 
-              onClick={handleExportChats}
-              disabled={chatHistories().length === 0}
-              title={chatHistories().length === 0 ? "No chats to export" : "Export all chat histories"}
-            >
-              Export All Chats
-            </button>
-            
-            <button 
-              class={styles.importButton} 
-              onClick={handleImportChats}
-              title="Import chat histories from JSON file"
-            >
-              Import Chats
-            </button>
-            
             <button 
               class={styles.deleteAllButton} 
               onClick={deleteAllChats}
