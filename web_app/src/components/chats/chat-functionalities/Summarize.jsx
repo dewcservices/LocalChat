@@ -1,10 +1,13 @@
 import { useContext, createSignal, onMount, createEffect } from 'solid-js';
 import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 import { ChatContext } from '../ChatContext';
 import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
+import { getChatHistories } from '../../../utils/ChatHistory';
 
 
 function Summarize() {
@@ -20,9 +23,62 @@ function Summarize() {
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
+  // Summarization Tour
+  const driverObj = driver({
+    showProgress: true,
+    allowHtml: true,
+    steps: [
+      { 
+        element: '#addModelBtn', 
+        popover: { 
+          title: "Adding Models", 
+          description: `
+            To begin with click here to upload models. 
+            Either upload your own models or upload the 'models' folder included in the app distribution.
+          `
+        } 
+      },
+      {
+        element: '#modelSelection',
+        popover: {
+          title: "Selecting a Model",
+          description: `
+            Next select a model to summarise your text with. 
+            For more information see the <A href="/models">model information page</A>.
+          `
+        }
+      },
+      {
+        element: "#tabSwitcher",
+        popover: {
+          title: "Text or File Input",
+          description: `Use the tab switcher to switch between summarising files or text input.`
+        }
+      },
+      {
+        element: "#inputTextArea",
+        popover: {
+          title: "Text/File Input",
+          description: `Upload some text or file(s).`
+        }
+      },
+      {
+        element: "#sendButton",
+        popover: {
+          title: "Submit",
+          description: `Use the submit button to summarise the text.`
+        }
+      }
+    ]
+  });
+
   // Checks the cache for models that can be used for summarization.
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('summarization'));
+
+    let chats = getChatHistories();
+    chats = chats.filter(c => c.chatType == 'summarize');
+    if (chats.length <= 1) driverObj.drive();
   });
 
   const addModel = async () => {
@@ -210,7 +266,7 @@ function Summarize() {
         <div class={styles.controlsContainer}>
 
           {/* text or file tab switcher */}
-          <div class={styles.controlsLeft}>
+          <div id="tabSwitcher" class={styles.controlsLeft}>
             <button 
               class={`${tab() === "file" ? styles.selectedTab : styles.tab} ${hoveredTab() === "file" ? styles.highlighted : ''}`}
               onClick={() => setTab("file")}
@@ -233,6 +289,7 @@ function Summarize() {
           <div class={styles.controlsRight}>
 
             <select 
+              id="modelSelection"
               class={styles.modelSelection} 
               value={modelName()}
               onChange={e => setModelName(e.currentTarget.value)}
@@ -243,7 +300,8 @@ function Summarize() {
               }</For>
             </select>
 
-            <label 
+            <label
+              id="addModelBtn"
               for="folderInput" 
               class={availableModels().length == 0 ? styles.noModels : styles.addModelButton}
             >
