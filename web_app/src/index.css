@@ -25,6 +25,7 @@
 
 body {
   margin: 0;
+  background-color: var(--background-primary);
 }
 
 .container {
@@ -77,4 +78,36 @@ button:hover, .inputButton:hover {
 
 .hidden {
   display: none;
+}
+
+/* container size for collapse button and smoother transition */
+.container {
+  display: grid;
+  grid-template-areas:
+    "sidebar pageArea";
+  grid-template-columns: 20% auto;
+  height: 100vh;
+  transition: grid-template-columns 0.3s ease;
+}
+
+/* when collapsed sidebar = 0px and will autofill the rest of the screen */
+.container.sidebar-collapsed {
+  grid-template-columns: 0px 1fr;
+}
+
+/* smooth slide animation when collapsing/expanding */
+.sidebarContainer {
+  transition: transform 0.3s ease;
+  overflow: hidden;
+}
+
+/* slide sidebar completely off screen when collapsed */
+.sidebarContainer.collapsed {
+  transform: translateX(-100%);
+}
+
+/* main page content area */
+.pageContainer {
+  grid-area: pageArea;  
+  background-color: var(--background-primary);
 }

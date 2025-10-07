@@ -27,7 +27,15 @@ function Layout(props) {
   // hover state for mouse navigation of chats
   const [hoveredChatId, setHoveredChatId] = createSignal(null);
   
+  // sidebar collapse state
+  const [sidebarCollapsed, setSidebarCollapsed] = createSignal(false);
+  
   const pageContent = props.children;
+  
+  // toggle sidebar function
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed());
+  };
   
   // updates the chat history
   createEffect(() => {
@@ -101,8 +109,17 @@ const deleteAllChats = () => {
 
   return (
     <>
-      <div class="container">
-        <div class="sidebarContainer">
+      <div class={sidebarCollapsed() ? "container sidebar-collapsed" : "container"}>
+        {/* collapse toggle button */}
+        <button 
+          class={styles.toggleSidebarButton}
+          onClick={toggleSidebar}
+          title={sidebarCollapsed() ? "expand sidebar" : "collapse sidebar"}
+        >
+          {sidebarCollapsed() ? '→' : '←'}
+        </button>
+
+        <div class={sidebarCollapsed() ? "sidebarContainer collapsed" : "sidebarContainer"}>
 
           <h1>Local Chat</h1>
           <A href="models">Model Testing</A>
