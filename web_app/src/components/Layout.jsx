@@ -114,7 +114,7 @@ const deleteAllChats = () => {
         <button 
           class={styles.toggleSidebarButton}
           onClick={toggleSidebar}
-          title={sidebarCollapsed() ? "Show sidebar" : "Hide sidebar"}
+          title={sidebarCollapsed() ? "expand sidebar" : "collapse sidebar"}
         >
           {sidebarCollapsed() ? '→' : '←'}
         </button>
