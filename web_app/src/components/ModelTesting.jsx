@@ -1,4 +1,4 @@
-import { createSignal, For, onMount } from 'solid-js';
+import { createSignal, For, onMount, createMemo } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env,  } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
@@ -119,9 +119,9 @@ function ModelTesting() {
 
     const table = document.getElementById("tableContainer").querySelector("table");
 
-    const tableUploadTimeCol = 2;
-    const tableGenerationTimeCol = 3;
-    const tableMessageCol = 4;
+    const tableUploadTimeCol = 1;
+    const tableGenerationTimeCol = 2;
+    const tableMessageCol = 3;
 
     // configure transformer js environment
     env.useBrowserCache = true;
@@ -134,7 +134,15 @@ function ModelTesting() {
 
     const modelList = selectedModels();
 
-    if (modelList.length > 0) {
+    let sortedModels = [];
+
+    // Sort models to be in same order as table.
+    for (const type of allowedModelTypes) {
+      const modelsOfType = modelList.filter(m => m.modelType == type);
+      sortedModels.push(...modelsOfType);
+    }
+
+    if (sortedModels.length > 0) {
       setBenchmarkData([]);
     }
 
@@ -147,12 +155,21 @@ function ModelTesting() {
     document.getElementById("benchmarkButton").disabled = true;
     document.getElementById("clearButton").disabled = true;
 
-    // Loop through each model, injecting the model into the cache, and running a sample prompt.
-    for (let i = 0; i < modelList.length; i++) {
-      const model = modelList[i];
-      const currentRow = table.rows[i+1];
 
-      table.rows[i].classList.remove(modelTestingStyles.currentTableRow);
+    let rowIndex = 1;
+
+    // Loop through each model, injecting the model into the cache, and running a sample prompt.
+    for (let i = 0; i < sortedModels.length; i++) {
+      const model = sortedModels[i];
+      rowIndex++;
+
+      if (table.rows[rowIndex].children.length == 1) {
+        rowIndex++;
+      }
+
+      let currentRow = table.rows[rowIndex];
+
+      table.rows[rowIndex].classList.remove(modelTestingStyles.currentTableRow);
       currentRow.classList.add(modelTestingStyles.currentTableRow);
 
       let generator;
@@ -433,16 +450,23 @@ function ModelTesting() {
 
     tableString += "Model Name\tModel Type\tUpload Times\tGeneration Times\tAVG Upload Time\tAVG Generation Time";
 
+    let currentModelType = ""
     for (let i = 1; i < table.rows.length; i++) {
       let row = table.rows[i];
+
+      if (row.children.length > 1) {
+        tableString += "\n"
+        tableString += row.cells[0].querySelector("span").innerHTML + "\t";  // Model Name
+        tableString += currentModelType + "\t";  // Model Name
+        tableString += row.cells[1].title + "\t";  // Upload Times
+        tableString += row.cells[2].title + "\t";  // Generation Times
+        tableString += row.cells[1].innerHTML + "\t";  // AVG Upload Time
+        tableString += row.cells[2].innerHTML + "\t";  // AVG Generation Time
+      } else {
+        currentModelType = row.firstChild.firstChild.querySelector("span").innerHTML
+      }
       
-      tableString += "\n"
-      tableString += row.cells[0].querySelector("span").innerHTML + "\t";  // Model Name
-      tableString += row.cells[1].querySelector("span").innerHTML + "\t";  // Model Type
-      tableString += row.cells[2].title + "\t";  // Upload Times
-      tableString += row.cells[3].title + "\t";  // Generation Times
-      tableString += row.cells[2].innerHTML + "\t";  // AVG Upload Time
-      tableString += row.cells[3].innerHTML + "\t";  // AVG Generation Time
+      
     }
 
     console.log(tableString);
@@ -769,23 +793,35 @@ function ModelTesting() {
             <thead>
               <tr>
                 <th>Model Name</th>
-                <th>Model Type</th>
                 <th>Avg Upload Time</th>
                 <th>Avg Generation Time</th>
                 <th>Sample Output</th>
               </tr>
             </thead>
-            <tbody>
-              <For each={selectedModels()}>{(model) =>
-                <tr>
-                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
-                  <td><span>{model.modelType}</span></td>
-                  <td></td> {/* Upload Time Cell */}
-                  <td></td> {/* Generation Time Cell */}
-                  <td></td> {/* Sample Output Cell */}
-                </tr>
-              }</For>
-            </tbody>
+            
+            <For each={allowedModelTypes}>{(type) => {
+              // make filteredModels reactive
+              const filteredModels = createMemo(() =>
+                selectedModels().filter(m => m.modelType.toLowerCase() === type.toLowerCase())
+              );
+              return (
+                <Show when={filteredModels().length > 0}>
+                  <tbody>
+                    <tr>
+                      <td colspan="4" style="padding:0.5em 0em"><b><span>{type}</span> Models</b></td>
+                    </tr>
+                    <For each={filteredModels()}>{(model) =>
+                      <tr>
+                        <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                    }</For>
+                  </tbody>
+                </Show>
+              );
+            }}</For>
           </table>
           
         </div>
