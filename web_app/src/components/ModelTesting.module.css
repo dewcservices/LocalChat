@@ -257,3 +257,15 @@ input[type=number] {
     display: flex;
     gap: 10px;
 }
+
+.fastTierModel {
+    background-color: var(--success-colour) !important;
+}
+
+.averageTierModel {
+    background-color: orange !important;
+}
+
+.slowTierModel {
+    background-color: var(--failure-colour) !important;
+}

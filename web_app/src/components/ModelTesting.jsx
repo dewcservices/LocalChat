@@ -1,24 +1,55 @@
 import { createSignal, For, onMount } from 'solid-js';
 import { pathJoin } from '../utils/PathJoin';
-import { pipeline, env } from '@huggingface/transformers';
+import { pipeline, env,  } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
 import { modelBenchmarks } from './modelBenchmarks.js';
 import { classList } from 'solid-js/web';
+import * as ort from 'onnxruntime-web';
+
+function filterForTopModels(models) {
+  const qualitySortedModels = models.sort((a,b) => b.quality - a.quality);
+
+  if (qualitySortedModels.length <= 5) {
+    return qualitySortedModels
+  } else {
+    const top4Quality = qualitySortedModels.slice(0,4);
+    let otherModels = qualitySortedModels.filter(m => !top4Quality.includes(m));
+    
+    let fastestFifthModel = null;
+    const speedTiers = ["fast","average","slow"];
+    for (const tier of speedTiers) {
+      let speedModels = otherModels.filter(m => m.inference_tier == tier);
+
+      if (speedModels.length > 0) {
+        const qualitySpeedModels = speedModels.sort((a,b) => b.quality - a.quality);
+        fastestFifthModel = qualitySpeedModels[0];
+        break;
+      }
+    }
+    return [...top4Quality, fastestFifthModel];
+  }
+
+  return qualitySortedModels;
+}
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
-
-  const allowedModelTypes = ["summarization","question-answering","translation"];
   
+  const speedTiers = {"fast":5,"average":10,"slow":15};
   const defaultLanguages = ["English","French"];
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
 
-  const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
-  const [sortedDefaultModels, setSortedDefaultModels] = createSignal(modelBenchmarks);
-  const [sortingState, setSortingState] = createSignal({type:null,col:null,subcol:null,order:"desc"})
+  const filteredModels = {}
+  const allowedModelTypes = ["summarization","question-answering","translation"];
+  for (const modelType of allowedModelTypes) {
+    filteredModels[modelType] = filterForTopModels(modelBenchmarks[modelType]);
+  }
 
-  const recommendationDevices = ["i7-12700F","i5-1135G7"];
+  const [sortedDefaultModels, setSortedDefaultModels] = createSignal(filteredModels);
+  const [sortingState, setSortingState] = createSignal({type:null,col:null,order:"desc"})
+
+  const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -429,73 +460,6 @@ function ModelTesting() {
 
   }
 
-  const recommendModels = () => {
-    // Choose three best models based on devices performance.
-    const benchmarkedModelType = document.getElementById("modelTypeSelector");
-    const benchmarkedModelUploadTime = document.getElementById("averageUploadTime");
-    const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime");
-
-    if (benchmarkedModelType.value == "") {
-      benchmarkedModelType.classList.add(modelTestingStyles.noInputSelectedPosible);
-      benchmarkedModelType.style.animation = "none";
-      benchmarkedModelType.offsetHeight;
-      benchmarkedModelType.style.animation = null;
-    };
-
-    if (benchmarkedModelUploadTime.value == 0) {
-      benchmarkedModelUploadTime.classList.add(modelTestingStyles.noInputSelectedPosible);
-      benchmarkedModelUploadTime.style.animation = "none";
-      benchmarkedModelUploadTime.offsetHeight;
-      benchmarkedModelUploadTime.style.animation = null;
-    }
-
-    if (benchmarkedModelGenerationTime.value == 0) {
-      benchmarkedModelGenerationTime.classList.add(modelTestingStyles.noInputSelectedPosible);
-      benchmarkedModelGenerationTime.style.animation = "none";
-      benchmarkedModelGenerationTime.offsetHeight;
-      benchmarkedModelGenerationTime.style.animation = null;
-    }
-
-    if (benchmarkedModelType.value == "" || benchmarkedModelUploadTime.value == 0 || benchmarkedModelGenerationTime.value == 0) {
-      return;
-    } 
-
-    const models = getModelTimes(benchmarkedModelType.value, benchmarkedModelUploadTime.value, benchmarkedModelGenerationTime.value);
-
-    console.log(models);
-
-    // Get models with closest performance to 5 seconds, 10 seconds, and 15 seconds.
-    const fiveSecondModel = models
-      .filter(model => model.infer_time <= 5)
-      .sort((a,b) => b.quality - a.quality)[0];
-
-    const tenSecondModel = models
-      .filter(model => model.infer_time <= 10)
-      .sort((a,b) => b.quality - a.quality)[0];
-
-    const fifteenSecondModel = models
-      .filter(model => model.infer_time <= 15)
-      .sort((a,b) => b.quality - a.quality)[0];
-
-    let reccomendations = [...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null);
-
-    // Ensure that more than one model is reccomended.
-    if (reccomendations.length < 3) {
-      for (let model of models) {
-        
-        if (!reccomendations.includes(model)) {
-          reccomendations.push(model);
-        }
-        if (reccomendations.length >= 3) {
-          break;
-        }
-      }
-    }
-
-    setRecommendedModels(reccomendations);
-
-  }
-
   const adjustLanguageVisibility = (e) => {
     //console.log(e.target.id);
     currentLanguageOption = e.target.id;
@@ -542,7 +506,7 @@ function ModelTesting() {
     //console.log(shownLanguages());
   }
 
-  const sortTable = (modelType, columnType, deviceType) => {
+  const sortTable = (modelType, columnType) => {
     setSortedDefaultModels(data => {
 
       const newData = {...data};
@@ -552,7 +516,7 @@ function ModelTesting() {
       if (sortingState()["col"] == columnType) {
         nextSortingState = sortingState()["order"] == "desc" ? "asc" : "desc";
       }
-      setSortingState({type:modelType,col:columnType,subcol:deviceType,order:nextSortingState});
+      setSortingState({type:modelType,col:columnType,order:nextSortingState});
 
       if (columnType == "Name") {
         newData[modelType] = [...newData[modelType]].sort((a, b) => {
@@ -563,18 +527,17 @@ function ModelTesting() {
         newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.quality - a.quality : a.quality - b.quality);
       } else if (columnType == "FileSize") {
         newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.file_size - a.file_size : a.file_size - b.file_size);
-      } else {
+      } else if (columnType == "Upload") {
         newData[modelType] = [...newData[modelType]].sort((a, b) => {
-
-          if (a["devices"][columnType] == null && b["devices"][columnType] == null) {
-            return 0;
-          } else if (a["devices"][columnType] == null) {
-            return 1;
-          } else if (b["devices"][columnType] == null) {
-            return -1;
-          } else {
-            return nextSortingState == "desc" ? b["devices"][columnType][deviceType] - a["devices"][columnType][deviceType] : a["devices"][columnType][deviceType] - b["devices"][columnType][deviceType];
-          }
+          const aValue = speedTiers[a.upload_tier];
+          const bValue = speedTiers[b.upload_tier];
+          return nextSortingState == "desc" ? bValue - aValue : aValue - bValue
+        });
+      } else if (columnType == "Generation") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => {
+          const aValue = speedTiers[a.inference_tier];
+          const bValue = speedTiers[b.inference_tier];
+          return nextSortingState == "desc" ? bValue - aValue : aValue - bValue
         });
       }
 
@@ -591,6 +554,10 @@ function ModelTesting() {
   };
 
   onMount(async () => {
+
+    //console.log(navigator.hardwareConcurrency);
+    //console.log(navigator.deviceMemory);
+
     if (!navigator.gpu) return;
     try {
       const adapter = await navigator.gpu.requestAdapter();
@@ -626,33 +593,32 @@ function ModelTesting() {
                     <th rowspan="2"><button id onClick={() => sortTable(type, "Name")}>Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
                     <th rowspan="2"><button onClick={() => sortTable(type, "Quality")}>Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
                     <th rowspan="2"><button onClick={() => sortTable(type, "FileSize")}>File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <For each={recommendationDevices}>{(device) => 
-                      <th colspan="2">{device}</th>
-                    }</For>
-                  </tr>
-                  <tr>
-                    <For each={recommendationDevices}>{(device) => 
-                      <>
-                        <th><button onClick={() => sortTable(type, device, "upload")}>Estimated Upload {sortingState().subcol == "upload" && sortingState().col == device && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                        <th><button onClick={() => sortTable(type, device, "inference")}>Estimated Runtime {sortingState().subcol == "inference" && sortingState().col == device && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                      </>
-                    }</For>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Upload")}>Upload Time Teir {sortingState().col == "Upload" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Generation")}>Run Time Teir {sortingState().col == "Generation" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <For each={sortedDefaultModels()[type]}>{(model) =>
+                  <For each={sortedDefaultModels()[type]}>{(model) => 
                     <tr>
                       <td>
                         <b>{model.name}</b><br/>
                         <span>One line about model</span></td>
                       <td>{model.quality} / 10</td>
                       <td>{model.file_size} GB</td> 
-                      <For each={recommendationDevices}>{(device) => 
-                        <>
-                          <td>{model.devices[device] == null ? "No data" : model.devices[device].upload + " sec"}</td> 
-                          <td>{model.devices[device] == null ? "No data" : model.devices[device].inference + " sec"}</td> 
-                        </>
-                      }</For>
+                      <td
+                        class={
+                          model.upload_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
+                          model.upload_tier == "average" ? modelTestingStyles.averageTierModel : "" +
+                          model.upload_tier == "slow" ? modelTestingStyles.slowTierModel : ""
+                        }
+                      >{model.upload_tier}</td> 
+                      <td
+                        class={
+                          model.inference_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
+                          model.inference_tier == "average" ? modelTestingStyles.averageTierModel : "" +
+                          model.inference_tier == "slow" ? modelTestingStyles.slowTierModel : ""
+                        }>
+                        {model.inference_tier}</td> 
                     </tr>
                   }</For>
                 </tbody>
