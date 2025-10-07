@@ -7,6 +7,7 @@ import { ChatContext } from '../ChatContext';
 import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
+import { getChatHistories } from '../../../utils/ChatHistory';
 
 
 function Summarize() {
@@ -73,10 +74,11 @@ function Summarize() {
 
   // Checks the cache for models that can be used for summarization.
   onMount(async () => {
-    let modelNames = await getCachedModelsNames('summarization');
+    setAvailableModels(await getCachedModelsNames('summarization'));
 
-    if (modelNames.length == 0) driverObj.drive()
-    else setAvailableModels(modelNames);
+    let chats = getChatHistories();
+    chats = chats.filter(c => c.chatType == 'summarize');
+    if (chats.length <= 1) driverObj.drive();
   });
 
   const addModel = async () => {

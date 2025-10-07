@@ -7,6 +7,7 @@ import styles from './QuestionAnswer.module.css';
 import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
+import { getChatHistories } from '../../../utils/ChatHistory';
 
 
 function QuestionAnswer() {
@@ -81,10 +82,11 @@ function QuestionAnswer() {
   });
 
   onMount(async () => {
-    let modelNames = await getCachedModelsNames('question-answering');
+    setAvailableModels(await getCachedModelsNames('question-answering'));
 
-    if (modelNames.length == 0) driverObj.drive()
-    else setAvailableModels(modelNames);
+    let chats = getChatHistories();
+    chats = chats.filter(c => c.chatType == "question-answer");
+    if (chats.length <= 1) driverObj.drive();
   });
 
   const addModel = async () => {
