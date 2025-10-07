@@ -6,30 +6,41 @@ import { modelBenchmarks } from './modelBenchmarks.js';
 import { classList } from 'solid-js/web';
 import * as ort from 'onnxruntime-web';
 
-function filterForTopModels(models) {
-  const qualitySortedModels = models.sort((a,b) => b.quality - a.quality);
+function filterForModels(models, allModels = false) {
 
-  if (qualitySortedModels.length <= 5) {
-    return qualitySortedModels
+  if (allModels) {
+    return models
   } else {
-    const top4Quality = qualitySortedModels.slice(0,4);
-    let otherModels = qualitySortedModels.filter(m => !top4Quality.includes(m));
-    
-    let fastestFifthModel = null;
-    const speedTiers = ["fast","average","slow"];
-    for (const tier of speedTiers) {
-      let speedModels = otherModels.filter(m => m.inference_tier == tier);
+    const qualitySortedModels = models.sort((a,b) => b.quality - a.quality);
 
-      if (speedModels.length > 0) {
-        const qualitySpeedModels = speedModels.sort((a,b) => b.quality - a.quality);
-        fastestFifthModel = qualitySpeedModels[0];
-        break;
+    if (qualitySortedModels.length <= 5) {
+      return qualitySortedModels
+    } else {
+      const top4Quality = qualitySortedModels.slice(0,4);
+      let otherModels = qualitySortedModels.filter(m => !top4Quality.includes(m));
+      
+      let fastestFifthModel = null;
+      const speedTiers = ["fast","average","slow"];
+      for (const tier of speedTiers) {
+        let speedModels = otherModels.filter(m => m.inference_tier == tier);
+
+        if (speedModels.length > 0) {
+          const qualitySpeedModels = speedModels.sort((a,b) => b.quality - a.quality);
+          fastestFifthModel = qualitySpeedModels[0];
+          break;
+        }
       }
+      return [...top4Quality, fastestFifthModel];
     }
-    return [...top4Quality, fastestFifthModel];
   }
+}
 
-  return qualitySortedModels;
+function changeRecommendingAllModels(modelTypes, status) {
+  let models = {}
+  for (const modelType of modelTypes) {
+    models[modelType] = filterForModels(modelBenchmarks[modelType], status);
+  }
+  return models
 }
 
 function ModelTesting() {
@@ -40,13 +51,12 @@ function ModelTesting() {
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
 
-  const filteredModels = {}
+  const [sortedDefaultModels, setSortedDefaultModels] = createSignal([]);
+  let filteredModels = {}
   const allowedModelTypes = ["summarization","question-answering","translation"];
-  for (const modelType of allowedModelTypes) {
-    filteredModels[modelType] = filterForTopModels(modelBenchmarks[modelType]);
-  }
+  setSortedDefaultModels(changeRecommendingAllModels(allowedModelTypes, false));
 
-  const [sortedDefaultModels, setSortedDefaultModels] = createSignal(filteredModels);
+
   const [sortingState, setSortingState] = createSignal({type:null,col:null,order:"desc"})
 
   const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
@@ -576,11 +586,19 @@ function ModelTesting() {
         <h2>Model Recommendations</h2>
 
         <div>
-          <ul class={modelTestingStyles.optionMenuSubTabs}>
-            <For each={allowedModelTypes}>{(type) =>
-              <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
-            }</For>
-          </ul>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <ul class={modelTestingStyles.optionMenuSubTabs}>
+              <For each={allowedModelTypes}>{(type) =>
+                <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
+              }</For>
+            </ul>
+            
+            <div>
+              <label for="includeAllModels">Show filtered model list: </label>
+              <input id="includeAllModels" type="checkbox" checked="true" onChange={(e) => setSortedDefaultModels(changeRecommendingAllModels(allowedModelTypes, !e.target.checked))}></input>
+            </div>
+            
+          </div>
 
           <For each={allowedModelTypes}>{(type) =>
             <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
@@ -629,8 +647,8 @@ function ModelTesting() {
       </div>
 
       <div class={modelTestingStyles.modelTesting}>
-        <h2>Model Testing:</h2>
-        <h4>Select models to benchmark:</h4>
+        <h2>Model Testing</h2>
+        <h4>Select models to benchmark</h4>
 
         <div class={modelTestingStyles.benchmarkingButtons}>
           <div class={modelTestingStyles.leftButtons}>

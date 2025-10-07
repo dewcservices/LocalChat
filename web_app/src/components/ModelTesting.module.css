@@ -242,6 +242,11 @@ input[type=number] {
     z-index: 2;
 }
 
+.defaultRecommendationMenu th {
+    background-color: var(--background-secondary);
+    padding: 1em;
+}
+
 .benchmarkingButtons {
     display: flex;
     justify-content: space-between;
@@ -253,7 +258,7 @@ input[type=number] {
     margin: 0;
 }
 
-.benchmarkingButtons .leftButtons, .benchmarkingButtons .rightButtons {
+.leftButtons, .rightButtons {
     display: flex;
     gap: 10px;
 }
