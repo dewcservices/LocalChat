@@ -14,6 +14,12 @@ function ModelTesting() {
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
 
+  const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
+  const [sortedDefaultModels, setSortedDefaultModels] = createSignal(modelBenchmarks);
+  const [sortingState, setSortingState] = createSignal({type:null,col:null,subcol:null,order:"desc"})
+
+  const recommendationDevices = ["i7-12700F","i5-1135G7"];
+
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
   setSubMenuID(0);
@@ -29,6 +35,7 @@ function ModelTesting() {
   const addModel = async (event) => {
     const files = [...event.target.files];
 
+    console.log(files);
     // No file added
     if (files.length == 0) {
       return;
@@ -375,12 +382,6 @@ function ModelTesting() {
 
   const toggleAdvancedOptions = () => {
     setMenuIsOpen(!menuIsOpen());
-    const btn = document.getElementById("advancedOptionsMenuButton");
-    if (menuIsOpen()) {
-      btn.innerHTML = "Advanced Options<br />⮟"
-    } else {
-      btn.innerHTML = "Advanced Options<br />⮝"
-    }
   }
 
   const copyTable = () => {
@@ -541,6 +542,46 @@ function ModelTesting() {
     //console.log(shownLanguages());
   }
 
+  const sortTable = (modelType, columnType, deviceType) => {
+    setSortedDefaultModels(data => {
+
+      const newData = {...data};
+
+      // Toggle the sorting state if the current column was just sorted for the opposite type, otherwise default to descending.
+      let nextSortingState = "desc";
+      if (sortingState()["col"] == columnType) {
+        nextSortingState = sortingState()["order"] == "desc" ? "asc" : "desc";
+      }
+      setSortingState({type:modelType,col:columnType,subcol:deviceType,order:nextSortingState});
+
+      if (columnType == "Name") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => {
+          if (a.name < b.name) {return nextSortingState == "desc" ? -1 : 1}
+          if (a.name > b.name) {return nextSortingState == "desc" ? 1 : -1}
+        });
+      } else if (columnType == "Quality") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.quality - a.quality : a.quality - b.quality);
+      } else if (columnType == "FileSize") {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.file_size - a.file_size : a.file_size - b.file_size);
+      } else {
+        newData[modelType] = [...newData[modelType]].sort((a, b) => {
+
+          if (a["devices"][columnType] == null && b["devices"][columnType] == null) {
+            return 0;
+          } else if (a["devices"][columnType] == null) {
+            return 1;
+          } else if (b["devices"][columnType] == null) {
+            return -1;
+          } else {
+            return nextSortingState == "desc" ? b["devices"][columnType][deviceType] - a["devices"][columnType][deviceType] : a["devices"][columnType][deviceType] - b["devices"][columnType][deviceType];
+          }
+        });
+      }
+
+      return newData;
+    })
+  }
+
   // Change the active processor.
   const changeProcessor = (newProcessor) => {
     if (processor() == newProcessor) return;
@@ -564,23 +605,81 @@ function ModelTesting() {
 
   return (
     <>
+    <div class={modelTestingStyles.modelTesting}>
+        <h2>Model Recommendations</h2>
+
+        <div>
+          <ul class={modelTestingStyles.optionMenuSubTabs}>
+            <For each={allowedModelTypes}>{(type) =>
+              <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
+            }</For>
+          </ul>
+
+          <For each={allowedModelTypes}>{(type) =>
+            <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
+              <table class={modelTestingStyles.tableMMLU}>
+                <colgroup>
+                  <col style="width: 25vw;" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th rowspan="2"><button id onClick={() => sortTable(type, "Name")}>Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Quality")}>Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "FileSize")}>File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <For each={recommendationDevices}>{(device) => 
+                      <th colspan="2">{device}</th>
+                    }</For>
+                  </tr>
+                  <tr>
+                    <For each={recommendationDevices}>{(device) => 
+                      <>
+                        <th><button onClick={() => sortTable(type, device, "upload")}>Estimated Upload {sortingState().subcol == "upload" && sortingState().col == device && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                        <th><button onClick={() => sortTable(type, device, "inference")}>Estimated Runtime {sortingState().subcol == "inference" && sortingState().col == device && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                      </>
+                    }</For>
+                  </tr>
+                </thead>
+                <tbody>
+                  <For each={sortedDefaultModels()[type]}>{(model) =>
+                    <tr>
+                      <td>
+                        <b>{model.name}</b><br/>
+                        <span>One line about model</span></td>
+                      <td>{model.quality} / 10</td>
+                      <td>{model.file_size} GB</td> 
+                      <For each={recommendationDevices}>{(device) => 
+                        <>
+                          <td>{model.devices[device] == null ? "No data" : model.devices[device].upload + " sec"}</td> 
+                          <td>{model.devices[device] == null ? "No data" : model.devices[device].inference + " sec"}</td> 
+                        </>
+                      }</For>
+                    </tr>
+                  }</For>
+                </tbody>
+              </table>
+            </div>
+          }</For>
+        </div>
+      </div>
+
       <div class={modelTestingStyles.modelTesting}>
         <h2>Model Testing:</h2>
         <h4>Select models to benchmark:</h4>
 
-        <div>
-          {/* Select Model/s for benchmarking */}
-          <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
-          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
-            Select Models
-          </label>
-                      
-          <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1}>Benchmark</button>
-          <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1}>Clear Models</button>
-        </div>
-
-        <div>
-          <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
+        <div class={modelTestingStyles.benchmarkingButtons}>
+          <div class={modelTestingStyles.leftButtons}>
+            {/* Select Model/s for benchmarking */}
+            <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
+            <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
+              Select Models
+            </label>
+                        
+            <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Benchmark</button>
+          </div>
+          <div class={modelTestingStyles.rightButtons}>
+            <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Clear Models</button>
+            <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()} classList={{ hidden: selectedModels().length == 0}}>⚙︎</button>
+          </div>
         </div>
 
         <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? "" : modelTestingStyles.menuClosed}`} id='advancedOptionsMenu'>
@@ -675,7 +774,7 @@ function ModelTesting() {
           </div>
         </div>
 
-        <div id="tableContainer" class={modelTestingStyles.tableContainer}>
+        <div id="tableContainer" class={modelTestingStyles.tableContainer} classList={{ hidden: selectedModels().length == 0}}>
           <table class={modelTestingStyles.tableMMLU}>
             <colgroup>
               <col/>
@@ -704,64 +803,9 @@ function ModelTesting() {
               }</For>
             </tbody>
           </table>
-        </div>
-        <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
-
-        <br /><br /><br />
-
-        <div id="modelRecommendationFeature" class={modelTestingStyles.recommendationArea}>
-          <p>This is for recommending models based on an estimate of your devices performance. Please enter the times it takes to run the baseline model on your device. The list of baseline models can be found <a title="TODO">TODO: Here</a>.</p>
           
-          <label for="modelTypeSelector">Model Type: </label>
-          <select name="modelTypeSelector" id="modelTypeSelector" class={modelTestingStyles.dropDownMenu}>
-            <option value="">Select Model Type</option>
-            <For each={allowedModelTypes}>{(type) =>
-              <option value={type}>{type}</option>
-            }</For>
-          </select> 
-
-          <br /><br />
-
-          <div class={modelTestingStyles.recommendationInputArea}>
-            <div>
-              <label for="averageUploadTime">Average Upload Time: </label>
-              <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
-
-              <label for="averageGenerationTime">Average Generation Time: </label>
-              <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
-            </div>
-          </div>
-          
-          <br />
-          <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Recommend Models</button>
-          <br />
-
         </div>
-        <div id="recommendedModelContainer" classList={{ hidden: recommenedModels().length == 0}}>
-          <p>These are a selection of recommended models based on your device:</p>
-          <table class={modelTestingStyles.tableMMLU}>
-            <thead>
-              <tr>
-                <th>Model Name</th>
-                <th>File Size</th>
-                <th>Predicted Upload Time</th>
-                <th>Predicted Generation Time</th>
-                <th>Output Quality Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={recommenedModels()}>{(model) =>
-                <tr>
-                  <td>{model.name}</td>
-                  <td>{model.file_size}</td>
-                  <td>{model.upload_time}</td>
-                  <td>{model.infer_time}</td>
-                  <td>{model.quality}</td>
-                </tr>
-              }</For>
-            </tbody>
-          </table>
-        </div>
+        <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()} classList={{ hidden: selectedModels().length == 0}}>Copy table to clipboard 📋</button>
       </div>
     </>
   );
