@@ -236,3 +236,23 @@
     background-color: var(--selected-button-colour);
     transform: scale(0.95);
 }
+
+/* sidebar toggle button */
+.toggleSidebarButton {
+    position: fixed;
+    left: 0;
+    top: 20px;
+    z-index: 1000;
+    background: var(--selected-button-colour);
+    border: 1px solid var(--highlight-colour);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-colour);
+    font-size: 16px;
+}
+
+.toggleSidebarButton:hover {
+    background: var(--highlight-colour);
+}
