@@ -175,8 +175,6 @@ function ModelTesting() {
       let generator;
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading: 0/" + globalModelRunCount;
 
-      // reset browser cache to clear any previous models
-      await caches.delete('transformers-cache');
       let cache = await caches.open('transformers-cache');
 
       // Run the model multiple times based on the global model run count
