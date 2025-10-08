@@ -1,66 +1,15 @@
 import { createSignal, For, onMount, createMemo } from 'solid-js';
-import { pathJoin } from '../utils/PathJoin';
 import { pipeline, env,  } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
-import { modelBenchmarks } from './modelBenchmarks.js';
-import { classList } from 'solid-js/web';
-import * as ort from 'onnxruntime-web';
-import { getCachedModelsNames, cacheModels } from '../utils/ModelCache';
-
-function filterForModels(models, allModels = false) {
-
-  if (allModels) {
-    return models
-  } else {
-    const qualitySortedModels = models.sort((a,b) => b.quality - a.quality);
-
-    if (qualitySortedModels.length <= 5) {
-      return qualitySortedModels
-    } else {
-      const top4Quality = qualitySortedModels.slice(0,4);
-      let otherModels = qualitySortedModels.filter(m => !top4Quality.includes(m));
-      
-      let fastestFifthModel = null;
-      const speedTiers = ["fast","average","slow"];
-      for (const tier of speedTiers) {
-        let speedModels = otherModels.filter(m => m.inference_tier == tier);
-
-        if (speedModels.length > 0) {
-          const qualitySpeedModels = speedModels.sort((a,b) => b.quality - a.quality);
-          fastestFifthModel = qualitySpeedModels[0];
-          break;
-        }
-      }
-      return [...top4Quality, fastestFifthModel];
-    }
-  }
-}
-
-function changeRecommendingAllModels(modelTypes, status) {
-  let models = {}
-  for (const modelType of modelTypes) {
-    models[modelType] = filterForModels(modelBenchmarks[modelType], status);
-  }
-  return models
-}
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
   
-  const speedTiers = {"fast":5,"average":10,"slow":15};
   const defaultLanguages = ["English","French"];
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
 
-  const [sortedDefaultModels, setSortedDefaultModels] = createSignal([]);
-  let filteredModels = {}
   const allowedModelTypes = ["summarization","question-answering","translation"];
-  setSortedDefaultModels(changeRecommendingAllModels(allowedModelTypes, false));
-
-
-  const [sortingState, setSortingState] = createSignal({type:null,col:null,order:"desc"})
-
-  const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -68,8 +17,6 @@ function ModelTesting() {
 
   // Variable to store most recent benchmarking data.
   const [benchmarkData, setBenchmarkData] = createSignal([]);
-  
-  const [recommenedModels, setRecommendedModels] = createSignal([]);
 
   const [processor, setProcessor] = createSignal("wasm");
   setProcessor("wasm");
@@ -188,7 +135,7 @@ function ModelTesting() {
       let generator;
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading: 0/" + globalModelRunCount;
 
-      let cache = await caches.open('transformers-cache');
+      //let cache = await caches.open('transformers-cache');
 
       // Run the model multiple times based on the global model run count
       for (let j = 1; j < (globalModelRunCount + 1); j++) {
@@ -455,26 +402,6 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
-  const getModelTimes = (modelType, uploadTime, inferenceTime) => {
-    const originalModels = modelBenchmarks[modelType];
-
-    const updatedModels = originalModels
-      .map(model => ({
-        ...model,
-        upload_time: model.upload_time * uploadTime,
-        infer_time: model.infer_time * inferenceTime,
-      }))
-      .sort((a,b) => {
-        if (a.quality !== b.quality) {
-          return b.quality - a.quality;
-        }
-        return a.infer_time - b.infer_time;
-      });
-
-    return updatedModels;
-
-  }
-
   const adjustLanguageVisibility = async (e) => {
     //console.log(e.target.id);
     currentLanguageOption = e.target.id;
@@ -522,45 +449,6 @@ function ModelTesting() {
     //console.log(shownLanguages());
   }
 
-  const sortTable = (modelType, columnType) => {
-    setSortedDefaultModels(data => {
-
-      const newData = {...data};
-
-      // Toggle the sorting state if the current column was just sorted for the opposite type, otherwise default to descending.
-      let nextSortingState = "desc";
-      if (sortingState()["col"] == columnType) {
-        nextSortingState = sortingState()["order"] == "desc" ? "asc" : "desc";
-      }
-      setSortingState({type:modelType,col:columnType,order:nextSortingState});
-
-      if (columnType == "Name") {
-        newData[modelType] = [...newData[modelType]].sort((a, b) => {
-          if (a.name < b.name) {return nextSortingState == "desc" ? -1 : 1}
-          if (a.name > b.name) {return nextSortingState == "desc" ? 1 : -1}
-        });
-      } else if (columnType == "Quality") {
-        newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.quality - a.quality : a.quality - b.quality);
-      } else if (columnType == "FileSize") {
-        newData[modelType] = [...newData[modelType]].sort((a, b) => nextSortingState == "desc" ? b.file_size - a.file_size : a.file_size - b.file_size);
-      } else if (columnType == "Upload") {
-        newData[modelType] = [...newData[modelType]].sort((a, b) => {
-          const aValue = speedTiers[a.upload_tier];
-          const bValue = speedTiers[b.upload_tier];
-          return nextSortingState == "desc" ? bValue - aValue : aValue - bValue
-        });
-      } else if (columnType == "Generation") {
-        newData[modelType] = [...newData[modelType]].sort((a, b) => {
-          const aValue = speedTiers[a.inference_tier];
-          const bValue = speedTiers[b.inference_tier];
-          return nextSortingState == "desc" ? bValue - aValue : aValue - bValue
-        });
-      }
-
-      return newData;
-    })
-  }
-
   // Change the active processor.
   const changeProcessor = (newProcessor) => {
     if (processor() == newProcessor) return;
@@ -588,70 +476,6 @@ function ModelTesting() {
 
   return (
     <>
-    <div class={modelTestingStyles.modelTesting}>
-        <h2>Model Recommendations</h2>
-
-        <div>
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <ul class={modelTestingStyles.optionMenuSubTabs}>
-              <For each={allowedModelTypes}>{(type) =>
-                <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
-              }</For>
-            </ul>
-            
-            <div>
-              <label for="includeAllModels">Show filtered model list: </label>
-              <input id="includeAllModels" type="checkbox" checked="true" onChange={(e) => setSortedDefaultModels(changeRecommendingAllModels(allowedModelTypes, !e.target.checked))}></input>
-            </div>
-            
-          </div>
-
-          <For each={allowedModelTypes}>{(type) =>
-            <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
-              <table class={modelTestingStyles.tableMMLU}>
-                <colgroup>
-                  <col style="width: 25vw;" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th rowspan="2"><button id onClick={() => sortTable(type, "Name")} title="Sort my model name">Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "Quality")} title="Sort by (currently) quality estimation">Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "FileSize")} title="Sort my file size (Gigabytes)">File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "Upload")} title="Sort by speed it takes model to create pipeline">Upload Time Tier {sortingState().col == "Upload" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "Generation")} title="Sort by speed it takes model to generate output">Run Time Tier {sortingState().col == "Generation" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={sortedDefaultModels()[type]}>{(model) => 
-                    <tr>
-                      <td>
-                        <b>{model.name}</b><br/>
-                        <span>One line about model</span></td>
-                      <td>{model.quality} / 10</td>
-                      <td>{model.file_size} GB</td> 
-                      <td
-                        class={
-                          model.upload_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
-                          model.upload_tier == "average" ? modelTestingStyles.averageTierModel : "" +
-                          model.upload_tier == "slow" ? modelTestingStyles.slowTierModel : ""
-                        }
-                      >{model.upload_tier.charAt(0).toUpperCase() + model.upload_tier.slice(1)}</td> 
-                      <td
-                        class={
-                          model.inference_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
-                          model.inference_tier == "average" ? modelTestingStyles.averageTierModel : "" +
-                          model.inference_tier == "slow" ? modelTestingStyles.slowTierModel : ""
-                        }>
-                        {model.inference_tier.charAt(0).toUpperCase() + model.inference_tier.slice(1)}</td> 
-                    </tr>
-                  }</For>
-                </tbody>
-              </table>
-            </div>
-          }</For>
-        </div>
-      </div>
-
       <div class={modelTestingStyles.modelTesting}>
         <h2>Model Testing</h2>
         <h4>Select models to benchmark</h4>
