@@ -92,16 +92,14 @@ function ModelTesting() {
 
 
     // add uploaded files to the cache
-    let models = await cacheModels(files);
-    let modelNames = models.map(mn => mn.modelName);
+    let uploadedModels = await cacheModels(files);
+    let modelNames = uploadedModels.map(mn => mn.modelName);
 
-    // check if uploaded models already chosen to benchmark
-    models = selectedModels().slice();
+    // add models to list of available models
+    let models = selectedModels().slice();
     for (let modelName of modelNames) {
       if (!models.some(mn => mn.name == modelName)) {
-
-        // if not chosen, create new model object and add to the cache
-        const currentModel = existingModels.filter(mn => mn.modelName == modelName)[0];
+        const currentModel = uploadedModels.filter(mn => mn.modelName == modelName)[0];
         let model = {name: modelName, modelType: currentModel.task, languages:null};
 
         // get languages for a translation model.
@@ -122,6 +120,7 @@ function ModelTesting() {
     }
 
     setSelectedModels(models);
+
 
     // Reset the input incase the model is removed and needs to be re-added.
     event.target.value = "";
