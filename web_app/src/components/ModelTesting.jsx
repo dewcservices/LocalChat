@@ -5,6 +5,7 @@ import modelTestingStyles from './ModelTesting.module.css';
 import { modelBenchmarks } from './modelBenchmarks.js';
 import { classList } from 'solid-js/web';
 import * as ort from 'onnxruntime-web';
+import { getCachedModelsNames, cacheModels } from '../utils/ModelCache';
 
 function filterForModels(models, allModels = false) {
 
@@ -89,25 +90,38 @@ function ModelTesting() {
       return;
     }
 
-    // Read config file
-    let fileText = await configFile.text();
-    fileText = JSON.parse(fileText);
 
-    // Check if model type is supported for benchmarking
-    if (!allowedModelTypes.find((element) => element == fileText.task)) {
-      alert("Model type '" + fileText.task + "' not supported for benchmarking");
-      return;
+    // add uploaded files to the cache
+    let models = await cacheModels(files);
+    let modelNames = models.map(mn => mn.modelName);
+
+    // check if uploaded models already chosen to benchmark
+    models = selectedModels().slice();
+    for (let modelName of modelNames) {
+      if (!models.some(mn => mn.name == modelName)) {
+
+        // if not chosen, create new model object and add to the cache
+        const currentModel = existingModels.filter(mn => mn.modelName == modelName)[0];
+        let model = {name: modelName, modelType: currentModel.task, languages:null};
+
+        // get languages for a translation model.
+        if (currentModel.task == "translation") {
+          let cache = await caches.open('transformers-cache');
+          let cacheKeys = await cache.keys();
+          let configKey = cacheKeys.filter(k => k.url.includes("browser_config.json") && k.url.includes(modelName))[0];
+
+          let response = await cache.match(configKey);
+          let array = await response.arrayBuffer();
+          let config = JSON.parse((new TextDecoder()).decode(array));
+
+          model.languages = config.languages;
+        }
+
+        models.push(model);
+      };
     }
 
-    // Create model JSON to store model.
-    const model = {
-      name: fileText.modelName,
-      files: files,
-      modelType: fileText.task,
-      languages: fileText.languages,
-    };
-
-    setSelectedModels([...selectedModels(), model]);
+    setSelectedModels(models);
 
     // Reset the input incase the model is removed and needs to be re-added.
     event.target.value = "";
@@ -197,36 +211,6 @@ function ModelTesting() {
 
         startTime = performance.now();
 
-        // Upload models to browsers cache.
-        for (let file of model.files) {
-    
-          let cacheKey = pathJoin(
-            env.remoteHost, 
-            env.remotePathTemplate
-              .replaceAll('{model}', model.name)
-              .replaceAll('{revision}', 'main'),
-            file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
-          );
-
-          // Ensure that the models files have been cached properly before moving on.
-          // This prevents the app from seeing no files, and trying to request them from hugging face.
-          await new Promise((resolve, reject) => {
-            let fileReader = new FileReader();
-            fileReader.onload = async () => {
-              let arrayBuffer = fileReader.result;
-              let uint8Array = new Uint8Array(arrayBuffer);
-              
-              try {
-                await cache.put(cacheKey, new Response(uint8Array));
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            };
-            fileReader.readAsArrayBuffer(file);
-          });
-        };
-    
         // Create pipeline for the generator;
         try {
           generator = await pipeline(model.modelType, model.name, { device: processor() });
@@ -492,7 +476,7 @@ function ModelTesting() {
 
   }
 
-  const adjustLanguageVisibility = (e) => {
+  const adjustLanguageVisibility = async (e) => {
     //console.log(e.target.id);
     currentLanguageOption = e.target.id;
 
@@ -521,6 +505,7 @@ function ModelTesting() {
           continue;
         }
 
+        // Load Languages
         let modelLanguages = selectedModels()[i].languages;
 
         if (firstModel) {
