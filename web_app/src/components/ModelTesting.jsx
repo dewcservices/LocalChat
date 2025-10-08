@@ -463,7 +463,7 @@ function ModelTesting() {
         tableString += row.cells[1].innerHTML + "\t";  // AVG Upload Time
         tableString += row.cells[2].innerHTML + "\t";  // AVG Generation Time
       } else {
-        currentModelType = row.firstChild.firstChild.querySelector("span").innerHTML
+        currentModelType = row.firstChild.firstChild.querySelector("span").innerHTML.toLowerCase()
       }
       
       
@@ -632,11 +632,11 @@ function ModelTesting() {
                 </colgroup>
                 <thead>
                   <tr>
-                    <th rowspan="2"><button id onClick={() => sortTable(type, "Name")}>Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "Quality")}>Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "FileSize")}>File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "Upload")}>Upload Time Teir {sortingState().col == "Upload" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
-                    <th rowspan="2"><button onClick={() => sortTable(type, "Generation")}>Run Time Teir {sortingState().col == "Generation" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button id onClick={() => sortTable(type, "Name")} title="Sort my model name">Model Information {sortingState().col == "Name" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Quality")} title="Sort by (currently) quality estimation">Output Quality {sortingState().col == "Quality" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "FileSize")} title="Sort my file size (Gigabytes)">File Size {sortingState().col == "FileSize" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Upload")} title="Sort by speed it takes model to create pipeline">Upload Time Tier {sortingState().col == "Upload" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
+                    <th rowspan="2"><button onClick={() => sortTable(type, "Generation")} title="Sort by speed it takes model to generate output">Run Time Tier {sortingState().col == "Generation" && sortingState().type == type ? sortingState().order == "desc" ? "⇊" : "⇈" : "⇅" }</button></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -653,14 +653,14 @@ function ModelTesting() {
                           model.upload_tier == "average" ? modelTestingStyles.averageTierModel : "" +
                           model.upload_tier == "slow" ? modelTestingStyles.slowTierModel : ""
                         }
-                      >{model.upload_tier}</td> 
+                      >{model.upload_tier.charAt(0).toUpperCase() + model.upload_tier.slice(1)}</td> 
                       <td
                         class={
                           model.inference_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
                           model.inference_tier == "average" ? modelTestingStyles.averageTierModel : "" +
                           model.inference_tier == "slow" ? modelTestingStyles.slowTierModel : ""
                         }>
-                        {model.inference_tier}</td> 
+                        {model.inference_tier.charAt(0).toUpperCase() + model.inference_tier.slice(1)}</td> 
                     </tr>
                   }</For>
                 </tbody>
@@ -800,15 +800,15 @@ function ModelTesting() {
             </thead>
             
             <For each={allowedModelTypes}>{(type) => {
-              // make filteredModels reactive
+
               const filteredModels = createMemo(() =>
-                selectedModels().filter(m => m.modelType.toLowerCase() === type.toLowerCase())
+                selectedModels().filter(m => m.modelType == type)
               );
               return (
                 <Show when={filteredModels().length > 0}>
                   <tbody>
                     <tr>
-                      <td colspan="4" style="padding:0.5em 0em"><b><span>{type}</span> Models</b></td>
+                      <td colspan="4" style="padding:0.5em 0em"><b><span>{type.charAt(0).toUpperCase() + type.slice(1)}</span> Models</b></td>
                     </tr>
                     <For each={filteredModels()}>{(model) =>
                       <tr>
