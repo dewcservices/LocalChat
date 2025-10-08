@@ -96,7 +96,7 @@ function ModelRecommendation() {
         <h2>Model Recommendations</h2>
         <p>
           This table contains the list of models available from the LocalChat Github release page. You can choose a model type to focusm which is by default "Summarization", and sort by each column type to find the model that is best for your needs.
-          Hover over a column name for a further description on what it lists
+          Hover over a column name for a further description on what it lists.
           This program cannot estimate how long each model will take to run on your hardware, but the models is the "fast" speed tier should almost always be the fastest available.
           If you want to directly test any models you have downloaded to your device, or want to see how models not on this table compare, try the <A href="/testing">Model Testing Page</A>.
         </p>

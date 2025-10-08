@@ -1,6 +1,7 @@
 import { createSignal, For, onMount, createMemo } from 'solid-js';
 import { pipeline, env,  } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
+import { getCachedModelsNames, cacheModels } from '../utils/ModelCache';
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
