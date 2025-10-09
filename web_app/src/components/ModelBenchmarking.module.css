@@ -18,7 +18,7 @@
 
 .tableContainer {
     margin-top: 1em;
-    border: 1px solid black;
+    /* border: 1px solid black; */
     overflow-x: auto;
     max-width: 75vw;
     scrollbar-color: black var(--background-secondary);

@@ -13,8 +13,6 @@ import cancelIcon from '../assets/cancel.png';
 
 
 function Layout(props) {
-  // TODO polish deletion of entire chat history
-  //    - ui button is ugly, and needs to be clearer that the button is dangerous
 
   const location = useLocation();
   const params = useParams();
@@ -124,7 +122,7 @@ const deleteAllChats = () => {
           <h1>Local Chat</h1>
           <A href="recommendation">Model Recommendations</A>
           <br/><br/>
-          <A href="testing">Model Testing</A>
+          <A href="benchmarking">Model Benchmarking</A>
           <br/><br/>
           <A href="/">Create New Chat</A>
           <br/><br/>

@@ -43,7 +43,7 @@ function QuestionAnswer() {
           title: "Selecting a Model",
           description: `
             Next select a model to summarise your text with. 
-            For more information see the <A href="/models">model information page</A>.
+            For more information see the <A href="/recommendation">model information page</A>.
           `
         }
       },

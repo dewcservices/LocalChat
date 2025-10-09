@@ -1,35 +1,34 @@
 import { createSignal, For } from 'solid-js';
-import modelTestingStyles from './ModelTesting.module.css';
+
+import styles from './ModelBenchmarking.module.css';
 import { modelBenchmarks } from './modelBenchmarks.js';
-import { A } from "@solidjs/router";
+
 
 function filterForModels(models, allModels = false) {
 
-  if (allModels) {
-    return models
-  } else {
-    const qualitySortedModels = models.sort((a,b) => b.quality - a.quality);
+  if (allModels) return models;
 
-    if (qualitySortedModels.length <= 5) {
-      return qualitySortedModels
-    } else {
-      const top4Quality = qualitySortedModels.slice(0,4);
-      let otherModels = qualitySortedModels.filter(m => !top4Quality.includes(m));
-      
-      let fastestFifthModel = null;
-      const speedTiers = ["fast","average","slow"];
-      for (const tier of speedTiers) {
-        let speedModels = otherModels.filter(m => m.inference_tier == tier);
+  const qualitySortedModels = models.sort((a,b) => b.quality - a.quality);
 
-        if (speedModels.length > 0) {
-          const qualitySpeedModels = speedModels.sort((a,b) => b.quality - a.quality);
-          fastestFifthModel = qualitySpeedModels[0];
-          break;
-        }
-      }
-      return [...top4Quality, fastestFifthModel];
+  if (qualitySortedModels.length <= 5) {
+    return qualitySortedModels;
+  }
+
+  const top4Quality = qualitySortedModels.slice(0,4);
+  let otherModels = qualitySortedModels.filter(m => !top4Quality.includes(m));
+  
+  let fastestFifthModel = null;
+  const speedTiers = ["fast","average","slow"];
+  for (const tier of speedTiers) {
+    let speedModels = otherModels.filter(m => m.inference_tier == tier);
+
+    if (speedModels.length > 0) {
+      const qualitySpeedModels = speedModels.sort((a,b) => b.quality - a.quality);
+      fastestFifthModel = qualitySpeedModels[0];
+      break;
     }
   }
+  return [...top4Quality, fastestFifthModel];
 }
 
 function changeRecommendingAllModels(modelTypes, status) {
@@ -46,7 +45,6 @@ function ModelRecommendation() {
   const [sortedDefaultModels, setSortedDefaultModels] = createSignal([]);
   const allowedModelTypes = ["summarization","question-answering","translation"];
   setSortedDefaultModels(changeRecommendingAllModels(allowedModelTypes, false));
-
 
   const [sortingState, setSortingState] = createSignal({type:null,col:null,order:"desc"})
   const [defaultRecommendationType, setDefaultRecommendationType] = createSignal(allowedModelTypes[0]);
@@ -92,20 +90,26 @@ function ModelRecommendation() {
 
   return (
     <>
-      <div class={modelTestingStyles.modelTesting}>
+      <div class={styles.modelTesting}>
         <h2>Model Recommendations</h2>
         <p>
-          This table contains the list of models available from the LocalChat Github release page. You can choose a model type to focusm which is by default "Summarization", and sort by each column type to find the model that is best for your needs.
-          Hover over a column name for a further description on what it lists.
-          This program cannot estimate how long each model will take to run on your hardware, but the models is the "fast" speed tier should almost always be the fastest available.
-          If you want to directly test any models you have downloaded to your device, or want to see how models not on this table compare, try the <A href="/testing">Model Testing Page</A>.
+          LocalChat currently supports three features: summarisation, question-answering, and translation.
+        </p>
+        <p>
+          Each feature requires a 'model' to be uploaded and selected to perform the task. I.e. a summarisation model
+          must be chosen to summarise some text. A default model for each task is provided in the 'web_app_[version].zip'
+          under the 'models' folder.
+        </p>
+        <p>
+          Optionally, more models can be downloaded from the <a href="https://github.com/dewcservices/LocalChat/releases">release page</a>.
+          These models are described in the table below.
         </p>
 
         <div>
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <ul class={modelTestingStyles.optionMenuSubTabs}>
+            <ul class={styles.optionMenuSubTabs}>
               <For each={allowedModelTypes}>{(type) =>
-                <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? modelTestingStyles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
+                <li><button onClick={() => setDefaultRecommendationType(type)} class={defaultRecommendationType() == type ? styles.selectedOptionMenuSubTab : ""}>{type.charAt(0).toUpperCase() + type.slice(1)}</button></li>
               }</For>
             </ul>
             
@@ -117,8 +121,8 @@ function ModelRecommendation() {
           </div>
 
           <For each={allowedModelTypes}>{(type) =>
-            <div id={type + "RecommendationSubmenu"} class={modelTestingStyles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
-              <table class={modelTestingStyles.tableMMLU}>
+            <div id={type + "RecommendationSubmenu"} class={styles.defaultRecommendationMenu} classList={{ hidden: defaultRecommendationType() !== type}}>
+              <table class={styles.tableMMLU}>
                 <colgroup>
                   <col style="width: 25vw;" />
                 </colgroup>
@@ -141,16 +145,16 @@ function ModelRecommendation() {
                       <td>{model.file_size} GB</td> 
                       <td
                         class={
-                          model.upload_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
-                          model.upload_tier == "average" ? modelTestingStyles.averageTierModel : "" +
-                          model.upload_tier == "slow" ? modelTestingStyles.slowTierModel : ""
+                          model.upload_tier == "fast" ? styles.fastTierModel : "" +
+                          model.upload_tier == "average" ? styles.averageTierModel : "" +
+                          model.upload_tier == "slow" ? styles.slowTierModel : ""
                         }
                       >{model.upload_tier.charAt(0).toUpperCase() + model.upload_tier.slice(1)}</td> 
                       <td
                         class={
-                          model.inference_tier == "fast" ? modelTestingStyles.fastTierModel : "" +
-                          model.inference_tier == "average" ? modelTestingStyles.averageTierModel : "" +
-                          model.inference_tier == "slow" ? modelTestingStyles.slowTierModel : ""
+                          model.inference_tier == "fast" ? styles.fastTierModel : "" +
+                          model.inference_tier == "average" ? styles.averageTierModel : "" +
+                          model.inference_tier == "slow" ? styles.slowTierModel : ""
                         }>
                         {model.inference_tier.charAt(0).toUpperCase() + model.inference_tier.slice(1)}</td> 
                     </tr>
