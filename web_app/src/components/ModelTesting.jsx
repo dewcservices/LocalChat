@@ -1,18 +1,16 @@
-import { createSignal, For, onMount } from 'solid-js';
-import { pathJoin } from '../utils/PathJoin';
-import { pipeline, env } from '@huggingface/transformers';
+import { createSignal, For, onMount, createMemo } from 'solid-js';
+import { pipeline, env,  } from '@huggingface/transformers';
 import modelTestingStyles from './ModelTesting.module.css';
-import { modelBenchmarks } from './modelBenchmarks.js';
-import { classList } from 'solid-js/web';
+import { getCachedModelsNames, cacheModels } from '../utils/ModelCache';
 
 function ModelTesting() {
   const [selectedModels, setSelectedModels] = createSignal([]);
-
-  const allowedModelTypes = ["summarization","question-answering","translation"];
   
   const defaultLanguages = ["English","French"];
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
   let currentLanguageOption = "unionLanguages";
+
+  const allowedModelTypes = ["summarization","question-answering","translation"];
 
   const [menuIsOpen, setMenuIsOpen] = createSignal([]);
   const [subMenuID, setSubMenuID] = createSignal([]);
@@ -20,8 +18,6 @@ function ModelTesting() {
 
   // Variable to store most recent benchmarking data.
   const [benchmarkData, setBenchmarkData] = createSignal([]);
-  
-  const [recommenedModels, setRecommendedModels] = createSignal([]);
 
   const [processor, setProcessor] = createSignal("wasm");
   setProcessor("wasm");
@@ -29,6 +25,7 @@ function ModelTesting() {
   const addModel = async (event) => {
     const files = [...event.target.files];
 
+    console.log(files);
     // No file added
     if (files.length == 0) {
       return;
@@ -41,25 +38,37 @@ function ModelTesting() {
       return;
     }
 
-    // Read config file
-    let fileText = await configFile.text();
-    fileText = JSON.parse(fileText);
 
-    // Check if model type is supported for benchmarking
-    if (!allowedModelTypes.find((element) => element == fileText.task)) {
-      alert("Model type '" + fileText.task + "' not supported for benchmarking");
-      return;
+    // add uploaded files to the cache
+    let uploadedModels = await cacheModels(files);
+    let modelNames = uploadedModels.map(mn => mn.modelName);
+
+    // add models to list of available models
+    let models = selectedModels().slice();
+    for (let modelName of modelNames) {
+      if (!models.some(mn => mn.name == modelName)) {
+        const currentModel = uploadedModels.filter(mn => mn.modelName == modelName)[0];
+        let model = {name: modelName, modelType: currentModel.task, languages:null};
+
+        // get languages for a translation model.
+        if (currentModel.task == "translation") {
+          let cache = await caches.open('transformers-cache');
+          let cacheKeys = await cache.keys();
+          let configKey = cacheKeys.filter(k => k.url.includes("browser_config.json") && k.url.includes(modelName))[0];
+
+          let response = await cache.match(configKey);
+          let array = await response.arrayBuffer();
+          let config = JSON.parse((new TextDecoder()).decode(array));
+
+          model.languages = config.languages;
+        }
+
+        models.push(model);
+      };
     }
 
-    // Create model JSON to store model.
-    const model = {
-      name: fileText.modelName,
-      files: files,
-      modelType: fileText.task,
-      languages: fileText.languages,
-    };
+    setSelectedModels(models);
 
-    setSelectedModels([...selectedModels(), model]);
 
     // Reset the input incase the model is removed and needs to be re-added.
     event.target.value = "";
@@ -71,9 +80,9 @@ function ModelTesting() {
 
     const table = document.getElementById("tableContainer").querySelector("table");
 
-    const tableUploadTimeCol = 2;
-    const tableGenerationTimeCol = 3;
-    const tableMessageCol = 4;
+    const tableUploadTimeCol = 1;
+    const tableGenerationTimeCol = 2;
+    const tableMessageCol = 3;
 
     // configure transformer js environment
     env.useBrowserCache = true;
@@ -86,7 +95,15 @@ function ModelTesting() {
 
     const modelList = selectedModels();
 
-    if (modelList.length > 0) {
+    let sortedModels = [];
+
+    // Sort models to be in same order as table.
+    for (const type of allowedModelTypes) {
+      const modelsOfType = modelList.filter(m => m.modelType == type);
+      sortedModels.push(...modelsOfType);
+    }
+
+    if (sortedModels.length > 0) {
       setBenchmarkData([]);
     }
 
@@ -99,20 +116,27 @@ function ModelTesting() {
     document.getElementById("benchmarkButton").disabled = true;
     document.getElementById("clearButton").disabled = true;
 
-    // Loop through each model, injecting the model into the cache, and running a sample prompt.
-    for (let i = 0; i < modelList.length; i++) {
-      const model = modelList[i];
-      const currentRow = table.rows[i+1];
 
-      table.rows[i].classList.remove(modelTestingStyles.currentTableRow);
+    let rowIndex = 1;
+
+    // Loop through each model, injecting the model into the cache, and running a sample prompt.
+    for (let i = 0; i < sortedModels.length; i++) {
+      const model = sortedModels[i];
+      rowIndex++;
+
+      if (table.rows[rowIndex].children.length == 1) {
+        rowIndex++;
+      }
+
+      let currentRow = table.rows[rowIndex];
+
+      table.rows[rowIndex].classList.remove(modelTestingStyles.currentTableRow);
       currentRow.classList.add(modelTestingStyles.currentTableRow);
 
       let generator;
       currentRow.cells[tableUploadTimeCol].innerText = "Uploading: 0/" + globalModelRunCount;
 
-      // reset browser cache to clear any previous models
-      await caches.delete('transformers-cache');
-      let cache = await caches.open('transformers-cache');
+      //let cache = await caches.open('transformers-cache');
 
       // Run the model multiple times based on the global model run count
       for (let j = 1; j < (globalModelRunCount + 1); j++) {
@@ -134,36 +158,6 @@ function ModelTesting() {
 
         startTime = performance.now();
 
-        // Upload models to browsers cache.
-        for (let file of model.files) {
-    
-          let cacheKey = pathJoin(
-            env.remoteHost, 
-            env.remotePathTemplate
-              .replaceAll('{model}', model.name)
-              .replaceAll('{revision}', 'main'),
-            file.name.endsWith(".onnx") ? 'onnx/' + file.name : file.name
-          );
-
-          // Ensure that the models files have been cached properly before moving on.
-          // This prevents the app from seeing no files, and trying to request them from hugging face.
-          await new Promise((resolve, reject) => {
-            let fileReader = new FileReader();
-            fileReader.onload = async () => {
-              let arrayBuffer = fileReader.result;
-              let uint8Array = new Uint8Array(arrayBuffer);
-              
-              try {
-                await cache.put(cacheKey, new Response(uint8Array));
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            };
-            fileReader.readAsArrayBuffer(file);
-          });
-        };
-    
         // Create pipeline for the generator;
         try {
           generator = await pipeline(model.modelType, model.name, { device: processor() });
@@ -375,12 +369,6 @@ function ModelTesting() {
 
   const toggleAdvancedOptions = () => {
     setMenuIsOpen(!menuIsOpen());
-    const btn = document.getElementById("advancedOptionsMenuButton");
-    if (menuIsOpen()) {
-      btn.innerHTML = "Advanced Options<br />⮟"
-    } else {
-      btn.innerHTML = "Advanced Options<br />⮝"
-    }
   }
 
   const copyTable = () => {
@@ -391,16 +379,23 @@ function ModelTesting() {
 
     tableString += "Model Name\tModel Type\tUpload Times\tGeneration Times\tAVG Upload Time\tAVG Generation Time";
 
+    let currentModelType = ""
     for (let i = 1; i < table.rows.length; i++) {
       let row = table.rows[i];
+
+      if (row.children.length > 1) {
+        tableString += "\n"
+        tableString += row.cells[0].querySelector("span").innerHTML + "\t";  // Model Name
+        tableString += currentModelType + "\t";  // Model Name
+        tableString += row.cells[1].title + "\t";  // Upload Times
+        tableString += row.cells[2].title + "\t";  // Generation Times
+        tableString += row.cells[1].innerHTML + "\t";  // AVG Upload Time
+        tableString += row.cells[2].innerHTML + "\t";  // AVG Generation Time
+      } else {
+        currentModelType = row.firstChild.firstChild.querySelector("span").innerHTML.toLowerCase()
+      }
       
-      tableString += "\n"
-      tableString += row.cells[0].querySelector("span").innerHTML + "\t";  // Model Name
-      tableString += row.cells[1].querySelector("span").innerHTML + "\t";  // Model Type
-      tableString += row.cells[2].title + "\t";  // Upload Times
-      tableString += row.cells[3].title + "\t";  // Generation Times
-      tableString += row.cells[2].innerHTML + "\t";  // AVG Upload Time
-      tableString += row.cells[3].innerHTML + "\t";  // AVG Generation Time
+      
     }
 
     console.log(tableString);
@@ -408,94 +403,7 @@ function ModelTesting() {
     navigator.clipboard.writeText(tableString);
   }
 
-  const getModelTimes = (modelType, uploadTime, inferenceTime) => {
-    const originalModels = modelBenchmarks[modelType];
-
-    const updatedModels = originalModels
-      .map(model => ({
-        ...model,
-        upload_time: model.upload_time * uploadTime,
-        infer_time: model.infer_time * inferenceTime,
-      }))
-      .sort((a,b) => {
-        if (a.quality !== b.quality) {
-          return b.quality - a.quality;
-        }
-        return a.infer_time - b.infer_time;
-      });
-
-    return updatedModels;
-
-  }
-
-  const recommendModels = () => {
-    // Choose three best models based on devices performance.
-    const benchmarkedModelType = document.getElementById("modelTypeSelector");
-    const benchmarkedModelUploadTime = document.getElementById("averageUploadTime");
-    const benchmarkedModelGenerationTime = document.getElementById("averageGenerationTime");
-
-    if (benchmarkedModelType.value == "") {
-      benchmarkedModelType.classList.add(modelTestingStyles.noInputSelectedPosible);
-      benchmarkedModelType.style.animation = "none";
-      benchmarkedModelType.offsetHeight;
-      benchmarkedModelType.style.animation = null;
-    };
-
-    if (benchmarkedModelUploadTime.value == 0) {
-      benchmarkedModelUploadTime.classList.add(modelTestingStyles.noInputSelectedPosible);
-      benchmarkedModelUploadTime.style.animation = "none";
-      benchmarkedModelUploadTime.offsetHeight;
-      benchmarkedModelUploadTime.style.animation = null;
-    }
-
-    if (benchmarkedModelGenerationTime.value == 0) {
-      benchmarkedModelGenerationTime.classList.add(modelTestingStyles.noInputSelectedPosible);
-      benchmarkedModelGenerationTime.style.animation = "none";
-      benchmarkedModelGenerationTime.offsetHeight;
-      benchmarkedModelGenerationTime.style.animation = null;
-    }
-
-    if (benchmarkedModelType.value == "" || benchmarkedModelUploadTime.value == 0 || benchmarkedModelGenerationTime.value == 0) {
-      return;
-    } 
-
-    const models = getModelTimes(benchmarkedModelType.value, benchmarkedModelUploadTime.value, benchmarkedModelGenerationTime.value);
-
-    console.log(models);
-
-    // Get models with closest performance to 5 seconds, 10 seconds, and 15 seconds.
-    const fiveSecondModel = models
-      .filter(model => model.infer_time <= 5)
-      .sort((a,b) => b.quality - a.quality)[0];
-
-    const tenSecondModel = models
-      .filter(model => model.infer_time <= 10)
-      .sort((a,b) => b.quality - a.quality)[0];
-
-    const fifteenSecondModel = models
-      .filter(model => model.infer_time <= 15)
-      .sort((a,b) => b.quality - a.quality)[0];
-
-    let reccomendations = [...new Set([fiveSecondModel, tenSecondModel, fifteenSecondModel])].filter(model => model != null);
-
-    // Ensure that more than one model is reccomended.
-    if (reccomendations.length < 3) {
-      for (let model of models) {
-        
-        if (!reccomendations.includes(model)) {
-          reccomendations.push(model);
-        }
-        if (reccomendations.length >= 3) {
-          break;
-        }
-      }
-    }
-
-    setRecommendedModels(reccomendations);
-
-  }
-
-  const adjustLanguageVisibility = (e) => {
+  const adjustLanguageVisibility = async (e) => {
     //console.log(e.target.id);
     currentLanguageOption = e.target.id;
 
@@ -524,6 +432,7 @@ function ModelTesting() {
           continue;
         }
 
+        // Load Languages
         let modelLanguages = selectedModels()[i].languages;
 
         if (firstModel) {
@@ -550,6 +459,10 @@ function ModelTesting() {
   };
 
   onMount(async () => {
+
+    //console.log(navigator.hardwareConcurrency);
+    //console.log(navigator.deviceMemory);
+
     if (!navigator.gpu) return;
     try {
       const adapter = await navigator.gpu.requestAdapter();
@@ -565,22 +478,23 @@ function ModelTesting() {
   return (
     <>
       <div class={modelTestingStyles.modelTesting}>
-        <h2>Model Testing:</h2>
-        <h4>Select models to benchmark:</h4>
+        <h2>Model Testing</h2>
+        <h4>Select models to benchmark</h4>
 
-        <div>
-          {/* Select Model/s for benchmarking */}
-          <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
-          <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
-            Select Models
-          </label>
-                      
-          <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1}>Benchmark</button>
-          <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1}>Clear Models</button>
-        </div>
-
-        <div>
-          <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()}>Advanced Options<br />⮟</button>
+        <div class={modelTestingStyles.benchmarkingButtons}>
+          <div class={modelTestingStyles.leftButtons}>
+            {/* Select Model/s for benchmarking */}
+            <input type="file" id="modelInput" className='hidden' webkitdirectory multiple onChange={addModel} />
+            <label for="modelInput" id="modelInputLabel" class={modelTestingStyles.inputButton} className='inputButton'>
+              Select Models
+            </label>
+                        
+            <button id="benchmarkButton" class={modelTestingStyles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Benchmark</button>
+          </div>
+          <div class={modelTestingStyles.rightButtons}>
+            <button id="clearButton" class={modelTestingStyles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Clear Models</button>
+            <button class={modelTestingStyles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()} classList={{ hidden: selectedModels().length == 0}}>⚙︎</button>
+          </div>
         </div>
 
         <div class={`${modelTestingStyles.advancedOptionsMenu} ${!menuIsOpen() ? "" : modelTestingStyles.menuClosed}`} id='advancedOptionsMenu'>
@@ -675,7 +589,7 @@ function ModelTesting() {
           </div>
         </div>
 
-        <div id="tableContainer" class={modelTestingStyles.tableContainer}>
+        <div id="tableContainer" class={modelTestingStyles.tableContainer} classList={{ hidden: selectedModels().length == 0}}>
           <table class={modelTestingStyles.tableMMLU}>
             <colgroup>
               <col/>
@@ -686,82 +600,39 @@ function ModelTesting() {
             <thead>
               <tr>
                 <th>Model Name</th>
-                <th>Model Type</th>
                 <th>Avg Upload Time</th>
                 <th>Avg Generation Time</th>
                 <th>Sample Output</th>
               </tr>
             </thead>
-            <tbody>
-              <For each={selectedModels()}>{(model) =>
-                <tr>
-                  <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
-                  <td><span>{model.modelType}</span></td>
-                  <td></td> {/* Upload Time Cell */}
-                  <td></td> {/* Generation Time Cell */}
-                  <td></td> {/* Sample Output Cell */}
-                </tr>
-              }</For>
-            </tbody>
+            
+            <For each={allowedModelTypes}>{(type) => {
+
+              const filteredModels = createMemo(() =>
+                selectedModels().filter(m => m.modelType == type)
+              );
+              return (
+                <Show when={filteredModels().length > 0}>
+                  <tbody>
+                    <tr>
+                      <td colspan="4" style="padding:0.5em 0em"><b><span>{type.charAt(0).toUpperCase() + type.slice(1)}</span> Models</b></td>
+                    </tr>
+                    <For each={filteredModels()}>{(model) =>
+                      <tr>
+                        <td><span class={modelTestingStyles.modelName} onClick={() => removeModel(model.name)}>{model.name}</span></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                    }</For>
+                  </tbody>
+                </Show>
+              );
+            }}</For>
           </table>
-        </div>
-        <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()}>Copy table to clipboard 📋</button>
-
-        <br /><br /><br />
-
-        <div id="modelRecommendationFeature" class={modelTestingStyles.recommendationArea}>
-          <p>This is for recommending models based on an estimate of your devices performance. Please enter the times it takes to run the baseline model on your device. The list of baseline models can be found <a title="TODO">TODO: Here</a>.</p>
           
-          <label for="modelTypeSelector">Model Type: </label>
-          <select name="modelTypeSelector" id="modelTypeSelector" class={modelTestingStyles.dropDownMenu}>
-            <option value="">Select Model Type</option>
-            <For each={allowedModelTypes}>{(type) =>
-              <option value={type}>{type}</option>
-            }</For>
-          </select> 
-
-          <br /><br />
-
-          <div class={modelTestingStyles.recommendationInputArea}>
-            <div>
-              <label for="averageUploadTime">Average Upload Time: </label>
-              <input type="number" id="averageUploadTime" value="0" step={0.1} min={0}/>
-
-              <label for="averageGenerationTime">Average Generation Time: </label>
-              <input type="number" id="averageGenerationTime" value="0" step={0.1} min={0}/>
-            </div>
-          </div>
-          
-          <br />
-          <button class={modelTestingStyles.inputButton} onClick={() => recommendModels()}>Recommend Models</button>
-          <br />
-
         </div>
-        <div id="recommendedModelContainer" classList={{ hidden: recommenedModels().length == 0}}>
-          <p>These are a selection of recommended models based on your device:</p>
-          <table class={modelTestingStyles.tableMMLU}>
-            <thead>
-              <tr>
-                <th>Model Name</th>
-                <th>File Size</th>
-                <th>Predicted Upload Time</th>
-                <th>Predicted Generation Time</th>
-                <th>Output Quality Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={recommenedModels()}>{(model) =>
-                <tr>
-                  <td>{model.name}</td>
-                  <td>{model.file_size}</td>
-                  <td>{model.upload_time}</td>
-                  <td>{model.infer_time}</td>
-                  <td>{model.quality}</td>
-                </tr>
-              }</For>
-            </tbody>
-          </table>
-        </div>
+        <button class={modelTestingStyles.inputButton + " " + modelTestingStyles.copyButton} onClick={() => copyTable()} classList={{ hidden: selectedModels().length == 0}}>Copy table to clipboard 📋</button>
       </div>
     </>
   );

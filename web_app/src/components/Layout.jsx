@@ -122,7 +122,9 @@ const deleteAllChats = () => {
         <div class={sidebarCollapsed() ? "sidebarContainer collapsed" : "sidebarContainer"}>
 
           <h1>Local Chat</h1>
-          <A href="models">Model Testing</A>
+          <A href="recommendation">Model Recommendations</A>
+          <br/><br/>
+          <A href="testing">Model Testing</A>
           <br/><br/>
           <A href="/">Create New Chat</A>
           <br/><br/>
