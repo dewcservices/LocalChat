@@ -13,8 +13,6 @@ import cancelIcon from '../assets/cancel.png';
 
 
 function Layout(props) {
-  // TODO polish deletion of entire chat history
-  //    - ui button is ugly, and needs to be clearer that the button is dangerous
 
   const location = useLocation();
   const params = useParams();
@@ -27,7 +25,15 @@ function Layout(props) {
   // hover state for mouse navigation of chats
   const [hoveredChatId, setHoveredChatId] = createSignal(null);
   
+  // sidebar collapse state
+  const [sidebarCollapsed, setSidebarCollapsed] = createSignal(false);
+  
   const pageContent = props.children;
+  
+  // toggle sidebar function
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed());
+  };
   
   // updates the chat history
   createEffect(() => {
@@ -101,94 +107,118 @@ const deleteAllChats = () => {
 
   return (
     <>
-      <div class="container">
-        <div class="sidebarContainer">
+      <div class={sidebarCollapsed() ? "container sidebar-collapsed" : "container"}>
+        {/* collapse toggle button */}
+        <button 
+          class={styles.toggleSidebarButton}
+          onClick={toggleSidebar}
+          title={sidebarCollapsed() ? "expand sidebar" : "collapse sidebar"}
+        >
+          {sidebarCollapsed() ? '→' : '←'}
+        </button>
+
+        <div class={sidebarCollapsed() ? "sidebarContainer collapsed" : "sidebarContainer"}>
 
           <h1>Local Chat</h1>
-          <A href="models">Model Testing</A>
+          <A href="recommendation">Model Recommendations</A>
+          <br/><br/>
+          <A href="benchmarking">Model Benchmarking</A>
           <br/><br/>
           <A href="/">Create New Chat</A>
           <br/><br/>
 
           <h2>Chat History</h2>
-          <div class={styles.chatHistoryWrapper}>
-            <div class={styles.chatHistoryScrollContainer}>
-              <For each={chatHistories()}>{(chat) =>
-                <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${params.id === chat.chatId ? styles.active : ''}`}
-                  onMouseEnter={() => setHoveredChatId(chat.chatId)}
-                  onMouseLeave={() => setHoveredChatId(null)}
-                  onClick={(event) => handleChatClick(chat.chatId, event)}
-                >
-                  <Show
-                    when={renamingId() === chat.chatId}
-                    fallback={
-                      <div class={styles.chatHistoryEntry}>
-                        <A 
-                          href={`/chat/${chat.chatId}`}
-                          class={styles.chatName}
-                          title={`Created: ${new Date(chat.creationDate).toUTCString()} | Latest: ${new Date(chat.latestMessageDate).toUTCString()}`}
-                        >
-                          {chat.chatName}
-                        </A>
-                        <div class={styles.actionIcons}>
+          <div class={styles.chatHistoryOuterContainer}>
+            <div class={styles.chatHistoryWrapper}>
+              <div class={styles.chatHistoryScrollContainer}>
+                <For each={chatHistories()}>{(chat) =>
+                  <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${params.id === chat.chatId ? styles.active : ''}`}
+                    onMouseEnter={() => setHoveredChatId(chat.chatId)}
+                    onMouseLeave={() => setHoveredChatId(null)}
+                    onClick={(event) => handleChatClick(chat.chatId, event)}
+                  >
+                    <Show
+                      when={renamingId() === chat.chatId}
+                      fallback={
+                        <div class={styles.chatHistoryEntry}>
+                          <A 
+                            href={`/chat/${chat.chatId}`}
+                            class={styles.chatName}
+                            title={`Created: ${new Date(chat.creationDate).toUTCString()} | Latest: ${new Date(chat.latestMessageDate).toUTCString()}`}
+                          >
+                            <Show when={chat.chatType === 'summarize'}>
+                              <span class={styles.chatTypeIcon}>📄</span>
+                            </Show>
+                            <Show when={chat.chatType === 'question-answer'}>
+                              <span class={styles.chatTypeIcon}>❓</span>
+                            </Show>
+                            <Show when={chat.chatType === 'translation'}>
+                              <span class={styles.chatTypeIcon}>🌐</span>
+                            </Show>
+                            <Show when={chat.chatType === 'general'}>
+                              <span class={styles.chatTypeIcon}>💬</span>
+                            </Show>
+                            {chat.chatName}
+                          </A>
+                          <div class={styles.actionIcons}>
+                            <button 
+                              class={styles.actionButton}
+                              onClick={(clickEvent) => {
+                                clickEvent.preventDefault();
+                                clickEvent.stopPropagation();
+                                startRenaming(chat.chatId);
+                              }}
+                              title="Rename Chat"
+                            >
+                              <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
+                            </button>
+                            <button 
+                              class={styles.actionButton}
+                              onClick={(clickEvent) => {
+                                clickEvent.preventDefault();
+                                clickEvent.stopPropagation();
+                                deleteChat(chat.chatId);
+                              }}
+                              title="Delete Chat"
+                            >
+                              <img src={trashIcon} alt="Delete" class={styles.actionIcon} />
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    >
+                      {/* section handling editing options UI */}
+                      <div class={styles.renameContainer}>
+                        <input 
+                          type="text" 
+                          value={newTitle()}
+                          onInput={inputEvent => setNewTitle(inputEvent.currentTarget.value)}
+                          onKeyDown={keyEvent => keyEvent.key === 'Enter' && applyRename()}
+                          class={styles.renameInput}
+                        />
+                        <div class={styles.renameActions}>
                           <button 
                             class={styles.actionButton}
-                            onClick={(clickEvent) => {
-                              clickEvent.preventDefault();
-                              clickEvent.stopPropagation();
-                              startRenaming(chat.chatId);
-                            }}
-                            title="Rename Chat"
+                            onClick={applyRename}
+                            title="Save Changes"
                           >
-                            <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
+                            <img src={saveIcon} alt="Save" class={styles.actionIcon} />
                           </button>
                           <button 
                             class={styles.actionButton}
-                            onClick={(clickEvent) => {
-                              clickEvent.preventDefault();
-                              clickEvent.stopPropagation();
-                              deleteChat(chat.chatId);
-                            }}
-                            title="Delete Chat"
+                            onClick={() => setRenamingId(null)}
+                            title="Cancel"
                           >
-                            <img src={trashIcon} alt="Delete" class={styles.actionIcon} />
+                            <img src={cancelIcon} alt="Cancel" class={styles.actionIcon} />
                           </button>
                         </div>
                       </div>
-                    }
-                  >
-                    {/* section handling editing options UI */}
-                    <div class={styles.renameContainer}>
-                      <input 
-                        type="text" 
-                        value={newTitle()}
-                        onInput={inputEvent => setNewTitle(inputEvent.currentTarget.value)}
-                        onKeyDown={keyEvent => keyEvent.key === 'Enter' && applyRename()}
-                        class={styles.renameInput}
-                      />
-                      <div class={styles.renameActions}>
-                        <button 
-                          class={styles.actionButton}
-                          onClick={applyRename}
-                          title="Save Changes"
-                        >
-                          <img src={saveIcon} alt="Save" class={styles.actionIcon} />
-                        </button>
-                        <button 
-                          class={styles.actionButton}
-                          onClick={() => setRenamingId(null)}
-                          title="Cancel"
-                        >
-                          <img src={cancelIcon} alt="Cancel" class={styles.actionIcon} />
-                        </button>
-                      </div>
-                    </div>
-                  </Show>
-                </div>
-              }</For>
+                    </Show>
+                  </div>
+                }</For>
+              </div>
             </div>
           </div>
-          <br/>
 
           <div class={styles.buttonContainer}>
             <button 

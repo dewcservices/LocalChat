@@ -26,79 +26,68 @@ export const modelBenchmarks = {
             name: "Xenova/bart-large-cnn",
             file_size: 0.443,
             quality: 7,
-            devices: {
-                "i7-12700F": {upload: 3.2, inference: 8.6}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "average",
         },{
             name: "Xenova/distilbart-cnn-6-6",
             file_size: 0.272,
             quality: 7,
-            devices: {
-                "i7-12700F": {upload: 2, inference: 4.8}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbart-cnn-12-3",
             file_size: 0.296,
             quality: 8,
-            devices: {
-                "i7-12700F": {upload: 1.8, inference: 4.7}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbart-cnn-12-6",
             file_size: 0.345,
             quality: 7,
-            devices: {
-                "i7-12700F": {upload: 2.2, inference: 5.6}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "average",
         },{
             name: "Xenova/distilbart-xsum-6-6",
             file_size: 0.272,
             quality: 2,
-            devices: {
-                "i7-12700F": {upload: 1.9, inference: 2.2}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbart-xsum-9-6",
             file_size: 0.309,
             quality: 3,
-            devices: {
-                "i7-12700F": {upload: 2.1, inference: 2.6}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbart-xsum-12-1",
             file_size: 0.264,
             quality: 2,
-            devices: {
-                "i7-12700F": {upload: 1.6, inference: 2.9}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbart-xsum-12-3",
             file_size: 0.296,
             quality: 4,
-            devices: {
-                "i7-12700F": {upload: 1.9, inference: 2.9}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbart-xsum-12-6",
             file_size: 0.345,
             quality: 1,
-            devices: {
-                "i7-12700F": {upload: 2.3, inference: 2.7}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "fcogidi/BARTxiv",
             file_size: 0.492,
             quality: 0,
-            devices: {
-                "i7-12700F": {upload: 4.7, inference: 11.2}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "slow",
         },{
             name: "ahmedaeb/distilbart-cnn-6-6-optimised",
             file_size: 0.321,
             quality: 7,
-            devices: {
-                "i7-12700F": {upload: 2.1, inference: 4.4}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         }
     ],
     translation: [
@@ -106,26 +95,20 @@ export const modelBenchmarks = {
             name: "Xenova/nllb-200-distilled-600M",
             file_size: 0.896,
             quality: 9,    // TODO: need to find method for checking quality of outputs for other model types.
-            devices: {
-                "i7-12700F": {upload: 5.8, inference: 4.9}, 
-                "i5-1135G7": {upload: 22.3, inference: 4.9}
-            },
+            upload_tier: "slow",
+            inference_tier: "fast",
         },{
             name: "Xenova/mbart-large-50-many-to-many-mmt",
             file_size: 0.848,
             quality: 7,
-            devices: {
-                "i7-12700F": {upload: 5.2, inference: 4.8}, 
-                "i5-1135G7": {upload: 16.7, inference: 6.5},
-            },
+            upload_tier: "slow",
+            inference_tier: "average",
         },{
             name: "Xenova/m2m100_418M",
             file_size: 0.61,
             quality: 8,
-            devices: {
-                "i7-12700F": {upload: 4.0, inference: 3.9}, 
-                "i5-1135G7": {upload: 13.4, inference: 5.8},
-            },
+            upload_tier: "slow",
+            inference_tier: "average",
         }
     ],
     "question-answering": [
@@ -133,60 +116,50 @@ export const modelBenchmarks = {
             name: "Xenova/distilbert-base-cased-distilled-squad",
             file_size: 0.063,
             quality: 0,
-            devices: {
-                "i7-12700F": {upload: 0.3, inference: 0.5},
-                "i5-1135G7": {upload: 0.8, inference: 0.5},
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
             name: "Xenova/distilbert-base-uncased-distilled-squad",
             file_size: 0.064,
             quality: 0.5,
-            devices: {
-                "i7-12700F": {upload: 0.3, inference: 0.5}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
-            name: "Xenova/tomasmcm/intel-dynamic-tinybert-onnx",
+            name: "tomasmcm/intel-dynamic-tinybert-onnx",
             file_size: 0.064,
             quality: 0.5,
-            devices: {
-                "i7-12700F": {upload: 0.4, inference: 0.6}, 
-                "i5-1135G7": {upload: 0.9, inference: 0.5},
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
-            name: "Xenova/jestevesv/distilbert-base-spanish-uncased-finetuned-qa-mlqa-onnx",
+            name: "jestevesv/distilbert-base-spanish-uncased-finetuned-qa-mlqa-onnx",
             file_size: 0.064,
             quality: 0,
-            devices: {
-                "i7-12700F": {upload: 0.4, inference: 0.8}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
-            name: "Xenova/onnx-community/bert-multi-english-german-squad2-ONNX",
+            name: "onnx-community/bert-multi-english-german-squad2-ONNX",
             file_size: 0.172,
             quality: 0,
-            devices: {
-                "i7-12700F": {upload: 0.9, inference: 1.1}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
-            name: "Xenova/onnx-community/mdeberta-ru-qa-ONNX",
+            name: "onnx-community/mdeberta-ru-qa-ONNX",
             file_size: 0.302,
             quality: 0,
-            devices: {
-                "i7-12700F": {upload: 1.8, inference: 4.7}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "average",
         },{
-            name: "Xenova/onnx-community/xdoc-base-squad2.0-ONNX",
+            name: "onnx-community/xdoc-base-squad2.0-ONNX",
             file_size: 0.122,
             quality: 0.5,
-            devices: {
-                "i7-12700F": {upload: 0.7, inference: 1.0}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         },{
-            name: "Xenova/onnx-community/xlm-roberta-base-squad2-distilled-ONNX",
+            name: "onnx-community/xlm-roberta-base-squad2-distilled-ONNX",
             file_size: 0.282,
             quality: 0.5,
-            devices: {
-                "i7-12700F": {upload: 1.4, inference: 1.4}, 
-            },
+            upload_tier: "fast",
+            inference_tier: "fast",
         }
     ]
 };

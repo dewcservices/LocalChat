@@ -27,3 +27,4 @@ web_app/*.local
 fileserver
 fileserver.exe
 dist/
+more_models/

@@ -7,7 +7,8 @@ import './index.css';
 import Layout from './components/Layout.jsx';
 import NewChat from './components/NewChat.jsx';
 import Chat from './components/chats/Chat.jsx';
-import ModelTesting from './components/ModelTesting.jsx'
+import ModelBenchmarking from './components/ModelBenchmarking.jsx'
+import ModelRecommendation from './components/ModelRecommendation.jsx'
 
 
 render(
@@ -15,7 +16,8 @@ render(
     <HashRouter root={Layout}>
       <Route path="/" component={NewChat} />
       <Route path="chat/:id" component={Chat} />
-      <Route path="models" component={ModelTesting} />
+      <Route path="recommendation" component={ModelRecommendation} />
+      <Route path="benchmarking" component={ModelBenchmarking} />
       <Route path="*" component={NewChat} />
     </HashRouter>
   ),

@@ -1,17 +1,27 @@
+/* outer wrapper container for chat histories */
+.chatHistoryOuterContainer {
+    background: var(--background-secondary, #2a2d33);
+    border: 1px solid var(--selected-button-color, #404040);
+    border-radius: 8px;
+    padding: clamp(8px, 1vw, 12px);
+    margin: clamp(6px, 0.8vh, 8px) 0 clamp(12px, 1.5vh, 16px) 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* css wrapper to contain scrollable area and buttons at a fixed position */
 .chatHistoryWrapper {
     display: flex;
     flex-direction: column;
-    height: 250px;
+    height: 55vh;
 }
 
 /* scrollable container for chat history */
 .chatHistoryScrollContainer {
-    height: 200px;
+    height: calc(55vh - 2rem);
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 4px;
-    margin-bottom: 8px;
+    margin-bottom: clamp(6px, 0.8vh, 8px);
 }
 
 /* custom scrollbar styling for webkit browsers */
@@ -36,11 +46,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5em;
+    padding: clamp(0.3em, 0.5vh, 0.4em) clamp(0.4em, 0.6vw, 0.6em);
     transition: all 0.2s ease;
     border-radius: 6px;
-    margin: 2px 0;
-    cursor: pointer; /* Make it clear the whole container is clickable */
+    margin: 1px 0; 
+    cursor: pointer;
 }
 
 .chatHistoryContainer:hover,
@@ -57,15 +67,23 @@
     width: 100%;
 }
 
+.chatTypeIcon {
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .chatName {
     flex: 1;
-    max-width: 200px;
+    max-width: 15vw;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     display: inline-block;
     color: var(--highlight-colour);
     text-align: left;
+    font-size: clamp(12px, 1vw, 14px);
+    line-height: 1.2;
 }
 
 .chatHistoryContainer.active {
@@ -95,8 +113,8 @@
 
 /* further icon styling for png sizes */
 .actionIcon {
-    width: 19px;
-    height: 19px;
+    width: clamp(15px, 1.2vw, 17px);
+    height: clamp(15px, 1.2vw, 17px);
     opacity: 0.7;
     transition: opacity 0.2s ease;
 }
@@ -112,14 +130,14 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 3px;
     border-radius: 4px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: clamp(20px, 1.5vw, 22px);
+    height: clamp(20px, 1.5vw, 22px);
 }
 
 .actionButton:hover {
@@ -146,7 +164,7 @@
     border-radius: 4px;
     padding: 4px 8px;
     color: var(--text-colour);
-    font-size: 14px;
+    font-size: clamp(12px, 1vw, 14px);
     outline: none;
     transition: all 0.2s ease;
 }
@@ -163,18 +181,19 @@
 
 .buttonContainer {
     display: flex;
-    gap: 8px;
-    padding-top: 16px;
-    height: 60px; /* Fixed height for button area */
+    gap: clamp(6px, 0.8vw, 8px);
+    padding-top: clamp(12px, 1.5vh, 16px);
+    height: auto;
+    min-height: clamp(40px, 5vh, 60px);
 }
 
 .exportButton {
     background: var(--background-tertiary);
     border: 1px solid var(--selected-button-colour);
-    padding: 8px 16px;
+    padding: clamp(6px, 0.8vh, 8px) clamp(12px, 1.2vw, 16px);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: clamp(12px, 1vw, 14px);
     transition: all 0.2s ease;
     flex: 1;
 }
@@ -197,10 +216,10 @@
 .deleteAllButton {
     background: var(--background-tertiary);
     border: 1px solid var(--selected-button-colour);
-    padding: 8px 16px;
+    padding: clamp(6px, 0.8vh, 8px) clamp(12px, 1.2vw, 16px);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: clamp(12px, 1vw, 14px);
     transition: all 0.2s ease;
     flex: 1;
 }
@@ -219,10 +238,10 @@
 .importButton {
     background: var(--background-tertiary);
     border: 1px solid var(--selected-button-colour);
-    padding: 8px 16px;
+    padding: clamp(6px, 0.8vh, 8px) clamp(12px, 1.2vw, 16px);
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: clamp(12px, 1vw, 14px);
     transition: all 0.2s ease;
     flex: 1;
 }
@@ -235,4 +254,24 @@
 .importButton:active {
     background-color: var(--selected-button-colour);
     transform: scale(0.95);
+}
+
+/* sidebar toggle button positioning */
+.toggleSidebarButton {
+    position: fixed;
+    left: 0;
+    top: clamp(28px, 3vh, 31px);
+    z-index: 1000;
+    background: var(--selected-button-colour);
+    border: 1px solid var(--highlight-colour);
+    padding: clamp(6px, 0.8vh, 8px) clamp(10px, 1vw, 12px);
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-colour);
+    font-size: clamp(12px, 1vw, 14px);
+}
+
+.toggleSidebarButton:hover {
+    background: var(--highlight-colour);
 }
