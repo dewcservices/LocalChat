@@ -1,13 +1,23 @@
+/* outer wrapper container for chat histories */
+.chatHistoryOuterContainer {
+    background: var(--background-secondary, #2a2d33);
+    border: 1px solid var(--selected-button-color, #404040);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* css wrapper to contain scrollable area and buttons at a fixed position */
 .chatHistoryWrapper {
     display: flex;
     flex-direction: column;
-    height: 250px;
+    height: 500px;
 }
 
 /* scrollable container for chat history */
 .chatHistoryScrollContainer {
-    height: 200px;
+    height: 480px; 
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 4px;
@@ -36,11 +46,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5em;
+    padding: 0.4em 0.6em;
     transition: all 0.2s ease;
     border-radius: 6px;
-    margin: 2px 0;
-    cursor: pointer; /* Make it clear the whole container is clickable */
+    margin: 1px 0; 
+    cursor: pointer;
 }
 
 .chatHistoryContainer:hover,
@@ -57,6 +67,12 @@
     width: 100%;
 }
 
+.chatTypeIcon {
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .chatName {
     flex: 1;
     max-width: 200px;
@@ -66,6 +82,8 @@
     display: inline-block;
     color: var(--highlight-colour);
     text-align: left;
+    font-size: 14px;
+    line-height: 1.2;
 }
 
 .chatHistoryContainer.active {
@@ -95,8 +113,8 @@
 
 /* further icon styling for png sizes */
 .actionIcon {
-    width: 19px;
-    height: 19px;
+    width: 17px;
+    height: 17px;
     opacity: 0.7;
     transition: opacity 0.2s ease;
 }
@@ -112,14 +130,14 @@
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 4px;
+    padding: 3px;
     border-radius: 4px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
 }
 
 .actionButton:hover {
@@ -165,7 +183,7 @@
     display: flex;
     gap: 8px;
     padding-top: 16px;
-    height: 60px; /* Fixed height for button area */
+    height: 60px;
 }
 
 .exportButton {
@@ -235,4 +253,24 @@
 .importButton:active {
     background-color: var(--selected-button-colour);
     transform: scale(0.95);
+}
+
+/* sidebar toggle button positioning */
+.toggleSidebarButton {
+    position: fixed;
+    left: 0;
+    top: 31px;
+    z-index: 1000;
+    background: var(--selected-button-colour);
+    border: 1px solid var(--highlight-colour);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-colour);
+    font-size: 14px;
+}
+
+.toggleSidebarButton:hover {
+    background: var(--highlight-colour);
 }

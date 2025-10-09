@@ -1,10 +1,13 @@
 import { useContext, createSignal, createEffect, onMount, Match, Switch } from 'solid-js';
 import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transformers';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 import styles from './QuestionAnswer.module.css';
 import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
+import { getChatHistories } from '../../../utils/ChatHistory';
 
 
 function QuestionAnswer() {
@@ -19,8 +22,71 @@ function QuestionAnswer() {
   const [contextTab, setContextTab] = createSignal("text");
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
+  // Q&A Tour
+  const driverObj = driver({
+    showProgress: true,
+    allowHtml: false,
+    steps: [
+      {
+        element: "#addModelBtn",
+        popover: {
+          title: "Adding Models",
+          description: `
+            To begin with click here to upload models. 
+            Either upload your own models or upload the 'models' folder included in the app distribution.
+          `
+        }
+      },
+      {
+        element: '#modelSelection',
+        popover: {
+          title: "Selecting a Model",
+          description: `
+            Next select a model to summarise your text with. 
+            For more information see the <A href="/recommendation">model information page</A>.
+          `
+        }
+      },
+      {
+        element: "#tabSwitcher",
+        popover: {
+          title: "Text or File Input",
+          description: `Use the tab switcher to switch between summarising files or text input.`
+        }
+      },
+      {
+        element: "#contextTextarea",
+        popover: {
+          title: "Context Input",
+          description: `
+            The question-answering models require that context is provided to derive the answer from.
+            Enter the context here.
+          `
+        }
+      },
+      {
+        element: "#questionTextarea",
+        popover: {
+          title: "Question Input",
+          description: `Insert the question here.`
+        }
+      },
+      {
+        element: "#sendButton",
+        popover: {
+          title: "Submit",
+          description: `Use the submit button to process the question.`
+        }
+      }
+    ]
+  });
+
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('question-answering'));
+
+    let chats = getChatHistories();
+    chats = chats.filter(c => c.chatType == "question-answer");
+    if (chats.length <= 1) driverObj.drive();
   });
 
   const addModel = async () => {
@@ -160,7 +226,7 @@ function QuestionAnswer() {
       <div class={styles.inputContainer}>
 
         <div class={styles.contextContainer}>
-          <div class={styles.tabContainer}>
+          <div id="tabSwitcher" class={styles.tabContainer}>
             <button
               class={contextTab() === "file" ? styles.selectedTab : styles.tab}
               onClick={() => setContextTab("file")}
@@ -205,6 +271,7 @@ function QuestionAnswer() {
         <div class={styles.controlsLeft}></div>
         <div class={styles.controlsRight}>
           <select 
+            id="modelSelection"
             class={styles.modelSelection} 
             value={modelName()}
             onChange={e => setModelName(e.currentTarget.value)}
@@ -214,7 +281,8 @@ function QuestionAnswer() {
               <option value={model}>{model}</option>
             }</For>
           </select>
-          <label 
+          <label
+            id="addModelBtn"
             for="folderInput" 
             class={availableModels().length == 0 ? styles.noModels : styles.addModelButton}
           >

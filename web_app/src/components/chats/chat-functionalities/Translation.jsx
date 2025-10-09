@@ -1,10 +1,13 @@
 import { useContext, createSignal, onMount, createEffect } from 'solid-js';
 import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 import { ChatContext } from "../ChatContext";
 import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
+import { getChatHistories } from '../../../utils/ChatHistory';
 
 
 function Translation() {
@@ -26,8 +29,74 @@ function Translation() {
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
+  const driverObj = driver({
+    showProgress: true,
+    allowHtml: false,
+    steps: [
+      {
+        element: "#addModelBtn",
+        popover: {
+          title: "Adding Models",
+          description: `
+            To begin with click here to upload models. 
+            Either upload your own models or upload the 'models' folder included in the app distribution.
+          `
+        }
+      },
+      {
+        element: '#modelSelection',
+        popover: {
+          title: "Selecting a Model",
+          description: `
+            Next select a model to summarise your text with. 
+            For more information see the <A href="/recommendation">model information page</A>.
+          `
+        }
+      },
+      {
+        element: "#src_lang",
+        popover: {
+          title: "Source Language",
+          description: `Select the language of the input text.`
+        }
+      },
+      {
+        element: "#tgt_lang",
+        popover: {
+          title: "Target Language",
+          description: `Select the language to translate to.`
+        }
+      },
+      {
+        element: "#tabSwitcher",
+        popover: {
+          title: "Text or File Input",
+          description: `Use the tab switcher to switch between summarising files or text input.`
+        }
+      },
+      {
+        element: "#inputTextArea",
+        popover: {
+          title: "Text/File Input",
+          description: `Upload some text or file(s).`
+        }
+      },
+      {
+        element: "#sendButton",
+        popover: {
+          title: "Submit",
+          description: `Use the submit button to translate the text.`
+        }
+      }
+    ]
+  });
+
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('translation'));
+
+    let chats = getChatHistories();
+    chats = chats.filter(c => c.chatType == 'translation');
+    if (chats.length <= 1) driverObj.drive();
   });
 
   const addModel = async () => {
@@ -244,7 +313,7 @@ function Translation() {
         {/* Control buttons row - moved to bottom */}
         <div class={styles.controlsContainer}>
 
-          <div class={styles.controlsLeft}>
+          <div id="tabSwitcher" class={styles.controlsLeft}>
             <button 
               class={`${tab() === "file" ? styles.selectedTab : styles.tab} ${hoveredTab() === "file" ? styles.highlighted : ''}`}
               onClick={() => setTab("file")}
@@ -267,6 +336,7 @@ function Translation() {
             
             <label for="src_lang">From: </label>
             <select 
+              id="src_lang"
               name="src_lang" 
               class={styles.selection}
               value={srcLang()} 
@@ -278,7 +348,8 @@ function Translation() {
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
-            <select 
+            <select
+              id="tgt_lang"
               name="tgt_lang" 
               class={styles.selection} 
               style="margin-right: 4vh;"
@@ -292,6 +363,7 @@ function Translation() {
             </select>
 
             <select 
+              id="modelSelection"
               class={styles.selection} 
               value={modelName()} 
               onChange={e => setModelName(e.currentTarget.value)}
@@ -302,6 +374,7 @@ function Translation() {
               }</For>
             </select>
             <label 
+              id="addModelBtn"
               for="folderInput" 
               class={availableModels().length == 0 ? styles.noModels : styles.addModelButton}
             >
