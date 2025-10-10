@@ -143,7 +143,10 @@ function ModelRecommendation() {
   }
 
   onMount(async () => {
-    driverObj.drive();
+    if (!localStorage.getItem("hasSeenRecommendationTutorial")) {
+      driverObj.drive();
+      localStorage.setItem("hasSeenRecommendationTutorial","true");
+    }
   });
 
   return (

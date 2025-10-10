@@ -3,6 +3,8 @@ import { pipeline, env } from '@huggingface/transformers';
 
 import styles from './ModelBenchmarking.module.css';
 import { cacheModels } from '../utils/ModelCache';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 
 function ModelBenchmarking() {
@@ -24,6 +26,124 @@ function ModelBenchmarking() {
 
   const [processor, setProcessor] = createSignal("wasm");
   setProcessor("wasm");
+
+  const [tourProgress, setTourProgress] = createSignal(0);
+  const tempTourModel = {"modelName":"TestModel","task":"summarization"};
+
+  // Recommendation Tour
+  const driverObj = driver({
+    showProgress: true,
+    allowHtml: true,
+    steps: [
+      { 
+        element: '.pageContainer', 
+        popover: { 
+          title: "Benchmarking Models", 
+          description: `This page lets you test your AI models, to run and compare them against eachother. Click anywhere outside the highlighted area to exit this tutorial.`
+        } 
+      },
+      {
+        element: '#modelInputLabel',
+        popover: {
+          title: "Uploading Models",
+          description: `Clicking this button will let you upload models. You can upload one or multiple models at a time, and even upload multiple different types of models at once.`,
+          onNextClick: () => {
+            setTourProgress(1);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#clearButton",
+        popover: {
+          title: "Removing Upload Models",
+          description: `If you accidentally upload a model you dont want to test, or want to remove all uploaded models, you can click this button.`
+        }
+      },
+      {
+        element: "#advancedOptionsMenuButton",
+        popover: {
+          title: "Customising Model Benchmarking",
+          description: `Clicking this button will open a menu that allows you to customise the input provided to each model during benchmarking.`,
+          onNextClick: () => {
+            setSubMenuID(0);
+            setTourProgress(2);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#advancedOptionsMenu",
+        popover: {
+          title: "Advanced Options Menu",
+          description: `This is the menu that appears.`
+        }
+      },
+      {
+        element: "#optionMenuSubTabs",
+        popover: {
+          title: "Changing the Tabs",
+          description: `These Tabs change the options shown. The options within each tab apply to the models of the matching type. The general options shown in this selected tab appy to all models.`
+        }
+      },
+      {
+        element: "#generalOptions",
+        popover: {
+          title: "General Options",
+          description: `These options appy to all models. The input changes how many times each model will run. This is useful for reducing the chances of seeing an outlier time. The CPU/GPU selector changes what models are run on. The GPU option is disabled if none is available.`,
+          onNextClick: () => {
+            setTourProgress(3);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#tourTableContainer",
+        popover: {
+          title: "Model Table",
+          description: `This is an example of what the model table will look like when models are added. The table is seperated by model type.`
+        }
+      },
+      {
+        element: "#tourTableContainer",
+        popover: {
+          title: "Copy Buttons",
+          description: `The Copy buttons will copy the table above them to the clipboard.`
+        }
+      },
+      {
+        element: "#benchmarkButton",
+        popover: {
+          title: "Benchmarking",
+          description: `Once you have uploaded your models and customised the settings you want, you can click this benchmarking button to start testing the models.`,
+          onNextClick: () => {
+            setTourProgress(4);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#tourTableContainer",
+        popover: {
+          title: "Finished Benchmarking",
+          description: `Once your models have finished benchmarking, the table will look something similar to this. The average upload and runtime columns will show how long it took the models to run, and the final column will show what the models output.`
+        }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
+      }
+    ],
+
+    onDestroyStarted: () => {
+      setTourProgress(0);
+      driverObj.destroy();
+    }
+  });
 
   const addModel = async (event) => {
 
@@ -369,8 +489,10 @@ function ModelBenchmarking() {
 
   onMount(async () => {
 
-    //console.log(navigator.hardwareConcurrency);
-    //console.log(navigator.deviceMemory);
+    if (!localStorage.getItem("hasSeenBenchmarkingTutorial")) {
+      driverObj.drive();
+      localStorage.setItem("hasSeenBenchmarkingTutorial","true");
+    }
 
     if (!navigator.gpu) return;
     try {
@@ -404,16 +526,16 @@ function ModelBenchmarking() {
               Select Models
             </label>
                         
-            <button id="benchmarkButton" class={styles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Benchmark</button>
+            <button id="benchmarkButton" class={styles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length == 0 && tourProgress() == 0} classList={{ hidden: selectedModels().length == 0 && tourProgress() == 0}}>Benchmark</button>
           </div>
           <div class={styles.rightButtons}>
-            <button id="clearButton" class={styles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Clear Models</button>
-            <button class={styles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()} classList={{ hidden: selectedModels().length == 0}}>⚙︎</button>
+            <button id="clearButton" class={styles.inputButton} onClick={clearModels } disabled={selectedModels().length == 0 && tourProgress() == 0} classList={{ hidden: selectedModels().length == 0 && tourProgress() == 0}}>Clear Models</button>
+            <button class={styles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()} classList={{ hidden: selectedModels().length == 0 && tourProgress() == 0}}>⚙︎</button>
           </div>
         </div>
 
-        <div class={`${styles.advancedOptionsMenu} ${!menuIsOpen() ? "" : styles.menuClosed}`} id='advancedOptionsMenu'>
-          <ul class={styles.optionMenuSubTabs}>
+        <div class={`${styles.advancedOptionsMenu} ${(!menuIsOpen() || tourProgress() == 2) ? "" : styles.menuClosed}`} id='advancedOptionsMenu'>
+          <ul class={styles.optionMenuSubTabs} id="optionMenuSubTabs">
             <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? styles.selectedOptionMenuSubTab : ""}>General</button></li>
             <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? styles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
             <li><button onClick={() => setSubMenuID(2)} class={subMenuID() == 2 ? styles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
@@ -422,9 +544,8 @@ function ModelBenchmarking() {
 
           {/* General Options Sub Menu */}
           <div id="generalOptions" class={styles.optionsSubMenu}
-          classList={{ hidden: subMenuID() !== 0 }}>
+          classList={{ hidden: subMenuID() !== 0 && tourProgress() != 2 }}>
 
-            <h5>Note: Run amount in individual models will override this value.</h5>
             <div class={styles.inputOption}>
               <label for="enableGlobalBenchmarkAmount">Run Models X number of times: </label>
               <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" />
@@ -504,7 +625,7 @@ function ModelBenchmarking() {
           </div>
         </div>
 
-        <div id="tableContainer" class={styles.tableContainer} classList={{ hidden: selectedModels().length == 0}}>
+        <div id="tableContainer" class={styles.tableContainer} classList={{ hidden: selectedModels().length == 0 || tourProgress() >= 3}}>
 
           <For each={allowedModelTypes}>{(type) => {
             const filteredModels = createMemo(() =>
@@ -559,7 +680,61 @@ function ModelBenchmarking() {
           }}</For>
 
         </div>
-
+        <div id="tourTableContainer" class={styles.tableContainer} classList={{ hidden: tourProgress() < 3}}>
+          <For each={allowedModelTypes}>{(type) => {
+            return (
+              <div>
+                <br/><br/>
+                <h3><span>{type.charAt(0).toUpperCase() + type.slice(1)}</span> Models</h3>
+                <table id={`${type}-table`} class={styles.tableMMLU}>
+                  <colgroup>
+                    <col/>
+                    <col/>
+                    <col span="2" class={styles.tableColShrink} />
+                    <col/>
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>Model Name</th>
+                      <th>Avg Upload Time</th>
+                      <th>Avg Generation Time</th>
+                      <th>Sample Output</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                      <td>
+                        <span 
+                          class={styles.modelName} 
+                        >
+                          Model Name Here
+                        </span>
+                      </td>
+                      <Show when={tourProgress() == 4} fallback={
+                        <>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </>
+                      }>
+                      <td>1.5s</td>
+                      <td>3.1s</td>
+                      <td>Sample Output Example</td>
+                      </Show>
+                    </tr>
+                  </tbody>
+                </table>
+                <button 
+                  class={styles.inputButton + " " + styles.copyButton} 
+                >
+                  Copy table to clipboard 📋
+                </button>
+              </div>
+            )
+          }}</For>
+        </div>
+        <br />
+        <button class={styles.inputButton} id="redoTutorial" onClick={() => driverObj.drive()}>Redo tutorial</button>
       </div>
     </>
   );
