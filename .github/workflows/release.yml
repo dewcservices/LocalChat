@@ -30,9 +30,16 @@ jobs:
         run: npm run build-local-chat
 
       - name: Create zip file
-        run: |
-          cd dist
-          zip -r ../web_app_${{ github.ref_name }}.zip .
+        working-directory: ./web_app/dist
+        run: zip -r ../web_app_${{ github.ref_name }}.zip .
+
+      - name: Download extra models
+        working-directory: ./
+        run: node ./web_app/build/extra_models.js
+
+      - name: Zip extra models
+        working-directory: ./more_models
+        run: zip -r ../more_models_${{ github.ref_name }}.zip .
 
       - name: Create GitHub Release
         id: create_release
@@ -40,6 +47,8 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          files: web_app_${{ github.ref_name }}.zip
+          files: |
+            web_app_${{ github.ref_name }}.zip
+            more_models_${{ github.ref_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

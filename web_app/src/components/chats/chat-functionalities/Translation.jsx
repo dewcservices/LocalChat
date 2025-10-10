@@ -48,7 +48,7 @@ function Translation() {
         popover: {
           title: "Selecting a Model",
           description: `
-            Next select a model to summarise your text with. 
+            Next select a model to translate your text with. 
             For more information see the <A href="/recommendation">model information page</A>.
           `
         }
