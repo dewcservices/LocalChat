@@ -57,13 +57,13 @@ function Layout(props) {
     }
   };
 
-const deleteAllChats = () => {
-  if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
+  const deleteAllChats = () => {
+    if (!confirm("Are you sure you want to delete ALL chat histories? This action cannot be undone.")) return;
 
-  deleteChatHistories();
-  navigate('/');
-  setChatHistories([]);
-};
+    deleteChatHistories();
+    navigate('/');
+    setChatHistories([]);
+  };
   
   // start renaming mode for a given chat
   const startRenaming = (chatId) => {
@@ -154,9 +154,6 @@ const deleteAllChats = () => {
                             </Show>
                             <Show when={chat.chatType === 'translation'}>
                               <span class={styles.chatTypeIcon}>🌐</span>
-                            </Show>
-                            <Show when={chat.chatType === 'general'}>
-                              <span class={styles.chatTypeIcon}>💬</span>
                             </Show>
                             {chat.chatName}
                           </A>
