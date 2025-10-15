@@ -489,9 +489,11 @@ function ModelBenchmarking() {
 
   onMount(async () => {
 
-    if (!localStorage.getItem("hasSeenBenchmarkingTutorial")) {
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["benchmarking"]) {
       driverObj.drive();
-      localStorage.setItem("hasSeenBenchmarkingTutorial","true");
+      tutorialSaves["benchmarking"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
     }
 
     if (!navigator.gpu) return;

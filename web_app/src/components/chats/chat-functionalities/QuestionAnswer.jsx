@@ -77,6 +77,14 @@ function QuestionAnswer() {
           title: "Submit",
           description: `Use the submit button to process the question.`
         }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
       }
     ]
   });
@@ -84,9 +92,12 @@ function QuestionAnswer() {
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('question-answering'));
 
-    let chats = getChatHistories();
-    chats = chats.filter(c => c.chatType == "question-answer");
-    if (chats.length <= 1) driverObj.drive();
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["question-answer"]) {
+      driverObj.drive();
+      tutorialSaves["question-answer"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
   });
 
   const addModel = async () => {
@@ -270,6 +281,13 @@ function QuestionAnswer() {
 
         <div class={styles.controlsLeft}></div>
         <div class={styles.controlsRight}>
+          <button
+            id="redoTutorial"
+            class={styles.addModelButton}
+            onClick={() => driverObj.drive()}
+          >
+            Redo tutorial
+          </button>
           <select 
             id="modelSelection"
             class={styles.modelSelection} 

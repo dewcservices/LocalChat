@@ -143,9 +143,11 @@ function ModelRecommendation() {
   }
 
   onMount(async () => {
-    if (!localStorage.getItem("hasSeenRecommendationTutorial")) {
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["recommendation"]) {
       driverObj.drive();
-      localStorage.setItem("hasSeenRecommendationTutorial","true");
+      tutorialSaves["recommendation"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
     }
   });
 

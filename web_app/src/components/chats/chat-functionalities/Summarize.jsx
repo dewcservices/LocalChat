@@ -68,6 +68,14 @@ function Summarize() {
           title: "Submit",
           description: `Use the submit button to summarise the text.`
         }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
       }
     ]
   });
@@ -76,9 +84,12 @@ function Summarize() {
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('summarization'));
 
-    let chats = getChatHistories();
-    chats = chats.filter(c => c.chatType == 'summarize');
-    if (chats.length <= 1) driverObj.drive();
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["summarization"]) {
+      driverObj.drive();
+      tutorialSaves["summarization"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
   });
 
   const addModel = async () => {
@@ -287,6 +298,14 @@ function Summarize() {
 
           {/* model selection and submit button */}
           <div class={styles.controlsRight}>
+
+            <button
+              id="redoTutorial"
+              class={styles.addModelButton}
+              onClick={() => driverObj.drive()}
+            >
+              Redo tutorial
+            </button>
 
             <select 
               id="modelSelection"

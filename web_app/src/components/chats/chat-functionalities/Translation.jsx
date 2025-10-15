@@ -87,6 +87,14 @@ function Translation() {
           title: "Submit",
           description: `Use the submit button to translate the text.`
         }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
       }
     ]
   });
@@ -94,9 +102,12 @@ function Translation() {
   onMount(async () => {
     setAvailableModels(await getCachedModelsNames('translation'));
 
-    let chats = getChatHistories();
-    chats = chats.filter(c => c.chatType == 'translation');
-    if (chats.length <= 1) driverObj.drive();
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["translation"]) {
+      driverObj.drive();
+      tutorialSaves["translation"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
   });
 
   const addModel = async () => {
@@ -333,7 +344,13 @@ function Translation() {
           </div>
 
           <div class={styles.controlsRight}>
-            
+            <button
+              id="redoTutorial"
+              class={styles.addModelButton}
+              onClick={() => driverObj.drive()}
+            >
+              Redo tutorial
+            </button>
             <label for="src_lang">From: </label>
             <select 
               id="src_lang"
@@ -352,7 +369,7 @@ function Translation() {
               id="tgt_lang"
               name="tgt_lang" 
               class={styles.selection} 
-              style="margin-right: 4vh;"
+              style="margin-right: 2vh;"
               value={tgtLang()} 
               onChange={e => setTgtLang(e.currentTarget.value)}
             >
