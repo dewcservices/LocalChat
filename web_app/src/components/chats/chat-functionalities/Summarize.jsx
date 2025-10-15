@@ -49,6 +49,15 @@ function Summarize() {
         }
       },
       {
+        element: '#processorSelector',
+        popover: {
+          title: "Choosing a processor",
+          description: `
+            If you want to use a GPU, choose the button here if it isn't grayed out. This will require reprocessing any selected models, which may take several minutes.
+          `
+        }
+      },
+      {
         element: "#tabSwitcher",
         popover: {
           title: "Text or File Input",
