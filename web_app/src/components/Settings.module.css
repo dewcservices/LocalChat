@@ -156,3 +156,134 @@
 .clearDataButton:active {
   transform: translateY(0);
 }
+
+/* Chat Management & Theme Styles */
+.chatStats,
+.actionCard,
+.themeToggleContainer,
+.modelCard {
+  background: var(--background-primary);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.chatStats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.managementActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actionCard h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.actionCard p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.exportButton,
+.importButton,
+.themeToggleButton {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.exportButton:hover:not(:disabled),
+.importButton:hover,
+.themeToggleButton:hover {
+  transform: translateY(-2px);
+}
+
+.exportButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.themeToggleContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+}
+
+.themeInfo h3 {
+  margin: 0 0 6px 0;
+}
+
+.themeInfo p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.themeToggleButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Model Selection Styles */
+.modelCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modelInfo h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.modelInfo p {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.modelDropdown {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--background-secondary);
+  border: 1px solid var(--button-border-colour);
+  color: var(--text-colour);
+  cursor: pointer;
+}
+
+.modelDropdown:hover {
+  border-color: var(--highlight-colour);
+}
+
+.modelDropdown:focus {
+  outline: none;
+  border-color: var(--highlight-colour);
+}
+
+.noModelsText {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.6;
+  font-style: italic;
+}

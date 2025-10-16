@@ -1,11 +1,61 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount, For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 import styles from './Settings.module.css';
 import { exportAllChats, importAllChats, getChatHistories } from '../utils/ChatHistory';
+import { useTheme } from './ThemeContext';
+import { getCachedModelsNames } from '../utils/ModelCache';
+import { getDefaultModel, setDefaultModel } from '../utils/DefaultModels';
 
 function Settings() {
   const [activeSection, setActiveSection] = createSignal('default-models');
   const [chatCount, setChatCount] = createSignal(getChatHistories().length);
+  const { theme, toggleTheme } = useTheme();
+
+  // Model states for each task type
+  const [summarizationModels, setSummarizationModels] = createSignal([]);
+  const [questionAnsweringModels, setQuestionAnsweringModels] = createSignal([]);
+  const [translationModels, setTranslationModels] = createSignal([]);
+
+  // Default model selections
+  const [defaultSummarizationModel, setDefaultSummarizationModel] = createSignal('');
+  const [defaultQuestionAnsweringModel, setDefaultQuestionAnsweringModel] = createSignal('');
+  const [defaultTranslationModel, setDefaultTranslationModel] = createSignal('');
+
+  // Load available models and default selections on mount
+  onMount(async () => {
+    // Load available models
+    const sumModels = await getCachedModelsNames('summarization');
+    const qaModels = await getCachedModelsNames('question-answering');
+    const transModels = await getCachedModelsNames('translation');
+
+    setSummarizationModels(sumModels);
+    setQuestionAnsweringModels(qaModels);
+    setTranslationModels(transModels);
+
+    // Load saved default models
+    setDefaultSummarizationModel(getDefaultModel('summarization'));
+    setDefaultQuestionAnsweringModel(getDefaultModel('question-answering'));
+    setDefaultTranslationModel(getDefaultModel('translation'));
+  });
+
+  // Handle model selection changes
+  const handleSummarizationChange = (e) => {
+    const model = e.currentTarget.value;
+    setDefaultSummarizationModel(model);
+    setDefaultModel('summarization', model);
+  };
+
+  const handleQuestionAnsweringChange = (e) => {
+    const model = e.currentTarget.value;
+    setDefaultQuestionAnsweringModel(model);
+    setDefaultModel('question-answering', model);
+  };
+
+  const handleTranslationChange = (e) => {
+    const model = e.currentTarget.value;
+    setDefaultTranslationModel(model);
+    setDefaultModel('translation', model);
+  };
 
   const sections = [
     { id: 'default-models', label: 'Default Models' },
@@ -111,7 +161,78 @@ function Settings() {
             <div class={styles.sectionView}>
               <h2 class={styles.sectionHeading}>Default Models</h2>
               <div class={styles.sectionContent}>
-                <p class={styles.placeholder}>Default model settings will go here...</p>
+                <p style="color: var(--text-colour); opacity: 0.9; margin: 0 0 16px 0;">
+                  Select default models for different tasks. These will be automatically loaded when you use each feature.
+                </p>
+
+                {/* Summarization Model */}
+                <div class={styles.modelCard}>
+                  <div class={styles.modelInfo}>
+                    <h3>📝 Summarization</h3>
+                    <p>Default model for text summarization</p>
+                  </div>
+                  <select 
+                    class={styles.modelDropdown}
+                    value={defaultSummarizationModel()}
+                    onChange={handleSummarizationChange}
+                  >
+                    <option value="">No default model</option>
+                    <For each={summarizationModels()}>{(model) => 
+                      <option value={model}>{model}</option>
+                    }</For>
+                  </select>
+                  <Show when={summarizationModels().length === 0}>
+                    <p class={styles.noModelsText}>
+                      No models available. Upload models to use this feature.
+                    </p>
+                  </Show>
+                </div>
+
+                {/* Question Answering Model */}
+                <div class={styles.modelCard}>
+                  <div class={styles.modelInfo}>
+                    <h3>❓ Question Answering</h3>
+                    <p>Default model for answering questions</p>
+                  </div>
+                  <select 
+                    class={styles.modelDropdown}
+                    value={defaultQuestionAnsweringModel()}
+                    onChange={handleQuestionAnsweringChange}
+                  >
+                    <option value="">No default model</option>
+                    <For each={questionAnsweringModels()}>{(model) => 
+                      <option value={model}>{model}</option>
+                    }</For>
+                  </select>
+                  <Show when={questionAnsweringModels().length === 0}>
+                    <p class={styles.noModelsText}>
+                      No models available. Upload models to use this feature.
+                    </p>
+                  </Show>
+                </div>
+
+                {/* Translation Model */}
+                <div class={styles.modelCard}>
+                  <div class={styles.modelInfo}>
+                    <h3>🌐 Translation</h3>
+                    <p>Default model for text translation</p>
+                  </div>
+                  <select 
+                    class={styles.modelDropdown}
+                    value={defaultTranslationModel()}
+                    onChange={handleTranslationChange}
+                  >
+                    <option value="">No default model</option>
+                    <For each={translationModels()}>{(model) => 
+                      <option value={model}>{model}</option>
+                    }</For>
+                  </select>
+                  <Show when={translationModels().length === 0}>
+                    <p class={styles.noModelsText}>
+                      No models available. Upload models to use this feature.
+                    </p>
+                  </Show>
+                </div>
               </div>
             </div>
           )}
@@ -169,7 +290,23 @@ function Settings() {
             <div class={styles.sectionView}>
               <h2 class={styles.sectionHeading}>Colour Settings</h2>
               <div class={styles.sectionContent}>
-                <p class={styles.placeholder}>Colour configuration options will go here...</p>
+                <p style="color: var(--text-colour); opacity: 0.9; margin: 0;">
+                  Switch between light and dark mode themes.
+                </p>
+                
+                <div class={styles.themeToggleContainer}>
+                  <div class={styles.themeInfo}>
+                    <h3>Appearance</h3>
+                    <p>Currently using <strong>{theme() === 'dark' ? 'Dark' : 'Light'}</strong> mode</p>
+                  </div>
+                  <button 
+                    class={styles.themeToggleButton}
+                    onClick={toggleTheme}
+                  >
+                    <span style="font-size: 1.2rem;">{theme() === 'dark' ? '☀️' : '🌙'}</span>
+                    Switch to {theme() === 'dark' ? 'Light' : 'Dark'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
