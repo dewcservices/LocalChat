@@ -21,18 +21,6 @@ function NewChat() {
     navigate(`/chat/${newId}`);
   };
 
-  const newGeneralChat = () => {
-    let newId = newChatId();
-    let currentDate = Date.now();
-
-    createNewChat(newId, 'general', currentDate);
-    saveMessages(newId, currentDate,
-      [{sender: 'chatbotMessage', date: currentDate, content: "Hi, this is a general chat where we can have conversations."}]
-    );
-
-    navigate(`/chat/${newId}`);
-  };
-
   const newQuestionAnswerChat = () => {
     let newId = newChatId();
     let currentDate = Date.now();
@@ -60,15 +48,14 @@ function NewChat() {
   return (
     <>
       <div class={styles.newChat}>
-        <h2>Select an option:</h2>
-        <div class={styles.newChatButtons}>
-          <button onclick={newSummarizeChat}>Summarise Text</button>
-          <button onClick={newQuestionAnswerChat}>Ask Question</button>
-          <button onclick={newGeneralChat}>General Chat</button>
-          <button onClick={newTranslationChat}>Translate</button>
-          {/* <A href="/models">Model Testing</A> */}
-        </div>
         
+        <h2>Select an option to start a new chat.</h2>
+        <div class={styles.newChatButtons}>
+          <button onclick={newSummarizeChat}>📄 Summarise Text</button>
+          <button onClick={newQuestionAnswerChat}>❓ Ask Question</button>
+          <button onClick={newTranslationChat}>🌐 Translate</button>
+        </div>
+
         {/* Documentation link */}
         <div class={styles.documentationContainer}>
           <a 
@@ -81,6 +68,7 @@ function NewChat() {
           </a>
           <span class={styles.internetNote}> (only accessible with internet access)</span>
         </div>
+
       </div>
     </>
   );
