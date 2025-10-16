@@ -154,7 +154,6 @@ function Settings() {
           ))}
         </div>
 
-        {/* Main Content Area */}
         <div class={styles.settingsMain}>
           {/* Default Models Section */}
           {activeSection() === 'default-models' && (
@@ -165,7 +164,7 @@ function Settings() {
                   Select default models for different tasks. These will be automatically loaded when you use each feature.
                 </p>
 
-                {/* Summarization Model */}
+                {/* Summarise Model Dropdown*/}
                 <div class={styles.modelCard}>
                   <div class={styles.modelInfo}>
                     <h3>📝 Summarization</h3>
@@ -188,7 +187,7 @@ function Settings() {
                   </Show>
                 </div>
 
-                {/* Question Answering Model */}
+                {/* Question Answering Model Dropdown*/}
                 <div class={styles.modelCard}>
                   <div class={styles.modelInfo}>
                     <h3>❓ Question Answering</h3>
@@ -211,7 +210,7 @@ function Settings() {
                   </Show>
                 </div>
 
-                {/* Translation Model */}
+                {/* Translation Model Dropdown*/}
                 <div class={styles.modelCard}>
                   <div class={styles.modelInfo}>
                     <h3>🌐 Translation</h3>
@@ -252,7 +251,8 @@ function Settings() {
                     <span class={styles.statValue}>{chatCount()}</span>
                   </div>
                 </div>
-
+                
+                {/* Chat Exporting */}
                 <div class={styles.managementActions}>
                   <div class={styles.actionCard}>
                     <h3 class={styles.actionTitle}>Export Chats</h3>
@@ -268,6 +268,7 @@ function Settings() {
                     </button>
                   </div>
 
+                  {/* Chat Importing */}
                   <div class={styles.actionCard}>
                     <h3 class={styles.actionTitle}>Import Chats</h3>
                     <p class={styles.actionDescription}>
@@ -293,7 +294,8 @@ function Settings() {
                 <p style="color: var(--text-colour); opacity: 0.9; margin: 0;">
                   Switch between light and dark mode themes.
                 </p>
-                
+
+                {/* Selection 1 - Light/Dark Mode Toggle */}
                 <div class={styles.themeToggleContainer}>
                   <div class={styles.themeInfo}>
                     <h3>Appearance</h3>
