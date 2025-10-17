@@ -8,13 +8,13 @@
 
 .newChatButtons {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, auto);
+  grid-template-columns: repeat(3, 1fr);
   gap: 2em;
+  margin-bottom: 4em;
 }
 
 .newChatButtons button,
-.newChatButtons A 
+.newChatButtons A
 {
   border-radius: 8px;
   text-align: center;

@@ -8,6 +8,7 @@ import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function Summarize() {
@@ -72,9 +73,16 @@ function Summarize() {
     ]
   });
 
-  // Checks the cache for models that can be used for summarization.
+  // this checks cached models for summarisation.
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('summarization'));
+    const models = await getCachedModelsNames('summarization');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('summarization');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'summarize');

@@ -44,7 +44,7 @@
   border-radius: 10px;
   border: 1px solid var(--button-border-colour);
   background-color: var(--background-secondary);
-  color: white;
+  color: var(--text-colour);
   padding: 12px 20px;
   overflow-y: auto;
 }
@@ -70,7 +70,7 @@
 }
 
 .inputContainer textarea::-webkit-scrollbar-thumb:hover {
-  background: #666666;
+  background: var(--active-colour);
 }
 
 .controlsLeft {
@@ -103,7 +103,7 @@
   margin-right: 1vh;
   background-color: var(--background-secondary);
   border-color: var(--button-border-colour);
-  color: white;
+  color: var(--text-colour);
   border-radius: 3px;
 }
 .modelSelection:hover {
@@ -118,10 +118,10 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 3vh;
-  color: white;
+  color: var(--text-colour);
 }
 .addModelButton:hover {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
   cursor: pointer;
 }
 .noModels {
@@ -132,9 +132,9 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 3vh;
-  color: white;
+  color: var(--text-colour);
 }
 .noModels:hover {
-  border-color: firebrick;
+  border-color: var(--failure-colour);
   cursor: pointer;
 }

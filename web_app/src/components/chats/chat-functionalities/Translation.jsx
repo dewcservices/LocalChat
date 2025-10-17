@@ -8,6 +8,7 @@ import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function Translation() {
@@ -48,7 +49,7 @@ function Translation() {
         popover: {
           title: "Selecting a Model",
           description: `
-            Next select a model to summarise your text with. 
+            Next select a model to translate your text with. 
             For more information see the <A href="/recommendation">model information page</A>.
           `
         }
@@ -91,8 +92,16 @@ function Translation() {
     ]
   });
 
+  // this checks cached models for translation.
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('translation'));
+    const models = await getCachedModelsNames('translation');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('translation');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'translation');

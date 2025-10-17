@@ -24,7 +24,7 @@
   padding: 1vh;
   background-color: var(--background-secondary);
   border-color: var(--button-border-colour);
-  color: white;
+  color: var(--text-colour);
   border-radius: 3px;
 }
 .modelSelection:hover {
@@ -39,26 +39,26 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 3vh;
-  color: white;
+  color: var(--text-colour);
   transition: all 0.2s ease;
 }
 .addModelButton:hover {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
   cursor: pointer;
 }
 .noModels {
   border: 1px solid var(--failure-colour);
   border-radius: 3px;
-  background-color: #292929;
+  background-color: var(--background-secondary);
   padding: 0.8vh;
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 3vh;
-  color: white;
+  color: var(--text-colour);
   transition: all 0.2s ease;
 }
 .noModels:hover {
-  border-color: firebrick;
+  border-color: var(--failure-colour);
   cursor: pointer;
 }
 
@@ -112,7 +112,7 @@
 }
 
 .inputContainer textarea::-webkit-scrollbar-thumb:hover {
-  background: #666666;
+  background: var(--active-colour);
 }
 
 /* Controls container at the bottom spacing and persistent element placement */

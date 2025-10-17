@@ -21,7 +21,7 @@
     /* border: 1px solid black; */
     overflow-x: auto;
     max-width: 75vw;
-    scrollbar-color: black var(--background-secondary);
+    scrollbar-color: var(--button-border-colour) var(--background-secondary);
 }
   
 .tableMMLU {
@@ -32,7 +32,7 @@
 }
 
 .tableMMLU th, .tableMMLU td {
-    border: 1px solid black;
+    border: 1px solid var(--button-border-colour);
     background-color: var(--background-primary);
     text-align: center;
     min-width: 8em;
@@ -73,7 +73,7 @@
 
 .advancedOptionsMenu {
     border-radius: 5px;
-    border: 1px solid black;
+    border: 1px solid var(--button-border-colour);
     background-color: var(--background-secondary);
     max-height: 500px;
     overflow: hidden;
@@ -90,7 +90,7 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #333;
+    background-color: var(--background-secondary);
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
     width: fit-content;
@@ -156,9 +156,9 @@
 
 .processSelector {
   margin: 1em 0em;
-  border: 1px solid #474747;
+  border: 1px solid var(--button-border-colour);
   border-radius: 3px;
-  background-color: #292929;
+  background-color: var(--background-secondary);
   padding: 1em;
   width: fit-content;
   display: flex;
@@ -175,7 +175,7 @@
 
 .recommendationArea {
     border-radius: 5px;
-    border: 1px solid black;
+    border: 1px solid var(--button-border-colour);
     background-color: var(--background-secondary);
     padding: 1em;
 }
@@ -183,7 +183,7 @@
 .recommendationInputArea {
     width: 30em;
     border-radius: 5px;
-    border: 1px solid black;
+    border: 1px solid var(--button-border-colour);
     background-color: var(--background-primary);
     padding: 1em;
 }
@@ -220,14 +220,14 @@ input[type=number] {
     max-height: 35vh;
     overflow-y: auto;
     overflow-x: auto;
-    scrollbar-color: black var(--background-secondary);
+    scrollbar-color: var(--button-border-colour) var(--background-secondary);
 }
 
 .defaultRecommendationMenu th {
     position: sticky;
     top: 0;
     z-index: 2;
-    border-bottom: 3px solid black;
+    border-bottom: 3px solid var(--button-border-colour);
 }
 
 .defaultRecommendationMenu th button {
