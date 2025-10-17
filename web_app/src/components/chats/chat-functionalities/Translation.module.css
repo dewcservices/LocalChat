@@ -17,10 +17,10 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 4vh;
-  color: white;
+  color: var(--text-colour);
 }
 .addModelButton:hover {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
   cursor: pointer;
 }
 .noModels {
@@ -31,10 +31,10 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 4vh;
-  color: white;
+  color: var(--text-colour);
 }
 .noModels:hover {
-  border-color: firebrick;
+  border-color: var(--failure-colour);
   cursor: pointer;
 }
 .tab {
@@ -44,10 +44,10 @@
   padding: 1vh;
   padding-left: 2vh;
   padding-right: 2vh;
-  color: white;
+  color: var(--text-colour);
 }
 .tab.highlighted {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: var(--background-tertiary) !important;
   transform: translateX(2px);
 }
 
@@ -58,7 +58,7 @@
   padding: 1vh;
   padding-left: 2vh;
   padding-right: 2vh;
-  color: white;
+  color: var(--text-colour);
 }
 
 .tab.highlighted, .selectedTab.highlighted {
@@ -111,7 +111,7 @@
 }
 
 .inputContainer textarea::-webkit-scrollbar-thumb:hover {
-  background: #666666;
+  background: var(--active-colour);
 }
 
 .sendButton {
@@ -121,11 +121,11 @@
   padding: 1vh;
   padding-left: 2vh;
   padding-right: 2vh;
-  color: white;
+  color: var(--text-colour);
 }
 .sendButton:hover {
   cursor: pointer;
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
 }
 
 .controlsContainer {
@@ -148,7 +148,7 @@
 .selection {
   background-color: var(--background-secondary);
   border-color: var(--button-border-colour);
-  color: white;
+  color: var(--text-colour);
   padding: 0.8vh;
   width: 13em;
   overflow: hidden;
