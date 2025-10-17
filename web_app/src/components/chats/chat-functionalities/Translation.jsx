@@ -8,6 +8,7 @@ import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function Translation() {
@@ -91,8 +92,16 @@ function Translation() {
     ]
   });
 
+  // this checks cached models for translation.
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('translation'));
+    const models = await getCachedModelsNames('translation');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('translation');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'translation');

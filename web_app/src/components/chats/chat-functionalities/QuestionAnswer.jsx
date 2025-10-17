@@ -8,6 +8,7 @@ import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function QuestionAnswer() {
@@ -81,8 +82,16 @@ function QuestionAnswer() {
     ]
   });
 
+  // this checks cached models for question and answering
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('question-answering'));
+    const models = await getCachedModelsNames('question-answering');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('question-answering');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == "question-answer");
