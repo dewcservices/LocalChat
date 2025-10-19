@@ -13,7 +13,7 @@ function ModelBenchmarking() {
   
   const defaultLanguages = ["English","French"];
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
-  let currentLanguageOption = "unionLanguages";
+  const [currentLanguageOption, setCurrentLanguageOption] = createSignal("unionLanguages");
 
   const allowedModelTypes = ["summarization","question-answering","translation"];
 
@@ -155,10 +155,22 @@ function ModelBenchmarking() {
     let translationInput = document.getElementById("translationTextArea").innerHTML;
     const sourceLanguage = document.getElementById("src_lang").value;
     const targetLanguage = document.getElementById("tgt_lang").value;
-    const languageOption = currentLanguageOption;
+    const languageOption = currentLanguageOption();
+    console.log(currentLanguageOption());
 
-    let saveSettings = [runAmount, summarizationInput, QAContext, QAQuestion, translationInput, sourceLanguage, targetLanguage, languageOption];
+    let saveSettings = {
+      "runAmount":runAmount,
+      "summarizationInput":summarizationInput,
+      "QAContext":QAContext,
+      "QAQuestion":QAQuestion,
+      "translationInput":translationInput,
+      "sourceLanguage":sourceLanguage,
+      "targetLanguage":targetLanguage,
+      "languageOption":languageOption
+    };
     localStorage.setItem("benchmarkingSettings", JSON.stringify(saveSettings));
+    
+    console.log(saveSettings);
   }
 
   const addModel = async (event) => {
@@ -204,7 +216,7 @@ function ModelBenchmarking() {
     // Reset the input incase the model is removed and needs to be re-added.
     event.target.value = "";
 
-    adjustLanguageVisibility({ target: { id: currentLanguageOption } });
+    adjustLanguageVisibility({ target: { id: currentLanguageOption() } });
   };
 
   const benchmarkModels = async () => {
@@ -448,12 +460,12 @@ function ModelBenchmarking() {
     navigator.clipboard.writeText(tableString);
   };
 
-  const adjustLanguageVisibility = async (e) => {
-    //console.log(e.target.id);
-    currentLanguageOption = e.target.id;
+  const adjustLanguageVisibility = async (languageID) => {
+    //console.log(languageID);
+    setCurrentLanguageOption(languageID);
 
     let languages = [...defaultLanguages];
-    if (e.target.id == "allLanguages") {
+    if (languageID == "allLanguages") {
       for (let i = 0; i < selectedModels().length; i++) {
 
         if (selectedModels()[i].modelType != "translation") {
@@ -469,7 +481,7 @@ function ModelBenchmarking() {
         }
       }
 
-    } else if (e.target.id == "unionLanguages") {
+    } else if (languageID == "unionLanguages") {
       let firstModel = true;
       for (let i = 0; i < selectedModels().length; i++) {
 
@@ -505,6 +517,27 @@ function ModelBenchmarking() {
 
   onMount(async () => {
 
+    // Load saved settings
+    let saveSettings = JSON.parse(localStorage.getItem("benchmarkingSettings")) || {};
+
+    document.getElementById("summarizationTextArea").innerHTML = saveSettings["summarizationInput"];
+    document.getElementById("QAContextTextArea").innerHTML = saveSettings["QAContext"];
+    document.getElementById("QAQuestionTextArea").innerHTML = saveSettings["QAQuestion"];
+    document.getElementById("translationTextArea").innerHTML = saveSettings["translationInput"];
+
+    if (saveSettings != {}) {
+      document.getElementById("globalBenchmarkRunCount").value = saveSettings["runAmount"];
+      document.getElementById("src_lang").value = saveSettings["sourceLanguage"];
+      document.getElementById("tgt_lang").value = saveSettings["targetLanguage"];
+      setCurrentLanguageOption(saveSettings["languageOption"]);
+    }
+
+    if (currentLanguageOption() == "unionLanguages") {
+      document.getElementById("unionLanguages").checked = true;
+    } else {
+      document.getElementById("allLanguages").checked = true;
+    }
+    
     let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
     if (!tutorialSaves["benchmarking"]) {
       driverObj.drive();
@@ -634,10 +667,10 @@ function ModelBenchmarking() {
 
             <div>
               <p>The options below determine whether the language selection boxes will show languages that all uploaded models have in common, or all models. If the former is selected, some models will fail to benchmark.</p>
-              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={() => {adjustLanguageVisibility; saveBenchmarkSettings()}} checked />
+              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={() => {adjustLanguageVisibility("unionLanguages"); saveBenchmarkSettings()}} />
               <label for="unionLanguages">Only show common languages.</label>
               <br />
-              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={() => {adjustLanguageVisibility; saveBenchmarkSettings()}} />
+              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={() => {adjustLanguageVisibility("allLanguages"); saveBenchmarkSettings()}} />
               <label for="allLanguages">Show all languages.</label>
             </div>
           </div>
