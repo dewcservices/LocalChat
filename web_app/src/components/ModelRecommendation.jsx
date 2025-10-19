@@ -166,6 +166,7 @@ function ModelRecommendation() {
         <p>
           Optionally, more models can be downloaded from the <a href="https://github.com/dewcservices/LocalChat/releases">release page</a>.
           These models are described in the table below.
+          Click the name of a model to be taken directly to its Hugging Face page (if internet access is available).
         </p>
 
         <div>
@@ -201,9 +202,7 @@ function ModelRecommendation() {
                   <tbody>
                     <For each={sortedDefaultModels()[type]}>{(model) => 
                       <tr>
-                        <td>
-                          <b>{model.name}</b><br/>
-                          <span>One line about model</span></td>
+                        <td><a href={model.link} target="_blank" rel="noopener noreferrer" style="color:var(--link-colour)"><b>{model.name}</b></a></td>
                         <td>{model.quality} / 10</td>
                         <td>{model.file_size} GB</td> 
                         <td
