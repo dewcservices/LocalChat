@@ -145,6 +145,22 @@ function ModelBenchmarking() {
     }
   });
 
+  const saveBenchmarkSettings = () => {
+
+    // Get all elements to save
+    const runAmount = document.getElementById("globalBenchmarkRunCount").value;
+    let summarizationInput = document.getElementById("summarizationTextArea").innerHTML;
+    let QAContext = document.getElementById("QAContextTextArea").innerHTML;
+    let QAQuestion = document.getElementById("QAQuestionTextArea").innerHTML;
+    let translationInput = document.getElementById("translationTextArea").innerHTML;
+    const sourceLanguage = document.getElementById("src_lang").value;
+    const targetLanguage = document.getElementById("tgt_lang").value;
+    const languageOption = currentLanguageOption;
+
+    let saveSettings = [runAmount, summarizationInput, QAContext, QAQuestion, translationInput, sourceLanguage, targetLanguage, languageOption];
+    localStorage.setItem("benchmarkingSettings", JSON.stringify(saveSettings));
+  }
+
   const addModel = async (event) => {
 
     let files = [...event.target.files];
@@ -550,7 +566,7 @@ function ModelBenchmarking() {
 
             <div class={styles.inputOption}>
               <label for="enableGlobalBenchmarkAmount">Run Models X number of times: </label>
-              <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" />
+              <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" onChange={() => saveBenchmarkSettings()} />
 
               <div id="processorSelector" class={styles.processSelector}>
                 <button 
@@ -577,7 +593,7 @@ function ModelBenchmarking() {
           classList={{ hidden: subMenuID() !== 1 }}>
 
             <h3>Summarisation test input field. Leave blank to use default input.</h3>
-            <textarea id="summarizationTextArea" class={styles.inputArea}
+            <textarea id="summarizationTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
             placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.' />
           </div>
 
@@ -586,10 +602,10 @@ function ModelBenchmarking() {
           classList={{ hidden: subMenuID() !== 2 }}>
             <h3>Question Answering input fields. Leave blank to use default input.</h3>
             <div>
-              <textarea id="QAContextTextArea" class={styles.inputArea}
+              <textarea id="QAContextTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
               placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.' />
             
-              <textarea id="QAQuestionTextArea" class={styles.inputArea}
+              <textarea id="QAQuestionTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
               placeholder="Why can't LLM's be used in the defense industry and what benefits does this technolgy bring?" />
             </div>
           </div>
@@ -598,18 +614,18 @@ function ModelBenchmarking() {
           <div id="translationOptions" class={styles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 3 }}>
             <h3>Translation input field and language selection. Ignore to use default input and languages.</h3>
-            <textarea id="translationTextArea" class={styles.inputArea}
+            <textarea id="translationTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
             placeholder="Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles."/>
                       
             <label for="src_lang">From: </label>
-            <select name="src_lang" id="src_lang" class={styles.dropDownMenu}>
+            <select name="src_lang" id="src_lang" class={styles.dropDownMenu} onChange={() => saveBenchmarkSettings()}>
               <option value="French">Select Language</option>
               <For each={shownLanguages()}>{(lang) =>
                 <option value={lang}>{lang}</option>
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
-            <select name="tgt_lang" id="tgt_lang" class={styles.dropDownMenu}>
+            <select name="tgt_lang" id="tgt_lang" class={styles.dropDownMenu} onChange={() => saveBenchmarkSettings()}>
               <option value="English">Select Language</option>
               <For each={shownLanguages()}>{(lang) =>
                 <option value={lang}>{lang}</option>
@@ -618,10 +634,10 @@ function ModelBenchmarking() {
 
             <div>
               <p>The options below determine whether the language selection boxes will show languages that all uploaded models have in common, or all models. If the former is selected, some models will fail to benchmark.</p>
-              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={adjustLanguageVisibility} checked />
+              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={() => {adjustLanguageVisibility; saveBenchmarkSettings()}} checked />
               <label for="unionLanguages">Only show common languages.</label>
               <br />
-              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={adjustLanguageVisibility} />
+              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={() => {adjustLanguageVisibility; saveBenchmarkSettings()}} />
               <label for="allLanguages">Show all languages.</label>
             </div>
           </div>

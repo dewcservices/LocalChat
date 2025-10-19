@@ -102,9 +102,9 @@ function QuestionAnswer() {
     setAvailableModels(await getCachedModelsNames('question-answering'));
 
     let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
-    if (!tutorialSaves["question-answer"]) {
+    if (!tutorialSaves["question-answering"]) {
       driverObj.drive();
-      tutorialSaves["question-answer"] = true;
+      tutorialSaves["question-answering"] = true;
       localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
     }
   });
