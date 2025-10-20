@@ -154,7 +154,7 @@ function Layout(props) {
                               }}
                               title="Rename Chat"
                             >
-                              <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
+                              <img src={pencilIcon} alt="Edit" class={`${styles.actionIcon} ${styles.editIcon}`} />
                             </button>
                             <button 
                               class={styles.actionButton}
@@ -186,7 +186,7 @@ function Layout(props) {
                             onClick={applyRename}
                             title="Save Changes"
                           >
-                            <img src={saveIcon} alt="Save" class={styles.actionIcon} />
+                            <img src={saveIcon} alt="Save" class={`${styles.actionIcon} ${styles.editIcon}`} />
                           </button>
                           <button 
                             class={styles.actionButton}

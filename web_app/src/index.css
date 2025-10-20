@@ -19,6 +19,7 @@
   --disabled-button-colour: #161616;
   --success-colour: darkgreen;
   --failure-colour: darkred;
+  --usermsg-colour: #225bb5;
 
   color: var(--text-colour);
 }
@@ -32,12 +33,14 @@
   --link-colour: #0066cc;
   --highlight-colour: #0080ff;
   --selected-button-colour: #e0e0e0;
-  --active-colour: #666666;
+  --active-colour: #bbbbbb;
   --button-border-colour: #d0d0d0;
   --disabled-text-colour: #999999;
   --disabled-button-colour: #f8f8f8;
   --success-colour: #28a745;
   --failure-colour: #dc3545;
+  --usermsg-colour: #c1c5cb;
+
 }
 
 body {

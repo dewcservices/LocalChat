@@ -36,7 +36,7 @@
 }
 
 .userMessage {
-  background-color: #225bb5;
+  background-color: var(--usermsg-colour);
   text-align: left;
   overflow-wrap: anywhere;
 }
