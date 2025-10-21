@@ -8,6 +8,7 @@ import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function Summarize() {
@@ -20,6 +21,7 @@ function Summarize() {
 
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
@@ -72,9 +74,16 @@ function Summarize() {
     ]
   });
 
-  // Checks the cache for models that can be used for summarization.
+  // this checks cached models for summarisation.
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('summarization'));
+    const models = await getCachedModelsNames('summarization');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('summarization');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'summarize');
@@ -211,12 +220,14 @@ function Summarize() {
       } else {
         alert("Unsupported file type. Please use .txt, .html, .docx, or .pdf files.");
         fileInput.value = null;
+        setSelectedFileName("No file chosen");
         return;
       }
     } catch (error) {
       console.error("Error parsing file:", error);
       alert("Error processing file. Please try a different file format.");
       fileInput.value = null;
+      setSelectedFileName("No file chosen");
       return;
     }
 
@@ -234,13 +245,14 @@ function Summarize() {
     }
 
     fileInput.value = null;  // clear file input element
+    setSelectedFileName("No file chosen");  // reset filename display
   };
 
   return (
     <>
       <div class={styles.inputContainer}>
 
-        {/* Dynamic input UI - moved to top */}
+        {/* dynamic input UI */}
         <Switch>
           <Match when={tab() === "text"}>
             <div class={styles.searchBarContainer}>
@@ -256,13 +268,22 @@ function Summarize() {
             </div>
           </Match>
           <Match when={tab() === "file"}>
-            <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+            <div class={styles.fileUploadContainer}>
+              <label for="fileInput" class={styles.fileUploadLabel}>
+                Choose File
+              </label>
+              <input 
+                type="file" 
+                id="fileInput" 
+                accept=".txt, .html, .docx, .pdf"
+                onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+              />
+              <span class={styles.selectedFileName}>{selectedFileName()}</span>
             </div>
           </Match>
         </Switch>
 
-        {/* Control buttons row */}
+        {/* control buttons row */}
         <div class={styles.controlsContainer}>
 
           {/* text or file tab switcher */}

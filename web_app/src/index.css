@@ -12,15 +12,35 @@
   --text-colour: white;
   --link-colour: lightblue;
   --highlight-colour: lightskyblue;
-  --selected-button-colour: #474747;
+  --selected-button-colour: #555555;
   --active-colour: gray;
   --button-border-colour: #474747;
   --disabled-text-colour: black;
   --disabled-button-colour: #161616;
   --success-colour: darkgreen;
   --failure-colour: darkred;
+  --usermsg-colour: #225bb5;
 
   color: var(--text-colour);
+}
+
+/* light theme */
+[data-theme="light"] {
+  --background-primary: #ffffff;
+  --background-secondary: #f5f5f5;
+  --background-tertiary: rgba(0, 0, 0, 0.05);
+  --text-colour: #1a1a1a;
+  --link-colour: #0066cc;
+  --highlight-colour: #0080ff;
+  --selected-button-colour: #e0e0e0;
+  --active-colour: #bbbbbb;
+  --button-border-colour: #d0d0d0;
+  --disabled-text-colour: #999999;
+  --disabled-button-colour: #f8f8f8;
+  --success-colour: #28a745;
+  --failure-colour: #dc3545;
+  --usermsg-colour: #c1c5cb;
+
 }
 
 body {

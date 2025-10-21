@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
-import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats, importAllChats } from "../utils/ChatHistory";
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
 
 // icon imports for use in chat history
 import pencilIcon from '../assets/pencil.png';
@@ -79,21 +79,6 @@ function Layout(props) {
     setRenamingId(null);
   };
 
-  // export all chats as JSON
-  const handleExportChats = () => {
-    try {
-      exportAllChats();
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Export failed. Please check the console for details.');
-    }
-  };
-
-  // import chats from JSON
-  const handleImportChats = () => {
-    importAllChats(true, () => window.location.reload());
-  };
-
   // handle clicking on the entire chat container
   const handleChatClick = (chatId, event) => {
     // Don't navigate if we're clicking on action buttons or in rename mode
@@ -123,6 +108,8 @@ function Layout(props) {
           <A href="recommendation">Model Recommendations</A>
           <br/><br/>
           <A href="benchmarking">Model Benchmarking</A>
+          <br/><br/>
+          <A href="/settings">Settings</A>
           <br/><br/>
           <A href="/">Create New Chat</A>
           <br/><br/>
@@ -167,7 +154,7 @@ function Layout(props) {
                               }}
                               title="Rename Chat"
                             >
-                              <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
+                              <img src={pencilIcon} alt="Edit" class={`${styles.actionIcon} ${styles.editIcon}`} />
                             </button>
                             <button 
                               class={styles.actionButton}
@@ -199,7 +186,7 @@ function Layout(props) {
                             onClick={applyRename}
                             title="Save Changes"
                           >
-                            <img src={saveIcon} alt="Save" class={styles.actionIcon} />
+                            <img src={saveIcon} alt="Save" class={`${styles.actionIcon} ${styles.editIcon}`} />
                           </button>
                           <button 
                             class={styles.actionButton}
@@ -218,23 +205,6 @@ function Layout(props) {
           </div>
 
           <div class={styles.buttonContainer}>
-            <button 
-              class={styles.exportButton} 
-              onClick={handleExportChats}
-              disabled={chatHistories().length === 0}
-              title={chatHistories().length === 0 ? "No chats to export" : "Export all chat histories"}
-            >
-              Export All Chats
-            </button>
-            
-            <button 
-              class={styles.importButton} 
-              onClick={handleImportChats}
-              title="Import chat histories from JSON file"
-            >
-              Import Chats
-            </button>
-            
             <button 
               class={styles.deleteAllButton} 
               onClick={deleteAllChats}
