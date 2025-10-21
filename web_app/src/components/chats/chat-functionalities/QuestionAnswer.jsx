@@ -8,6 +8,7 @@ import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function QuestionAnswer() {
@@ -20,6 +21,7 @@ function QuestionAnswer() {
     // list of models that are already loaded into the cache
 
   const [contextTab, setContextTab] = createSignal("text");
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   // Q&A Tour
@@ -81,8 +83,16 @@ function QuestionAnswer() {
     ]
   });
 
+  // this checks cached models for question and answering
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('question-answering'));
+    const models = await getCachedModelsNames('question-answering');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('question-answering');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == "question-answer");
@@ -245,7 +255,18 @@ function QuestionAnswer() {
               <textarea id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
             </Match>
             <Match when={contextTab() === "file"}>
-              <input type="file" id="fileInput" accept=".txt, .html, .docx" />
+              <div class={styles.fileUploadContainer}>
+                <label for="fileInput" class={styles.fileUploadLabel}>
+                  Choose File
+                </label>
+                <input 
+                  type="file" 
+                  id="fileInput" 
+                  accept=".txt, .html, .docx"
+                  onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+                />
+                <span class={styles.selectedFileName}>{selectedFileName()}</span>
+              </div>
             </Match>
           </Switch>
         </div>

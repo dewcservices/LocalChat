@@ -8,6 +8,7 @@ import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function Translation() {
@@ -26,6 +27,7 @@ function Translation() {
   
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
@@ -91,8 +93,16 @@ function Translation() {
     ]
   });
 
+  // this checks cached models for translation.
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('translation'));
+    const models = await getCachedModelsNames('translation');
+    setAvailableModels(models);
+
+    // this auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('translation');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'translation');
@@ -304,8 +314,17 @@ function Translation() {
             </div>
           </Match>
           <Match when={tab() === "file"}>
-            <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html., .docx" />
+            <div class={styles.fileUploadContainer}>
+              <label for="fileInput" class={styles.fileUploadLabel}>
+                Choose File
+              </label>
+              <input 
+                type="file" 
+                id="fileInput" 
+                accept=".txt, .html, .docx"
+                onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+              />
+              <span class={styles.selectedFileName}>{selectedFileName()}</span>
             </div>
           </Match>
         </Switch>

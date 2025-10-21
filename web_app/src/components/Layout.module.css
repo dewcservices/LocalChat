@@ -123,7 +123,10 @@
     opacity: 1;
 }
 
-/* may add some colouring changes for icons as they are just all black */
+/* this will change the icons (edit and save) upon toggling light mode on */
+[data-theme="light"] .editIcon {
+    filter: brightness(0) saturate(100%);
+}
 
 /* individual action button styling */
 .actionButton {
@@ -216,12 +219,13 @@
 .deleteAllButton {
     background: var(--background-tertiary);
     border: 1px solid var(--selected-button-colour);
-    padding: clamp(6px, 0.8vh, 8px) clamp(12px, 1.2vw, 16px);
+    padding: 16px 100px !important;
     border-radius: 6px;
     cursor: pointer;
-    font-size: clamp(12px, 1vw, 14px);
+    font-size: 14px;
     transition: all 0.2s ease;
-    flex: 1;
+    margin: -10px auto 0 auto;
+    display: block;
 }
 
 .deleteAllButton:hover {
