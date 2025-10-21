@@ -6,6 +6,8 @@ import { cacheModels } from '../utils/ModelCache';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
+import loadingGif from '../assets/loading.gif';
+
 
 function ModelBenchmarking() {
 
@@ -250,7 +252,7 @@ function ModelBenchmarking() {
         let generator;
 
         // upload model multiple times and measure times
-        currentRow.cells[tableUploadTimeCol].innerText = "Uploading 0/" + globalModelRunCount;
+        currentRow.cells[tableUploadTimeCol].innerHTML = "Uploading 0/" + globalModelRunCount + `<img src="${loadingGif}" width=10px />`;
         for (let j = 1; j < (globalModelRunCount + 1); j++) {
 
           // correctly dispose of generator
@@ -287,7 +289,7 @@ function ModelBenchmarking() {
           setBenchmarkData(timings);
 
           // update text
-          currentRow.cells[tableUploadTimeCol].innerText = `Uploading: ${j}/${globalModelRunCount}`;
+          currentRow.cells[tableUploadTimeCol].innerHTML = `Uploading: ${j}/${globalModelRunCount}` + `<img src="${loadingGif}" width=10px />`;
           await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
         }
 
@@ -305,7 +307,7 @@ function ModelBenchmarking() {
         currentRow.cells[tableUploadTimeCol].title = totalUploadTimes;
 
         // inference multiple times and measure times
-        currentRow.cells[tableGenerationTimeCol].innerText = "Genarting 0/" + globalModelRunCount;
+        currentRow.cells[tableGenerationTimeCol].innerHTML = "Generating 0/" + globalModelRunCount + `<img src="${loadingGif}" width=10px />`;
         await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
         let output = "";
         for (let j = 1; j < (globalModelRunCount + 1); j++) {
@@ -384,7 +386,7 @@ function ModelBenchmarking() {
           timings[`${model.name}-Generate`].push(totalTime);
           setBenchmarkData(timings);
 
-          currentRow.cells[tableGenerationTimeCol].innerText = `Generating: ${j}/${globalModelRunCount}`;
+          currentRow.cells[tableGenerationTimeCol].innerHTML = `Generating: ${j}/${globalModelRunCount}` + `<img src="${loadingGif}" width=10px />`;
           await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
         }
 
