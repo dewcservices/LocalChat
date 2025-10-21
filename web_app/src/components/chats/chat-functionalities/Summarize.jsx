@@ -21,6 +21,7 @@ function Summarize() {
 
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
@@ -219,12 +220,14 @@ function Summarize() {
       } else {
         alert("Unsupported file type. Please use .txt, .html, .docx, or .pdf files.");
         fileInput.value = null;
+        setSelectedFileName("No file chosen");
         return;
       }
     } catch (error) {
       console.error("Error parsing file:", error);
       alert("Error processing file. Please try a different file format.");
       fileInput.value = null;
+      setSelectedFileName("No file chosen");
       return;
     }
 
@@ -242,13 +245,14 @@ function Summarize() {
     }
 
     fileInput.value = null;  // clear file input element
+    setSelectedFileName("No file chosen");  // reset filename display
   };
 
   return (
     <>
       <div class={styles.inputContainer}>
 
-        {/* Dynamic input UI - moved to top */}
+        {/* dynamic input UI */}
         <Switch>
           <Match when={tab() === "text"}>
             <div class={styles.searchBarContainer}>
@@ -264,13 +268,22 @@ function Summarize() {
             </div>
           </Match>
           <Match when={tab() === "file"}>
-            <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+            <div class={styles.fileUploadContainer}>
+              <label for="fileInput" class={styles.fileUploadLabel}>
+                Choose File
+              </label>
+              <input 
+                type="file" 
+                id="fileInput" 
+                accept=".txt, .html, .docx, .pdf"
+                onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+              />
+              <span class={styles.selectedFileName}>{selectedFileName()}</span>
             </div>
           </Match>
         </Switch>
 
-        {/* Control buttons row */}
+        {/* control buttons row */}
         <div class={styles.controlsContainer}>
 
           {/* text or file tab switcher */}

@@ -18,6 +18,7 @@
   padding-right: 2vh;
   margin-right: 4vh;
   color: var(--text-colour);
+  transition: all 0.2s ease;
 }
 .addModelButton:hover {
   border-color: var(--highlight-colour);
@@ -73,6 +74,42 @@
   flex-direction: column;
   position: relative;
   margin-bottom: 3vh; /* more space for housing additional controls below text entry area */
+}
+
+.fileUploadContainer {
+  display: flex;
+  align-items: center;
+  gap: 1vh;
+  margin-top: 2vh;
+  margin-left: 2vh;
+}
+
+/* hide the actual file input */
+.fileUploadContainer input[type="file"] {
+  display: none;
+}
+
+/* button styling */
+.fileUploadLabel {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh 2vh;
+  color: var(--text-colour);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.fileUploadLabel:hover {
+  border-color: var(--highlight-colour);
+}
+
+/* display filename uploaded */
+.selectedFileName {
+  color: var(--text-colour);
+  font-size: 14px;
+  opacity: 0.7;
 }
 
 .inputContainer textarea {

@@ -21,6 +21,7 @@ function QuestionAnswer() {
     // list of models that are already loaded into the cache
 
   const [contextTab, setContextTab] = createSignal("text");
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   // Q&A Tour
@@ -254,7 +255,18 @@ function QuestionAnswer() {
               <textarea id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
             </Match>
             <Match when={contextTab() === "file"}>
-              <input type="file" id="fileInput" accept=".txt, .html, .docx" />
+              <div class={styles.fileUploadContainer}>
+                <label for="fileInput" class={styles.fileUploadLabel}>
+                  Choose File
+                </label>
+                <input 
+                  type="file" 
+                  id="fileInput" 
+                  accept=".txt, .html, .docx"
+                  onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+                />
+                <span class={styles.selectedFileName}>{selectedFileName()}</span>
+              </div>
             </Match>
           </Switch>
         </div>

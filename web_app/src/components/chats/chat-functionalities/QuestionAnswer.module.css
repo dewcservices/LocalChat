@@ -33,6 +33,43 @@
   border-color: var(--success-colour) !important;
 }
 
+/* File upload container styling */
+.fileUploadContainer {
+  display: flex;
+  align-items: center;
+  gap: 1vh;
+  margin-top: 1vh;
+  margin-left: 1vh;
+}
+
+/* Hide the actual file input */
+.fileUploadContainer input[type="file"] {
+  display: none;
+}
+
+/* Style the label as a button */
+.fileUploadLabel {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh 2vh;
+  color: var(--text-colour);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.fileUploadLabel:hover {
+  border-color: var(--highlight-colour);
+}
+
+/* Display selected filename */
+.selectedFileName {
+  color: var(--text-colour);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
 .inputContainer textarea {
   margin-top: 1vh;
   margin-left: 1vh;
@@ -119,6 +156,7 @@
   padding-right: 2vh;
   margin-right: 3vh;
   color: var(--text-colour);
+  transition: all 0.2s ease;
 }
 .addModelButton:hover {
   border-color: var(--highlight-colour);
