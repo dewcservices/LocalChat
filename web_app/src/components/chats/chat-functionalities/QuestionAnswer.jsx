@@ -1,4 +1,4 @@
-import { useContext, createSignal, createEffect, onMount, Match, Switch } from 'solid-js';
+import { useContext, createSignal, createEffect, onMount, onCleanup, Match, Switch } from 'solid-js';
 import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -83,20 +83,34 @@ function QuestionAnswer() {
     ]
   });
 
-  // this checks cached models for question and answering
   onMount(async () => {
+    // get cached models
     const models = await getCachedModelsNames('question-answering');
     setAvailableModels(models);
 
-    // this auto-select the default model if one is set in the settings page
+    // auto-select the default model if one is set in the settings page
     const defaultModel = getDefaultModel('question-answering');
     if (defaultModel && models.includes(defaultModel)) {
       setModelName(defaultModel);
     }
 
+    // tour activation
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == "question-answer");
     if (chats.length <= 1) driverObj.drive();
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (qaPipeline) {
+        if (qaPipeline.session) await qaPipeline.session.release();
+        await qaPipeline.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
   });
 
   const addModel = async () => {
@@ -161,6 +175,18 @@ function QuestionAnswer() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
+    // release existing pipeline
+    try {
+      if (qaPipeline) {
+        if (qaPipeline.session) await qaPipeline.session.release();
+        await qaPipeline.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
     try {
       qaPipeline = await pipeline('question-answering', modelName(), { device: chatContext.processor() });
       console.log("Finished model setup using", chatContext.processor());
