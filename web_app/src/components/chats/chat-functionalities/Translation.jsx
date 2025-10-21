@@ -1,4 +1,4 @@
-import { useContext, createSignal, onMount, createEffect } from 'solid-js';
+import { useContext, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -93,20 +93,34 @@ function Translation() {
     ]
   });
 
-  // this checks cached models for translation.
   onMount(async () => {
+    // get cached models
     const models = await getCachedModelsNames('translation');
     setAvailableModels(models);
 
-    // this auto-select the default model if one is set in the settings page
+    // auto-select the default model if one is set in the settings page
     const defaultModel = getDefaultModel('translation');
     if (defaultModel && models.includes(defaultModel)) {
       setModelName(defaultModel);
     }
 
+    // tour activation
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'translation');
     if (chats.length <= 1) driverObj.drive();
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (translator) {
+        if (translator.session) await translator.session.release();
+        await translator.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
   });
 
   const addModel = async () => {
@@ -171,6 +185,18 @@ function Translation() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
+    // release existing pipeline
+    try {
+      if (translator) {
+        if (translator.session) await translator.session.release();
+        await translator.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
     try {
       translator = await pipeline('translation', modelName(), { device: chatContext.processor() });
       console.log("Finished model setup using", chatContext.processor());

@@ -1,4 +1,4 @@
-import { useContext, createSignal, onMount, createEffect } from 'solid-js';
+import { useContext, createSignal, onMount, createEffect, onCleanup } from 'solid-js';
 import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -74,20 +74,32 @@ function Summarize() {
     ]
   });
 
-  // this checks cached models for summarisation.
   onMount(async () => {
+    // get cached models
     const models = await getCachedModelsNames('summarization');
     setAvailableModels(models);
 
-    // this auto-select the default model if one is set in the settings page
+    // auto-select the default model if one is set in the settings page
     const defaultModel = getDefaultModel('summarization');
-    if (defaultModel && models.includes(defaultModel)) {
-      setModelName(defaultModel);
-    }
+    if (defaultModel && models.includes(defaultModel)) setModelName(defaultModel);
 
+    // tour activation
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'summarize');
     if (chats.length <= 1) driverObj.drive();
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (summarizer) {
+        if (summarizer.session) await summarizer.session.release();
+        await summarizer.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
   });
 
   const addModel = async () => {
@@ -152,8 +164,27 @@ function Summarize() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
-    summarizer = await pipeline('summarization', modelName(), { device: chatContext.processor() });
-    console.log("Finished model setup using", chatContext.processor());
+    // release existing pipeline
+    try {
+      if (summarizer) {
+        if (summarizer.session) await summarizer.session.release();
+        await summarizer.dispose();
+        console.log('Released pipeline.');
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
+    try {
+      summarizer = await pipeline('summarization', modelName(), { device: chatContext.processor() });
+      console.log("Finished model setup using", chatContext.processor());
+    } catch (e) {
+      console.log(`Error loading model: ${e}`);
+      summarizer = null;
+      setModelName('');
+      alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
+    }
 
     setAddModelBtnText("Add Model(s)");
     document.getElementById("folderInput").disabled = false;
@@ -166,7 +197,6 @@ function Summarize() {
       alert("A model must be selected before summarising text. Please select a model.");
       return;
     }
-    // TODO improve UX around model loading, promise handling, and error handling
     if (!(summarizer instanceof SummarizationPipeline)) {
       alert("Model is loading... please try again.");
       return;
@@ -197,7 +227,6 @@ function Summarize() {
       alert("A model must be selected before summarising text. Please select a model.");
       return;
     }
-    // TODO improve UX around model loading, promise handling, and error handling
     if (!(summarizer instanceof SummarizationPipeline)) {
       alert("Model is loading... please try again.");
       return;
