@@ -9,6 +9,8 @@ import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFile
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
 
+import loadingGif from '../../../assets/loading.gif';
+
 
 function Summarize() {
 
@@ -157,6 +159,10 @@ function Summarize() {
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     setAddModelBtnText("Creating pipeline");
+
+    let modelSelectionInput = document.getElementById("addModelBtn");
+    modelSelectionInput.innerHTML += `<img src="${loadingGif}" width=10px />`;
+
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
@@ -167,6 +173,7 @@ function Summarize() {
     console.log("Finished model setup using", chatContext.processor());
 
     setAddModelBtnText("Add Model(s)");
+    modelSelectionInput.innerHTML = "Add Model(s)";
     document.getElementById("folderInput").disabled = false;
     document.getElementById("sendButton").disabled = false;
   });
@@ -192,7 +199,7 @@ function Summarize() {
     inputTextArea.value = "";
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
-    await new Promise(resolve => setTimeout(resolve, 0));  // force a re-render by yielding control back to browser
+    await new Promise(requestAnimationFrame);  // force a re-render by yielding control back to browser
 
     try {
       let output = await summarizer(userMessage, { max_new_tokens: 100});  // generate response
@@ -244,7 +251,7 @@ function Summarize() {
     chatContext.addFile(fileContent, file.name);
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
-    await new Promise(resolve => setTimeout(resolve, 0));  // forces a re-render again by yielding control back to the browser
+    await new Promise(requestAnimationFrame);  // forces a re-render again by yielding control back to the browser
     
     try {
       let output = await summarizer(fileContent, { max_new_tokens: 100}); 

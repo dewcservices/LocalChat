@@ -9,6 +9,8 @@ import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../..
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
 
+import loadingGif from '../../../assets/loading.gif';
+
 
 function Translation() {
 
@@ -175,6 +177,10 @@ function Translation() {
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     setAddModelBtnText("Creating pipeline");
+
+    let modelSelectionInput = document.getElementById("addModelBtn");
+    modelSelectionInput.innerHTML += `<img src="${loadingGif}" width=10px />`;
+
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
@@ -205,6 +211,7 @@ function Translation() {
       alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
     } finally {
       setAddModelBtnText("Add Model(s)");
+      modelSelectionInput.innerHTML = "Add Model(s)";
       document.getElementById("folderInput").disabled = false;
       document.getElementById("sendButton").disabled = false;
     }
@@ -242,6 +249,7 @@ function Translation() {
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // force a re-render by yielding control back to browser
+    await new Promise(requestAnimationFrame);
 
     try {
       let output = await translator(userMessage, {src_lang: srcLang(), tgt_lang: tgtLang()});
@@ -294,6 +302,7 @@ function Translation() {
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // forces a re-render again by yielding control back to the browser
+    await new Promise(requestAnimationFrame);
 
     try {
       let output = await translator(fileContent, {src_lang: srcLang(), tgt_lang: tgtLang()});

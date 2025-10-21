@@ -9,6 +9,7 @@ import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../..
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
 
+import loadingGif from '../../../assets/loading.gif';
 
 function QuestionAnswer() {
   
@@ -165,6 +166,10 @@ function QuestionAnswer() {
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     setAddModelBtnText("Creating pipeline");
+
+    let modelSelectionInput = document.getElementById("addModelBtn");
+    modelSelectionInput.innerHTML += `<img src="${loadingGif}" width=10px />`;
+
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
@@ -181,6 +186,7 @@ function QuestionAnswer() {
       alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
     } finally {
       setAddModelBtnText("Add Model(s)");
+      modelSelectionInput.innerHTML = "Add Model(s)";
       document.getElementById("folderInput").disabled = false;
       document.getElementById("sendButton").disabled = false;
     }

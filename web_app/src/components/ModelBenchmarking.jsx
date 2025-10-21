@@ -153,8 +153,6 @@ function ModelBenchmarking() {
     let QAContext = document.getElementById("QAContextTextArea").innerHTML;
     let QAQuestion = document.getElementById("QAQuestionTextArea").innerHTML;
     let translationInput = document.getElementById("translationTextArea").innerHTML;
-    const sourceLanguage = document.getElementById("src_lang").value;
-    const targetLanguage = document.getElementById("tgt_lang").value;
     const languageOption = currentLanguageOption();
     console.log(currentLanguageOption());
 
@@ -164,8 +162,6 @@ function ModelBenchmarking() {
       "QAContext":QAContext,
       "QAQuestion":QAQuestion,
       "translationInput":translationInput,
-      "sourceLanguage":sourceLanguage,
-      "targetLanguage":targetLanguage,
       "languageOption":languageOption
     };
     localStorage.setItem("benchmarkingSettings", JSON.stringify(saveSettings));
@@ -520,15 +516,13 @@ function ModelBenchmarking() {
     // Load saved settings
     let saveSettings = JSON.parse(localStorage.getItem("benchmarkingSettings")) || {};
 
-    document.getElementById("summarizationTextArea").innerHTML = saveSettings["summarizationInput"];
-    document.getElementById("QAContextTextArea").innerHTML = saveSettings["QAContext"];
-    document.getElementById("QAQuestionTextArea").innerHTML = saveSettings["QAQuestion"];
-    document.getElementById("translationTextArea").innerHTML = saveSettings["translationInput"];
+    document.getElementById("summarizationTextArea").innerHTML = saveSettings["summarizationInput"] || "";
+    document.getElementById("QAContextTextArea").innerHTML = saveSettings["QAContext"] || "";
+    document.getElementById("QAQuestionTextArea").innerHTML = saveSettings["QAQuestion"] || "";
+    document.getElementById("translationTextArea").innerHTML = saveSettings["translationInput"] || "";
+    document.getElementById("globalBenchmarkRunCount").value = saveSettings["runAmount"] || 1;
 
     if (saveSettings != {}) {
-      document.getElementById("globalBenchmarkRunCount").value = saveSettings["runAmount"];
-      document.getElementById("src_lang").value = saveSettings["sourceLanguage"];
-      document.getElementById("tgt_lang").value = saveSettings["targetLanguage"];
       setCurrentLanguageOption(saveSettings["languageOption"]);
     }
 
