@@ -65,7 +65,7 @@ function QuestionAnswer() {
         }
       },
       {
-        element: "#contextTextarea",
+        element: "#contentInput",
         popover: {
           title: "Context Input",
           description: `
@@ -266,14 +266,14 @@ function QuestionAnswer() {
               Text Context
             </button>
           </div>
-          <Switch>
-            <Match when={contextTab() === "text"}>
-              <textarea id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
-            </Match>
-            <Match when={contextTab() === "file"}>
-              <input type="file" id="fileInput" accept=".txt, .html, .docx" />
-            </Match>
-          </Switch>
+
+          <div id="contentInput">
+            <textarea classList={{ hidden: contextTab() != "text"}} id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
+            <input classList={{ hidden: contextTab() != "file"}} type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+          </div>
+          
+
+          
         </div>
         
         <div class={styles.questionContainer}>

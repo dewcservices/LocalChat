@@ -67,7 +67,7 @@ function Summarize() {
         }
       },
       {
-        element: "#inputTextArea",
+        element: "#contentInput",
         popover: {
           title: "Text/File Input",
           description: `Upload some text or file(s).`
@@ -268,26 +268,19 @@ function Summarize() {
       <div class={styles.inputContainer}>
 
         {/* Dynamic input UI - moved to top */}
-        <Switch>
-          <Match when={tab() === "text"}>
-            <div class={styles.searchBarContainer}>
-              <textarea id="inputTextArea" 
-                placeholder='Enter text to summarise here...'
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    summarizeTextInput();
-                  }
-                }}
-              ></textarea>
-            </div>
-          </Match>
-          <Match when={tab() === "file"}>
-            <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
-            </div>
-          </Match>
-        </Switch>
+        <div id="contentInput" class={styles.searchBarContainer}>
+          <textarea id="inputTextArea" 
+            classList={{ hidden: tab() != "text"}}
+            placeholder='Enter text to summarise here...'
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                summarizeTextInput();
+              }
+            }}
+          ></textarea>
+          <input classList={{ hidden: tab() != "file"}} type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+        </div>
 
         {/* Control buttons row */}
         <div class={styles.controlsContainer}>
