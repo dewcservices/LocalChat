@@ -1,12 +1,11 @@
 .inputContainer {
   grid-area: input;
   background-color: var(--background-primary);
-  padding: 1vh;
+  padding: 1vh 1vh 0vh 1vh;
   border-top: 1px solid black;
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .addModelButton {
@@ -135,7 +134,6 @@
   justify-content: space-between; 
   padding: 2vh 0;
   border-top: 1px solid var(--button-border-colour);
-  border-bottom: 1px solid var(--button-border-colour);
   margin-top: auto; 
 }
 
