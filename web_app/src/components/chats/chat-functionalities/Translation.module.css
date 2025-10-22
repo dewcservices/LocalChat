@@ -157,3 +157,17 @@
 .selection:hover {
   cursor: pointer;
 }
+
+.fileUploadLabel {
+  padding: 1vh;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--button-border-colour);
+  color: white;
+  border-radius: 10px;
+  width: 6em;
+}
+
+.fileUploadLabel:hover {
+  cursor: pointer;
+  background-color: var(--background-tertiary);
+}

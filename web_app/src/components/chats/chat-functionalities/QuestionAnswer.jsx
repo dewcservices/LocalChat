@@ -269,7 +269,11 @@ function QuestionAnswer() {
 
           <div id="contentInput">
             <textarea classList={{ hidden: contextTab() != "text"}} id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
-            <input classList={{ hidden: contextTab() != "file"}} type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+            <div style="margin-top:2vh;position:absolute;">
+              <label classList={{ hidden: contextTab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
+              <input class="hidden" type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+            </div>
+            
           </div>
           
 

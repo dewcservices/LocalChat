@@ -279,7 +279,8 @@ function Summarize() {
               }
             }}
           ></textarea>
-          <input classList={{ hidden: tab() != "file"}} type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+          <label classList={{ hidden: tab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
+          <input class="hidden" type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
         </div>
 
         {/* Control buttons row */}
