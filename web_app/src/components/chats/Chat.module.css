@@ -152,6 +152,7 @@
 .processSelector {
   position: fixed;
   top: 1vw;
+  right: 2vw;
   z-index: 1;
   border: 1px solid var(--button-border-colour);
   border-radius: 3px;
