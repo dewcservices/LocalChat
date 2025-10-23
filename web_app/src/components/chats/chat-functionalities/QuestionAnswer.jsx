@@ -1,4 +1,4 @@
-import { useContext, createSignal, createEffect, onMount, Match, Switch } from 'solid-js';
+import { useContext, createSignal, createEffect, onMount, onCleanup, Match, Switch } from 'solid-js';
 import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -8,6 +8,7 @@ import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function QuestionAnswer() {
@@ -20,6 +21,7 @@ function QuestionAnswer() {
     // list of models that are already loaded into the cache
 
   const [contextTab, setContextTab] = createSignal("text");
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   // Q&A Tour
@@ -42,7 +44,7 @@ function QuestionAnswer() {
         popover: {
           title: "Selecting a Model",
           description: `
-            Next select a model to summarise your text with. 
+            Next select a model. 
             For more information see the <A href="/recommendation">model information page</A>.
           `
         }
@@ -82,11 +84,33 @@ function QuestionAnswer() {
   });
 
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('question-answering'));
+    // get cached models
+    const models = await getCachedModelsNames('question-answering');
+    setAvailableModels(models);
 
+    // auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('question-answering');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
+
+    // tour activation
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == "question-answer");
     if (chats.length <= 1) driverObj.drive();
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (qaPipeline) {
+        if (qaPipeline.session) await qaPipeline.session.release();
+        await qaPipeline.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
   });
 
   const addModel = async () => {
@@ -151,6 +175,18 @@ function QuestionAnswer() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
+    // release existing pipeline
+    try {
+      if (qaPipeline) {
+        if (qaPipeline.session) await qaPipeline.session.release();
+        await qaPipeline.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
     try {
       qaPipeline = await pipeline('question-answering', modelName(), { device: chatContext.processor() });
       console.log("Finished model setup using", chatContext.processor());
@@ -245,7 +281,18 @@ function QuestionAnswer() {
               <textarea id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
             </Match>
             <Match when={contextTab() === "file"}>
-              <input type="file" id="fileInput" accept=".txt, .html, .docx" />
+              <div class={styles.fileUploadContainer}>
+                <label for="fileInput" class={styles.fileUploadLabel}>
+                  Choose File
+                </label>
+                <input 
+                  type="file" 
+                  id="fileInput" 
+                  accept=".txt, .html, .docx"
+                  onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+                />
+                <span class={styles.selectedFileName}>{selectedFileName()}</span>
+              </div>
             </Match>
           </Switch>
         </div>

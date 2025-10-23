@@ -1,4 +1,4 @@
-import { useContext, createSignal, onMount, createEffect } from 'solid-js';
+import { useContext, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -8,6 +8,7 @@ import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 
 function Translation() {
@@ -26,6 +27,7 @@ function Translation() {
   
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
@@ -48,7 +50,7 @@ function Translation() {
         popover: {
           title: "Selecting a Model",
           description: `
-            Next select a model to summarise your text with. 
+            Next select a model to translate your text with. 
             For more information see the <A href="/recommendation">model information page</A>.
           `
         }
@@ -92,11 +94,33 @@ function Translation() {
   });
 
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('translation'));
+    // get cached models
+    const models = await getCachedModelsNames('translation');
+    setAvailableModels(models);
 
+    // auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('translation');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
+
+    // tour activation
     let chats = getChatHistories();
     chats = chats.filter(c => c.chatType == 'translation');
     if (chats.length <= 1) driverObj.drive();
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (translator) {
+        if (translator.session) await translator.session.release();
+        await translator.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
   });
 
   const addModel = async () => {
@@ -161,6 +185,18 @@ function Translation() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
+    // release existing pipeline
+    try {
+      if (translator) {
+        if (translator.session) await translator.session.release();
+        await translator.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
     try {
       translator = await pipeline('translation', modelName(), { device: chatContext.processor() });
       console.log("Finished model setup using", chatContext.processor());
@@ -304,8 +340,17 @@ function Translation() {
             </div>
           </Match>
           <Match when={tab() === "file"}>
-            <div style="margin-top:2vh;margin-left:2vh;">
-              <input type="file" id="fileInput" accept=".txt, .html., .docx" />
+            <div class={styles.fileUploadContainer}>
+              <label for="fileInput" class={styles.fileUploadLabel}>
+                Choose File
+              </label>
+              <input 
+                type="file" 
+                id="fileInput" 
+                accept=".txt, .html, .docx"
+                onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+              />
+              <span class={styles.selectedFileName}>{selectedFileName()}</span>
             </div>
           </Match>
         </Switch>

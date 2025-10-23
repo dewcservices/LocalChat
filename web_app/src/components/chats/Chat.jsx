@@ -8,7 +8,6 @@ import { getChatHistory, saveMessages, saveFiles, getChatHistories, autoUpdateCh
 
 // Chat Functionalities
 import Summarize from './chat-functionalities/Summarize';
-import GeneralChat from './chat-functionalities/GeneralChat';
 import QuestionAnswer from './chat-functionalities/QuestionAnswer';
 import Translation from './chat-functionalities/Translation';
 
@@ -25,6 +24,9 @@ function Chat() {
   const [processor, setProcessor] = createSignal("wasm");
 
   const [chatHistory, setChatHistory] = createSignal(null);
+  
+  // counter to ensure unique message IDs even within the same millisecond
+  let messageIdCounter = 0;
 
   createEffect(() => {
     setChatHistory(getChatHistory(params.id));
@@ -34,7 +36,7 @@ function Chat() {
   });
   
   const addMessage = (content, fromUser, selectedModel = null) => {
-    let messageDate = Date.now();
+    let messageDate = Date.now() + (messageIdCounter++);
     chatHistory().latestMessageDate = messageDate;
     setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 
@@ -165,9 +167,6 @@ function Chat() {
           <Switch>
             <Match when={chatHistory()?.chatType === "summarize"}>
               <Summarize />
-            </Match>
-            <Match when={chatHistory()?.chatType === "general"}>
-              <GeneralChat />
             </Match>
             <Match when={chatHistory()?.chatType === "question-answer"}>
               <QuestionAnswer />
