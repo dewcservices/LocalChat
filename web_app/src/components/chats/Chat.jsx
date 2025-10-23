@@ -24,6 +24,9 @@ function Chat() {
   const [processor, setProcessor] = createSignal("wasm");
 
   const [chatHistory, setChatHistory] = createSignal(null);
+  
+  // counter to ensure unique message IDs even within the same millisecond
+  let messageIdCounter = 0;
 
   createEffect(() => {
     setChatHistory(getChatHistory(params.id));
@@ -33,7 +36,7 @@ function Chat() {
   });
   
   const addMessage = (content, fromUser, selectedModel = null) => {
-    let messageDate = Date.now();
+    let messageDate = Date.now() + (messageIdCounter++);
     chatHistory().latestMessageDate = messageDate;
     setMessages([...messages(), {sender: fromUser ? "userMessage" : "chatbotMessage", date: messageDate, modelName: selectedModel, content: content}]);
 

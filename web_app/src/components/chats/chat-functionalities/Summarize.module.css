@@ -5,7 +5,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .tab, .selectedTab, .sendButton {
@@ -89,7 +88,7 @@
   display: none;
 }
 
-/* button styling */
+/* style the label as a button */
 .fileUploadLabel {
   border: 1px solid var(--button-border-colour);
   border-radius: 3px;
