@@ -21,6 +21,6 @@
     "follow-redirects": "^1.15.11",
     "vite": "^6.2.0",
     "vite-plugin-singlefile": "^2.2.0",
-    "vite-plugin-solid": "^2.11.9"
+    "vite-plugin-solid": "^2.11.10"
   }
 }
