@@ -10,7 +10,7 @@
     "build-local-chat": "node build/build_local_chat.js"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.4.2",
+    "@huggingface/transformers": "^3.7.6",
     "@solidjs/router": "^0.15.3",
     "driver.js": "^1.3.6",
     "mammoth": "^1.11.0",
