@@ -1,4 +1,4 @@
-import { useContext, createSignal, onMount, createEffect } from 'solid-js';
+import { useContext, createSignal, onMount, onCleanup, createEffect } from 'solid-js';
 import { pipeline, env, TranslationPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -8,6 +8,7 @@ import styles from './Translation.module.css';
 import { parseDocxFileAsync, parseTxtFileAsync, parseHTMLFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 import loadingGif from '../../../assets/loading.gif';
 
@@ -28,6 +29,7 @@ function Translation() {
   
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
@@ -111,13 +113,34 @@ function Translation() {
   });
 
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('translation'));
+    // get cached models
+    const models = await getCachedModelsNames('translation');
+    setAvailableModels(models);
+
+    // auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('translation');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
 
     let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
     if (!tutorialSaves["translation"]) {
       driverObj.drive();
       tutorialSaves["translation"] = true;
       localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (translator) {
+        if (translator.session) await translator.session.release();
+        await translator.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
     }
   });
 
@@ -187,6 +210,18 @@ function Translation() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
+    // release existing pipeline
+    try {
+      if (translator) {
+        if (translator.session) await translator.session.release();
+        await translator.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
     try {
       translator = await pipeline('translation', modelName(), { device: chatContext.processor() });
       console.log("Finished model setup using", chatContext.processor());
@@ -330,7 +365,14 @@ function Translation() {
               }}
             ></textarea>
           <label classList={{ hidden: tab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
-          <input class="hidden" type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+          <input 
+                  class="hidden"
+                  type="file" 
+                  id="fileInput" 
+                  accept=".txt, .html, .docx, .pdf"
+                  onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+          />
+          <span class={styles.selectedFileName}>{selectedFileName()}</span>
         </div>
 
         {/* Control buttons row - moved to bottom */}

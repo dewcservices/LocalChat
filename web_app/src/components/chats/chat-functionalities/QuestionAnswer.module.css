@@ -33,6 +33,43 @@
   border-color: var(--success-colour) !important;
 }
 
+/* File upload container styling */
+.fileUploadContainer {
+  display: flex;
+  align-items: center;
+  gap: 1vh;
+  margin-top: 1vh;
+  margin-left: 1vh;
+}
+
+/* Hide the actual file input */
+.fileUploadContainer input[type="file"] {
+  display: none;
+}
+
+/* Style the label as a button */
+.fileUploadLabel {
+  border: 1px solid var(--button-border-colour);
+  border-radius: 3px;
+  background-color: var(--background-secondary);
+  padding: 0.8vh 2vh;
+  color: var(--text-colour);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.fileUploadLabel:hover {
+  border-color: var(--highlight-colour);
+}
+
+/* Display selected filename */
+.selectedFileName {
+  color: var(--text-colour);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
 .inputContainer textarea {
   margin-top: 1vh;
   margin-left: 1vh;
@@ -44,7 +81,7 @@
   border-radius: 10px;
   border: 1px solid var(--button-border-colour);
   background-color: var(--background-secondary);
-  color: white;
+  color: var(--text-colour);
   padding: 12px 20px;
   overflow-y: auto;
 }
@@ -70,7 +107,7 @@
 }
 
 .inputContainer textarea::-webkit-scrollbar-thumb:hover {
-  background: #666666;
+  background: var(--active-colour);
 }
 
 .controlsLeft {
@@ -103,7 +140,7 @@
   margin-right: 1vh;
   background-color: var(--background-secondary);
   border-color: var(--button-border-colour);
-  color: white;
+  color: var(--text-colour);
   border-radius: 3px;
 }
 .modelSelection:hover {
@@ -118,10 +155,11 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 3vh;
-  color: white;
+  color: var(--text-colour);
+  transition: all 0.2s ease;
 }
 .addModelButton:hover {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
   cursor: pointer;
 }
 .noModels {
@@ -132,10 +170,10 @@
   padding-left: 2vh;
   padding-right: 2vh;
   margin-right: 3vh;
-  color: white;
+  color: var(--text-colour);
 }
 .noModels:hover {
-  border-color: firebrick;
+  border-color: var(--failure-colour);
   cursor: pointer;
 }
 

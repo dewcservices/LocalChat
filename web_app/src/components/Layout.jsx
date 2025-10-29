@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate, A } from "@solidjs/router";
 
 import { ChatHistoriesContext } from "./LayoutChatHistoriesContext";
 import styles from './Layout.module.css';
-import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat, exportAllChats, importAllChats } from "../utils/ChatHistory";
+import { getChatHistories, deleteChatHistories, deleteChatHistory, renameChat } from "../utils/ChatHistory";
 
 // icon imports for use in chat history
 import pencilIcon from '../assets/pencil.png';
@@ -79,21 +79,6 @@ function Layout(props) {
     setRenamingId(null);
   };
 
-  // export all chats as JSON
-  const handleExportChats = () => {
-    try {
-      exportAllChats();
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Export failed. Please check the console for details.');
-    }
-  };
-
-  // import chats from JSON
-  const handleImportChats = () => {
-    importAllChats(true, () => window.location.reload());
-  };
-
   // handle clicking on the entire chat container
   const handleChatClick = (chatId, event) => {
     // Don't navigate if we're clicking on action buttons or in rename mode
@@ -108,7 +93,6 @@ function Layout(props) {
   return (
     <>
       <div class={sidebarCollapsed() ? "container sidebar-collapsed" : "container"}>
-        {/* collapse toggle button */}
         <button 
           class={styles.toggleSidebarButton}
           onClick={toggleSidebar}
@@ -117,20 +101,34 @@ function Layout(props) {
           {sidebarCollapsed() ? '→' : '←'}
         </button>
 
+        <Show when={sidebarCollapsed()}>
+          <button 
+            class={styles.newChatButton}
+            onClick={() => navigate('/')}
+            title="Create New Chat"
+          >
+            +
+          </button>
+        </Show>
+
         <div class={sidebarCollapsed() ? "sidebarContainer collapsed" : "sidebarContainer"}>
+          <div class={styles.sidebarTopSection}>
+            <h1>Local Chat</h1>
+            <A href="recommendation">Model Recommendations</A>
+            <br/><br/>
+            <A href="benchmarking">Model Benchmarking</A>
+            <br/><br/>
+            <A href="/settings">Settings</A>
+            <br/><br/>
+            <A href="/">Create New Chat</A>
+            <br/><br/>
+          </div>
 
-          <h1>Local Chat</h1>
-          <A href="recommendation">Model Recommendations</A>
-          <br/><br/>
-          <A href="benchmarking">Model Benchmarking</A>
-          <br/><br/>
-          <A href="/">Create New Chat</A>
-          <br/><br/>
-
-          <h2>Chat History</h2>
-          <div class={styles.chatHistoryOuterContainer}>
-            <div class={styles.chatHistoryWrapper}>
-              <div class={styles.chatHistoryScrollContainer}>
+          <div class={styles.sidebarMiddleSection}>
+            <h2>Chat History</h2>
+            <div class={styles.chatHistoryOuterContainer}>
+              <div class={styles.chatHistoryWrapper}>
+                <div class={styles.chatHistoryScrollContainer}>
                 <For each={chatHistories()}>{(chat) =>
                   <div class={`${styles.chatHistoryContainer} ${hoveredChatId() === chat.chatId ? styles.highlighted : ''} ${params.id === chat.chatId ? styles.active : ''}`}
                     onMouseEnter={() => setHoveredChatId(chat.chatId)}
@@ -167,7 +165,7 @@ function Layout(props) {
                               }}
                               title="Rename Chat"
                             >
-                              <img src={pencilIcon} alt="Edit" class={styles.actionIcon} />
+                              <img src={pencilIcon} alt="Edit" class={`${styles.actionIcon} ${styles.editIcon}`} />
                             </button>
                             <button 
                               class={styles.actionButton}
@@ -184,7 +182,6 @@ function Layout(props) {
                         </div>
                       }
                     >
-                      {/* section handling editing options UI */}
                       <div class={styles.renameContainer}>
                         <input 
                           type="text" 
@@ -199,7 +196,7 @@ function Layout(props) {
                             onClick={applyRename}
                             title="Save Changes"
                           >
-                            <img src={saveIcon} alt="Save" class={styles.actionIcon} />
+                            <img src={saveIcon} alt="Save" class={`${styles.actionIcon} ${styles.editIcon}`} />
                           </button>
                           <button 
                             class={styles.actionButton}
@@ -216,38 +213,24 @@ function Layout(props) {
               </div>
             </div>
           </div>
-
-          <div class={styles.buttonContainer}>
-            <button 
-              class={styles.exportButton} 
-              onClick={handleExportChats}
-              disabled={chatHistories().length === 0}
-              title={chatHistories().length === 0 ? "No chats to export" : "Export all chat histories"}
-            >
-              Export All Chats
-            </button>
-            
-            <button 
-              class={styles.importButton} 
-              onClick={handleImportChats}
-              title="Import chat histories from JSON file"
-            >
-              Import Chats
-            </button>
-            
-            <button 
-              class={styles.deleteAllButton} 
-              onClick={deleteAllChats}
-              title="Delete all chat histories"
-            >
-              Delete All Chats
-            </button>
           </div>
-          <br />
+
+          <div class={styles.sidebarBottomSection}>
+            <div class={styles.buttonContainer}>
+              <button 
+                class={styles.deleteAllButton} 
+                onClick={deleteAllChats}
+                title="Delete all chat histories"
+              >
+                Delete All Chats
+              </button>
+            </div>
+            <br />
+          </div>
         </div>
         <div class="pageContainer">
           <ChatHistoriesContext.Provider value={{ setChatHistories }}>
-            {pageContent} {/* More descriptive name for nested components */}
+            {pageContent}
           </ChatHistoriesContext.Provider>
         </div>
       </div>

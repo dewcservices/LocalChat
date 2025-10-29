@@ -4,20 +4,23 @@
     border: 1px solid var(--selected-button-color, #404040);
     border-radius: 8px;
     padding: clamp(8px, 1vw, 12px);
-    margin: clamp(6px, 0.8vh, 8px) 0 clamp(12px, 1.5vh, 16px) 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-height: 0; /* Important for flex children to scroll properly */
+    display: flex;
+    flex-direction: column;
 }
 
 /* css wrapper to contain scrollable area and buttons at a fixed position */
 .chatHistoryWrapper {
     display: flex;
     flex-direction: column;
-    height: 55vh;
+    height: 100%;
 }
 
 /* scrollable container for chat history */
 .chatHistoryScrollContainer {
-    height: calc(55vh - 2rem);
+    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 4px;
@@ -123,7 +126,10 @@
     opacity: 1;
 }
 
-/* may add some colouring changes for icons as they are just all black */
+/* this will change the icons (edit and save) upon toggling light mode on */
+[data-theme="light"] .editIcon {
+    filter: brightness(0) saturate(100%);
+}
 
 /* individual action button styling */
 .actionButton {
@@ -216,12 +222,15 @@
 .deleteAllButton {
     background: var(--background-tertiary);
     border: 1px solid var(--selected-button-colour);
-    padding: clamp(6px, 0.8vh, 8px) clamp(12px, 1.2vw, 16px);
+    padding: clamp(12px, 1.6vh, 18px) clamp(50px, 5vw, 80px);
     border-radius: 6px;
     cursor: pointer;
-    font-size: clamp(12px, 1vw, 14px);
+    font-size: clamp(12px, 1vw, 16px);
     transition: all 0.2s ease;
-    flex: 1;
+    margin: -10px clamp(12px, 1.5vw, 20px) 0 clamp(12px, 1.5vw, 20px);
+    display: block;
+    width: auto;
+    max-width: calc(100% - clamp(24px, 3vw, 40px));
 }
 
 .deleteAllButton:hover {
@@ -256,22 +265,83 @@
     transform: scale(0.95);
 }
 
+/* top section (title and navlinks) */
+.sidebarTopSection {
+    height: 22vh;
+    overflow: visible;
+}
+
+/* middle section (chat histories and scrollable container) */
+.sidebarMiddleSection {
+    height: 55vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebarMiddleSection h2 {
+    flex-shrink: 0;
+    margin-bottom: clamp(6px, 0.8vh, 8px);
+}
+
+/* bottom section (delete button) */
+.sidebarBottomSection {
+    height: 15vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* sidebar toggle button positioning */
 .toggleSidebarButton {
     position: fixed;
     left: 0;
-    top: clamp(28px, 3vh, 31px);
-    z-index: 1000;
+    top: 0;
+    z-index: 1001;
     background: var(--selected-button-colour);
     border: 1px solid var(--highlight-colour);
+    border-left: none;
+    border-top: none;
     padding: clamp(6px, 0.8vh, 8px) clamp(10px, 1vw, 12px);
     border-radius: 0 6px 6px 0;
     cursor: pointer;
     transition: all 0.3s ease;
     color: var(--text-colour);
     font-size: clamp(12px, 1vw, 14px);
+    width: 44px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
 }
 
 .toggleSidebarButton:hover {
+    background: var(--highlight-colour);
+}
+
+.toggleSidebarButton:focus {
+    outline: none;
+}
+
+.newChatButton {
+    position: fixed;
+    left: 0;
+    top: 48px;
+    z-index: 1001;
+    background: var(--selected-button-colour);
+    border: 1px solid var(--highlight-colour);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    cursor: pointer;
+    color: var(--text-colour);
+    font-size: 20px;
+    font-weight: bold;
+    width: 44px;
+    height: 40px;
+    outline: none;
+}
+
+.newChatButton:hover {
     background: var(--highlight-colour);
 }

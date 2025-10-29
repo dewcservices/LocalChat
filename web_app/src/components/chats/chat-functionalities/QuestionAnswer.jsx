@@ -1,4 +1,4 @@
-import { useContext, createSignal, createEffect, onMount, Match, Switch } from 'solid-js';
+import { useContext, createSignal, createEffect, onMount, onCleanup, Match, Switch } from 'solid-js';
 import { pipeline, env, QuestionAnsweringPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -8,6 +8,7 @@ import { ChatContext } from '../ChatContext';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 import loadingGif from '../../../assets/loading.gif';
 
@@ -21,6 +22,7 @@ function QuestionAnswer() {
     // list of models that are already loaded into the cache
 
   const [contextTab, setContextTab] = createSignal("text");
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
   // Q&A Tour
@@ -100,13 +102,34 @@ function QuestionAnswer() {
   });
 
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('question-answering'));
+    // get cached models
+    const models = await getCachedModelsNames('question-answering');
+    setAvailableModels(models);
 
     let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
     if (!tutorialSaves["question-answering"]) {
       driverObj.drive();
       tutorialSaves["question-answering"] = true;
       localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
+    
+    // auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('question-answering');
+    if (defaultModel && models.includes(defaultModel)) {
+      setModelName(defaultModel);
+    }
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (qaPipeline) {
+        if (qaPipeline.session) await qaPipeline.session.release();
+        await qaPipeline.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
     }
   });
 
@@ -176,6 +199,18 @@ function QuestionAnswer() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
+    // release existing pipeline
+    try {
+      if (qaPipeline) {
+        if (qaPipeline.session) await qaPipeline.session.release();
+        await qaPipeline.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
     try {
       qaPipeline = await pipeline('question-answering', modelName(), { device: chatContext.processor() });
       console.log("Finished model setup using", chatContext.processor());
@@ -271,13 +306,18 @@ function QuestionAnswer() {
             <textarea classList={{ hidden: contextTab() != "text"}} id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
             <div style="margin-top:2vh;position:absolute;">
               <label classList={{ hidden: contextTab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
-              <input class="hidden" type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+              <input 
+                  class="hidden"
+                  type="file" 
+                  id="fileInput" 
+                  accept=".txt, .html, .docx, .pdf"
+                  onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+              />
+              <span class={styles.selectedFileName}>{selectedFileName()}</span>
             </div>
             
           </div>
-          
-
-          
+        
         </div>
         
         <div class={styles.questionContainer}>

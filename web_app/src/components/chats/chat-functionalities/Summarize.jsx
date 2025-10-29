@@ -1,4 +1,4 @@
-import { useContext, createSignal, onMount, createEffect } from 'solid-js';
+import { useContext, createSignal, onMount, createEffect, onCleanup } from 'solid-js';
 import { pipeline, env, SummarizationPipeline } from '@huggingface/transformers';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
@@ -8,6 +8,7 @@ import styles from './Summarize.module.css';
 import { parseDocxFileAsync, parseHTMLFileAsync, parseTxtFileAsync, parsePdfFileAsync } from '../../../utils/FileReaders';
 import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
+import { getDefaultModel } from '../../../utils/DefaultModels';
 
 import loadingGif from '../../../assets/loading.gif';
 
@@ -22,6 +23,7 @@ function Summarize() {
 
   const [tab, setTab] = createSignal("text");
   const [hoveredTab, setHoveredTab] = createSignal(null);
+  const [selectedFileName, setSelectedFileName] = createSignal("No file chosen");
 
   const [addModelBtnText, setAddModelBtnText] = createSignal("Add Model(s)");
 
@@ -91,15 +93,33 @@ function Summarize() {
     ]
   });
 
-  // Checks the cache for models that can be used for summarization.
   onMount(async () => {
-    setAvailableModels(await getCachedModelsNames('summarization'));
+    // get cached models
+    const models = await getCachedModelsNames('summarization');
+    setAvailableModels(models);
 
     let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
     if (!tutorialSaves["summarization"]) {
       driverObj.drive();
       tutorialSaves["summarization"] = true;
       localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
+    
+    // auto-select the default model if one is set in the settings page
+    const defaultModel = getDefaultModel('summarization');
+    if (defaultModel && models.includes(defaultModel)) setModelName(defaultModel);
+  });
+
+  onCleanup(async () => {
+    // release existing pipeline
+    try {
+      if (summarizer) {
+        if (summarizer.session) await summarizer.session.release();
+        await summarizer.dispose();
+      }
+      console.log('Released pipeline.');
+    } catch (error) {
+      console.warn(error);
     }
   });
 
@@ -169,8 +189,27 @@ function Summarize() {
     env.useBrowserCache = true;
     env.allowRemoteModels = true;
 
-    summarizer = await pipeline('summarization', modelName(), { device: chatContext.processor() });
-    console.log("Finished model setup using", chatContext.processor());
+    // release existing pipeline
+    try {
+      if (summarizer) {
+        if (summarizer.session) await summarizer.session.release();
+        await summarizer.dispose();
+        console.log('Released pipeline.');
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+
+    // instantiate pipeline
+    try {
+      summarizer = await pipeline('summarization', modelName(), { device: chatContext.processor() });
+      console.log("Finished model setup using", chatContext.processor());
+    } catch (e) {
+      console.log(`Error loading model: ${e}`);
+      summarizer = null;
+      setModelName('');
+      alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
+    }
 
     setAddModelBtnText("Add Model(s)");
     modelSelectionInput.innerHTML = "Add Model(s)";
@@ -184,7 +223,6 @@ function Summarize() {
       alert("A model must be selected before summarising text. Please select a model.");
       return;
     }
-    // TODO improve UX around model loading, promise handling, and error handling
     if (!(summarizer instanceof SummarizationPipeline)) {
       alert("Model is loading... please try again.");
       return;
@@ -215,7 +253,6 @@ function Summarize() {
       alert("A model must be selected before summarising text. Please select a model.");
       return;
     }
-    // TODO improve UX around model loading, promise handling, and error handling
     if (!(summarizer instanceof SummarizationPipeline)) {
       alert("Model is loading... please try again.");
       return;
@@ -238,12 +275,14 @@ function Summarize() {
       } else {
         alert("Unsupported file type. Please use .txt, .html, .docx, or .pdf files.");
         fileInput.value = null;
+        setSelectedFileName("No file chosen");
         return;
       }
     } catch (error) {
       console.error("Error parsing file:", error);
       alert("Error processing file. Please try a different file format.");
       fileInput.value = null;
+      setSelectedFileName("No file chosen");
       return;
     }
 
@@ -261,6 +300,7 @@ function Summarize() {
     }
 
     fileInput.value = null;  // clear file input element
+    setSelectedFileName("No file chosen");  // reset filename display
   };
 
   return (
@@ -280,10 +320,17 @@ function Summarize() {
             }}
           ></textarea>
           <label classList={{ hidden: tab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
-          <input class="hidden" type="file" id="fileInput" accept=".txt, .html, .docx, .pdf" />
+          <input 
+                class="hidden"
+                type="file" 
+                id="fileInput" 
+                accept=".txt, .html, .docx, .pdf"
+                onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+          />
+          <span class={styles.selectedFileName}>{selectedFileName()}</span>
         </div>
 
-        {/* Control buttons row */}
+        {/* control buttons row */}
         <div class={styles.controlsContainer}>
 
           {/* text or file tab switcher */}

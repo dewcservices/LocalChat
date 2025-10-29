@@ -1,4 +1,3 @@
-
 .chatContainer {
   display: grid;
   grid-template-areas:
@@ -11,9 +10,9 @@
 
 .messagesContainer {
   grid-area: messages;
-  background-color: #191919;
+  background-color: var(--background-primary);
   overflow-y: scroll;
-  scrollbar-color: black #292929;
+  scrollbar-color: var(--background-primary) var(--background-secondary);
   padding: 3vh 15vw;
   align-content: start;
   display: flex;
@@ -24,8 +23,8 @@
 
 .messagesContainer div,
 .inputContainer button {
-  border: 2px solid #474747;
-  color: white;
+  border: 2px solid var(--button-border-colour);
+  color: var(--text-colour);
   border-radius: 5px;
   padding: 1vh;
   display: block;
@@ -33,18 +32,18 @@
 }
 
 .inputContainer button:hover {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
   cursor: pointer;
 }
 
 .userMessage {
-  background-color: #225bb5;
+  background-color: var(--usermsg-colour);
   text-align: left;
   overflow-wrap: anywhere;
 }
 
 .chatbotMessage {
-  background-color: #292929;
+  background-color: var(--background-secondary);
 }
 
 .userMessage, .chatbotMessage {
@@ -57,7 +56,7 @@
 
 .inputContainer {
   grid-area: input;
-  background-color: #191919;
+  background-color: var(--background-primary);
   padding: 3vh 5vw;
   border-top: 1px solid black;
   position: relative;
@@ -75,17 +74,17 @@
 }
 
 .fileUploadLabel {
-  border: 1px solid #474747;
+  border: 1px solid var(--button-border-colour);
   border-radius: 3px;
-  background-color: #292929;
+  background-color: var(--background-secondary);
   margin-right: 1vw;
   padding: 1vh;
 }
 
 .disabledLabel {
-  background-color: #191919;
+  background-color: var(--background-primary);
   cursor: auto;
-  border-color: #292929 !important;
+  border-color: var(--background-secondary) !important;
 }
 
 .disabledLabel:after {
@@ -94,7 +93,7 @@
 }
 
 .fileUploadContainer label:hover {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
   cursor: pointer;
 }
 
@@ -108,7 +107,7 @@
 }
 
 .inputContainer button {
-  background-color: #292929;
+  background-color: var(--background-secondary);
   position: absolute;
   bottom: 0vh;
   right: 6vw;
@@ -129,46 +128,47 @@
 }
 
 .copyButton {
-  background-color: #292929;
+  background-color: var(--background-secondary);
   border-radius: 3px;
-  border: 1px solid #292929;
-  color: white;
+  border: 1px solid var(--background-secondary);
+  color: var(--text-colour);
   max-width: fit-content;
   padding: 1vh;
 }
 
 .copyButton:hover {
   cursor: pointer;
-  border: 1px solid #474747;
+  border: 1px solid var(--button-border-colour);
 }
 
 .copyButton:active {
-  border: 1px solid white;
+  border: 1px solid var(--text-colour);
 }
 
 .modelNameText {
   border: none !important;
-  background-color: #292929;
+  background-color: var(--background-secondary);
   margin-top: 2vh;
 }
 
 .processSelector {
   position: fixed;
   top: 1vw;
+  right: 2vw;
   z-index: 1;
-  border: 1px solid #474747;
+  border: 1px solid var(--button-border-colour);
   border-radius: 3px;
   margin: 1vh 1vw;
   padding: 1vh;
 }
 
 .processorButton {
-  border: 1px solid #474747;
+  border: 1px solid var(--button-border-colour);
   border-radius: 3px;
-  background-color: #292929;
+  background-color: var(--background-secondary);
   padding: 1vh;
   margin: 0 1vh;
-  color: white;
+  color: var(--text-colour);
 }
 
 .processorButton:hover {
@@ -176,15 +176,15 @@
 }
 
 .processorButton:hover:enabled {
-  border-color: lightblue;
+  border-color: var(--highlight-colour);
 }
 
 .processorButton:disabled {
-  color: black;
-  background-color: #191919;
+  color: var(--disabled-text-colour);
+  background-color: var(--disabled-button-colour);
   cursor: auto;
 }
 
 .processorButtonSelected {
-  border-color: white !important;
+  border-color: var(--text-colour) !important;
 }
