@@ -54,6 +54,7 @@ body {
     "sidebar pageArea";
   grid-template-columns: 20% auto;
   height: 100vh;
+  overflow: hidden;
 }
 
 .sidebarContainer {
@@ -61,11 +62,15 @@ body {
   background-color: var(--background-secondary);
   border-right: 1px solid black;
   text-align: center;
+  position: sticky;
+  top: 0;
 }
 
 .pageContainer {
   grid-area: pageArea;  
   background-color: var(--background-primary);
+  overflow-y: auto;
+  scrollbar-color: black var(--background-secondary);
 }
 
 h1 {

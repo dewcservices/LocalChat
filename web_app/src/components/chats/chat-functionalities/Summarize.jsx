@@ -10,6 +10,8 @@ import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
 import { getDefaultModel } from '../../../utils/DefaultModels';
 
+import loadingGif from '../../../assets/loading.gif';
+
 
 function Summarize() {
 
@@ -51,6 +53,15 @@ function Summarize() {
         }
       },
       {
+        element: '#processorSelector',
+        popover: {
+          title: "Choosing a processor",
+          description: `
+            If you want to use a GPU, choose the button here if it isn't grayed out. This will require reprocessing any selected models, which may take several minutes.
+          `
+        }
+      },
+      {
         element: "#tabSwitcher",
         popover: {
           title: "Text or File Input",
@@ -58,7 +69,7 @@ function Summarize() {
         }
       },
       {
-        element: "#inputTextArea",
+        element: "#contentInput",
         popover: {
           title: "Text/File Input",
           description: `Upload some text or file(s).`
@@ -70,6 +81,14 @@ function Summarize() {
           title: "Submit",
           description: `Use the submit button to summarise the text.`
         }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
       }
     ]
   });
@@ -79,14 +98,16 @@ function Summarize() {
     const models = await getCachedModelsNames('summarization');
     setAvailableModels(models);
 
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["summarization"]) {
+      driverObj.drive();
+      tutorialSaves["summarization"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
+    
     // auto-select the default model if one is set in the settings page
     const defaultModel = getDefaultModel('summarization');
     if (defaultModel && models.includes(defaultModel)) setModelName(defaultModel);
-
-    // tour activation
-    let chats = getChatHistories();
-    chats = chats.filter(c => c.chatType == 'summarize');
-    if (chats.length <= 1) driverObj.drive();
   });
 
   onCleanup(async () => {
@@ -158,6 +179,10 @@ function Summarize() {
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     setAddModelBtnText("Creating pipeline");
+
+    let modelSelectionInput = document.getElementById("addModelBtn");
+    modelSelectionInput.innerHTML += `<img src="${loadingGif}" width=10px />`;
+
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
@@ -187,6 +212,7 @@ function Summarize() {
     }
 
     setAddModelBtnText("Add Model(s)");
+    modelSelectionInput.innerHTML = "Add Model(s)";
     document.getElementById("folderInput").disabled = false;
     document.getElementById("sendButton").disabled = false;
   });
@@ -211,7 +237,7 @@ function Summarize() {
     inputTextArea.value = "";
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
-    await new Promise(resolve => setTimeout(resolve, 0));  // force a re-render by yielding control back to browser
+    await new Promise(requestAnimationFrame);  // force a re-render by yielding control back to browser
 
     try {
       let output = await summarizer(userMessage, { max_new_tokens: 100});  // generate response
@@ -264,7 +290,7 @@ function Summarize() {
     chatContext.addFile(fileContent, file.name);
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
-    await new Promise(resolve => setTimeout(resolve, 0));  // forces a re-render again by yielding control back to the browser
+    await new Promise(requestAnimationFrame);  // forces a re-render again by yielding control back to the browser
     
     try {
       let output = await summarizer(fileContent, { max_new_tokens: 100}); 
@@ -281,36 +307,28 @@ function Summarize() {
     <>
       <div class={styles.inputContainer}>
 
-        {/* dynamic input UI */}
-        <Switch>
-          <Match when={tab() === "text"}>
-            <div class={styles.searchBarContainer}>
-              <textarea id="inputTextArea" 
-                placeholder='Enter text to summarise here...'
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    summarizeTextInput();
-                  }
-                }}
-              ></textarea>
-            </div>
-          </Match>
-          <Match when={tab() === "file"}>
-            <div class={styles.fileUploadContainer}>
-              <label for="fileInput" class={styles.fileUploadLabel}>
-                Choose File
-              </label>
-              <input 
+        {/* Dynamic input UI - moved to top */}
+        <div id="contentInput" class={styles.searchBarContainer}>
+          <textarea id="inputTextArea" 
+            classList={{ hidden: tab() != "text"}}
+            placeholder='Enter text to summarise here...'
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                summarizeTextInput();
+              }
+            }}
+          ></textarea>
+          <label classList={{ hidden: tab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
+          <input 
+                class="hidden"
                 type="file" 
                 id="fileInput" 
                 accept=".txt, .html, .docx, .pdf"
                 onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
-              />
-              <span class={styles.selectedFileName}>{selectedFileName()}</span>
-            </div>
-          </Match>
-        </Switch>
+          />
+          <span class={styles.selectedFileName}>{selectedFileName()}</span>
+        </div>
 
         {/* control buttons row */}
         <div class={styles.controlsContainer}>
@@ -337,6 +355,14 @@ function Summarize() {
 
           {/* model selection and submit button */}
           <div class={styles.controlsRight}>
+
+            <button
+              id="redoTutorial"
+              class={styles.addModelButton}
+              onClick={() => driverObj.drive()}
+            >
+              Redo tutorial
+            </button>
 
             <select 
               id="modelSelection"

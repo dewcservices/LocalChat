@@ -3,6 +3,10 @@ import { pipeline, env } from '@huggingface/transformers';
 
 import styles from './ModelBenchmarking.module.css';
 import { cacheModels } from '../utils/ModelCache';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
+
+import loadingGif from '../assets/loading.gif';
 
 
 function ModelBenchmarking() {
@@ -11,7 +15,7 @@ function ModelBenchmarking() {
   
   const defaultLanguages = ["English","French"];
   const [shownLanguages, setShownLanguages] = createSignal([...defaultLanguages]);
-  let currentLanguageOption = "unionLanguages";
+  const [currentLanguageOption, setCurrentLanguageOption] = createSignal("unionLanguages");
 
   const allowedModelTypes = ["summarization","question-answering","translation"];
 
@@ -24,6 +28,148 @@ function ModelBenchmarking() {
 
   const [processor, setProcessor] = createSignal("wasm");
   setProcessor("wasm");
+
+  const [tourProgress, setTourProgress] = createSignal(0);
+  const tempTourModel = {"modelName":"TestModel","task":"summarization"};
+
+  // Recommendation Tour
+  const driverObj = driver({
+    showProgress: true,
+    allowHtml: true,
+    steps: [
+      { 
+        element: '.pageContainer', 
+        popover: { 
+          title: "Benchmarking Models", 
+          description: `This page lets you test your AI models, to run and compare them against eachother. Click anywhere outside the highlighted area to exit this tutorial.`
+        } 
+      },
+      {
+        element: '#modelInputLabel',
+        popover: {
+          title: "Uploading Models",
+          description: `Clicking this button will let you upload models. You can upload one or multiple models at a time, and even upload multiple different types of models at once.`,
+          onNextClick: () => {
+            setTourProgress(1);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#clearButton",
+        popover: {
+          title: "Removing Upload Models",
+          description: `If you accidentally upload a model you dont want to test, or want to remove all uploaded models, you can click this button.`
+        }
+      },
+      {
+        element: "#advancedOptionsMenuButton",
+        popover: {
+          title: "Customising Model Benchmarking",
+          description: `Clicking this button will open a menu that allows you to customise the input provided to each model during benchmarking.`,
+          onNextClick: () => {
+            setSubMenuID(0);
+            setTourProgress(2);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#advancedOptionsMenu",
+        popover: {
+          title: "Advanced Options Menu",
+          description: `This is the menu that appears.`
+        }
+      },
+      {
+        element: "#optionMenuSubTabs",
+        popover: {
+          title: "Changing the Tabs",
+          description: `These Tabs change the options shown. The options within each tab apply to the models of the matching type. The general options shown in this selected tab appy to all models.`
+        }
+      },
+      {
+        element: "#generalOptions",
+        popover: {
+          title: "General Options",
+          description: `These options appy to all models. The input changes how many times each model will run. This is useful for reducing the chances of seeing an outlier time. The CPU/GPU selector changes what models are run on. The GPU option is disabled if none is available.`,
+          onNextClick: () => {
+            setTourProgress(3);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#tourTableContainer",
+        popover: {
+          title: "Model Table",
+          description: `This is an example of what the model table will look like when models are added. The table is seperated by model type.`
+        }
+      },
+      {
+        element: "#tourTableContainer",
+        popover: {
+          title: "Copy Buttons",
+          description: `The Copy buttons will copy the table above them to the clipboard.`
+        }
+      },
+      {
+        element: "#benchmarkButton",
+        popover: {
+          title: "Benchmarking",
+          description: `Once you have uploaded your models and customised the settings you want, you can click this benchmarking button to start testing the models.`,
+          onNextClick: () => {
+            setTourProgress(4);
+            driverObj.moveNext();
+          }
+        }
+      },
+      {
+        element: "#tourTableContainer",
+        popover: {
+          title: "Finished Benchmarking",
+          description: `Once your models have finished benchmarking, the table will look something similar to this. The average upload and runtime columns will show how long it took the models to run, and the final column will show what the models output.`
+        }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
+      }
+    ],
+
+    onDestroyStarted: () => {
+      setTourProgress(0);
+      driverObj.destroy();
+    }
+  });
+
+  const saveBenchmarkSettings = () => {
+
+    // Get all elements to save
+    const runAmount = document.getElementById("globalBenchmarkRunCount").value;
+    let summarizationInput = document.getElementById("summarizationTextArea").innerHTML;
+    let QAContext = document.getElementById("QAContextTextArea").innerHTML;
+    let QAQuestion = document.getElementById("QAQuestionTextArea").innerHTML;
+    let translationInput = document.getElementById("translationTextArea").innerHTML;
+    const languageOption = currentLanguageOption();
+    console.log(currentLanguageOption());
+
+    let saveSettings = {
+      "runAmount":runAmount,
+      "summarizationInput":summarizationInput,
+      "QAContext":QAContext,
+      "QAQuestion":QAQuestion,
+      "translationInput":translationInput,
+      "languageOption":languageOption
+    };
+    localStorage.setItem("benchmarkingSettings", JSON.stringify(saveSettings));
+    
+    console.log(saveSettings);
+  }
 
   const addModel = async (event) => {
 
@@ -68,7 +214,7 @@ function ModelBenchmarking() {
     // Reset the input incase the model is removed and needs to be re-added.
     event.target.value = "";
 
-    adjustLanguageVisibility({ target: { id: currentLanguageOption } });
+    adjustLanguageVisibility({ target: { id: currentLanguageOption() } });
   };
 
   const benchmarkModels = async () => {
@@ -106,7 +252,7 @@ function ModelBenchmarking() {
         let generator;
 
         // upload model multiple times and measure times
-        currentRow.cells[tableUploadTimeCol].innerText = "Uploading 0/" + globalModelRunCount;
+        currentRow.cells[tableUploadTimeCol].innerHTML = "Uploading 0/" + globalModelRunCount + `<img src="${loadingGif}" width=10px />`;
         for (let j = 1; j < (globalModelRunCount + 1); j++) {
 
           // correctly dispose of generator
@@ -143,7 +289,7 @@ function ModelBenchmarking() {
           setBenchmarkData(timings);
 
           // update text
-          currentRow.cells[tableUploadTimeCol].innerText = `Uploading: ${j}/${globalModelRunCount}`;
+          currentRow.cells[tableUploadTimeCol].innerHTML = `Uploading: ${j}/${globalModelRunCount}` + `<img src="${loadingGif}" width=10px />`;
           await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
         }
 
@@ -161,7 +307,7 @@ function ModelBenchmarking() {
         currentRow.cells[tableUploadTimeCol].title = totalUploadTimes;
 
         // inference multiple times and measure times
-        currentRow.cells[tableGenerationTimeCol].innerText = "Genarting 0/" + globalModelRunCount;
+        currentRow.cells[tableGenerationTimeCol].innerHTML = "Generating 0/" + globalModelRunCount + `<img src="${loadingGif}" width=10px />`;
         await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
         let output = "";
         for (let j = 1; j < (globalModelRunCount + 1); j++) {
@@ -240,7 +386,7 @@ function ModelBenchmarking() {
           timings[`${model.name}-Generate`].push(totalTime);
           setBenchmarkData(timings);
 
-          currentRow.cells[tableGenerationTimeCol].innerText = `Generating: ${j}/${globalModelRunCount}`;
+          currentRow.cells[tableGenerationTimeCol].innerHTML = `Generating: ${j}/${globalModelRunCount}` + `<img src="${loadingGif}" width=10px />`;
           await new Promise(resolve => setTimeout(() => requestAnimationFrame(resolve)));
         }
 
@@ -312,12 +458,12 @@ function ModelBenchmarking() {
     navigator.clipboard.writeText(tableString);
   };
 
-  const adjustLanguageVisibility = async (e) => {
-    //console.log(e.target.id);
-    currentLanguageOption = e.target.id;
+  const adjustLanguageVisibility = async (languageID) => {
+    //console.log(languageID);
+    setCurrentLanguageOption(languageID);
 
     let languages = [...defaultLanguages];
-    if (e.target.id == "allLanguages") {
+    if (languageID == "allLanguages") {
       for (let i = 0; i < selectedModels().length; i++) {
 
         if (selectedModels()[i].modelType != "translation") {
@@ -333,7 +479,7 @@ function ModelBenchmarking() {
         }
       }
 
-    } else if (e.target.id == "unionLanguages") {
+    } else if (languageID == "unionLanguages") {
       let firstModel = true;
       for (let i = 0; i < selectedModels().length; i++) {
 
@@ -369,8 +515,31 @@ function ModelBenchmarking() {
 
   onMount(async () => {
 
-    //console.log(navigator.hardwareConcurrency);
-    //console.log(navigator.deviceMemory);
+    // Load saved settings
+    let saveSettings = JSON.parse(localStorage.getItem("benchmarkingSettings")) || {};
+
+    document.getElementById("summarizationTextArea").innerHTML = saveSettings["summarizationInput"] || "";
+    document.getElementById("QAContextTextArea").innerHTML = saveSettings["QAContext"] || "";
+    document.getElementById("QAQuestionTextArea").innerHTML = saveSettings["QAQuestion"] || "";
+    document.getElementById("translationTextArea").innerHTML = saveSettings["translationInput"] || "";
+    document.getElementById("globalBenchmarkRunCount").value = saveSettings["runAmount"] || 1;
+
+    if (saveSettings != {}) {
+      setCurrentLanguageOption(saveSettings["languageOption"]);
+    }
+
+    if (currentLanguageOption() == "unionLanguages") {
+      document.getElementById("unionLanguages").checked = true;
+    } else {
+      document.getElementById("allLanguages").checked = true;
+    }
+    
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["benchmarking"]) {
+      driverObj.drive();
+      tutorialSaves["benchmarking"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
 
     if (!navigator.gpu) return;
     try {
@@ -404,16 +573,16 @@ function ModelBenchmarking() {
               Select Models
             </label>
                         
-            <button id="benchmarkButton" class={styles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Benchmark</button>
+            <button id="benchmarkButton" class={styles.inputButton} onClick={benchmarkModels} disabled={selectedModels().length == 0 && tourProgress() == 0} classList={{ hidden: selectedModels().length == 0 && tourProgress() == 0}}>Benchmark</button>
           </div>
           <div class={styles.rightButtons}>
-            <button id="clearButton" class={styles.inputButton} onClick={clearModels } disabled={selectedModels().length < 1} classList={{ hidden: selectedModels().length == 0}}>Clear Models</button>
-            <button class={styles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()} classList={{ hidden: selectedModels().length == 0}}>⚙︎</button>
+            <button id="clearButton" class={styles.inputButton} onClick={clearModels } disabled={selectedModels().length == 0 && tourProgress() == 0} classList={{ hidden: selectedModels().length == 0 && tourProgress() == 0}}>Clear Models</button>
+            <button class={styles.inputButton} id="advancedOptionsMenuButton" onClick={() => toggleAdvancedOptions()} classList={{ hidden: selectedModels().length == 0 && tourProgress() == 0}}>⚙︎</button>
           </div>
         </div>
 
-        <div class={`${styles.advancedOptionsMenu} ${!menuIsOpen() ? "" : styles.menuClosed}`} id='advancedOptionsMenu'>
-          <ul class={styles.optionMenuSubTabs}>
+        <div class={`${styles.advancedOptionsMenu} ${(!menuIsOpen() || tourProgress() == 2) ? "" : styles.menuClosed}`} id='advancedOptionsMenu'>
+          <ul class={styles.optionMenuSubTabs} id="optionMenuSubTabs">
             <li><button onClick={() => setSubMenuID(0)} class={subMenuID() == 0 ? styles.selectedOptionMenuSubTab : ""}>General</button></li>
             <li><button onClick={() => setSubMenuID(1)} class={subMenuID() == 1 ? styles.selectedOptionMenuSubTab : ""}>Summarisation</button></li>
             <li><button onClick={() => setSubMenuID(2)} class={subMenuID() == 2 ? styles.selectedOptionMenuSubTab : ""}>Question Answering</button></li>
@@ -422,12 +591,11 @@ function ModelBenchmarking() {
 
           {/* General Options Sub Menu */}
           <div id="generalOptions" class={styles.optionsSubMenu}
-          classList={{ hidden: subMenuID() !== 0 }}>
+          classList={{ hidden: subMenuID() !== 0 && tourProgress() != 2 }}>
 
-            <h5>Note: Run amount in individual models will override this value.</h5>
             <div class={styles.inputOption}>
               <label for="enableGlobalBenchmarkAmount">Run Models X number of times: </label>
-              <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" />
+              <input type="number" id="globalBenchmarkRunCount" min="1" max="99" value="1" onChange={() => saveBenchmarkSettings()} />
 
               <div id="processorSelector" class={styles.processSelector}>
                 <button 
@@ -454,7 +622,7 @@ function ModelBenchmarking() {
           classList={{ hidden: subMenuID() !== 1 }}>
 
             <h3>Summarisation test input field. Leave blank to use default input.</h3>
-            <textarea id="summarizationTextArea" class={styles.inputArea}
+            <textarea id="summarizationTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
             placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.' />
           </div>
 
@@ -463,10 +631,10 @@ function ModelBenchmarking() {
           classList={{ hidden: subMenuID() !== 2 }}>
             <h3>Question Answering input fields. Leave blank to use default input.</h3>
             <div>
-              <textarea id="QAContextTextArea" class={styles.inputArea}
+              <textarea id="QAContextTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
               placeholder='There is an emerging trend of standing up local language models for analysing private and sensitive data (for example, Ollama, Open WebUI). Typically, these solutions require provisioning a server that is capable of hosting the model and then providing a REST API for others on the network. This solution is not always ideal in Defence. Defence is a very siloed organisation by design, where need-to-know is a critical security mechanism. Some teams work with extremely sensitive data and may not have the expertise or the infrastructure necessary to set up a local LLM service. All teams however have access to a Windows machine with a web browser. Some of these machines have GPUs, but many do not. By enabling AI inference in the browser we can empower more teams in Defence to have access to state-of-the-art chatbots to help them understand their data.' />
             
-              <textarea id="QAQuestionTextArea" class={styles.inputArea}
+              <textarea id="QAQuestionTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
               placeholder="Why can't LLM's be used in the defense industry and what benefits does this technolgy bring?" />
             </div>
           </div>
@@ -475,18 +643,18 @@ function ModelBenchmarking() {
           <div id="translationOptions" class={styles.optionsSubMenu}
           classList={{ hidden: subMenuID() !== 3 }}>
             <h3>Translation input field and language selection. Ignore to use default input and languages.</h3>
-            <textarea id="translationTextArea" class={styles.inputArea}
+            <textarea id="translationTextArea" class={styles.inputArea} onChange={() => saveBenchmarkSettings()}
             placeholder="Il existe une tendance émergente consistant à mettre en place des modèles linguistiques locaux pour l’analyse des données privées et sensibles."/>
                       
             <label for="src_lang">From: </label>
-            <select name="src_lang" id="src_lang" class={styles.dropDownMenu}>
+            <select name="src_lang" id="src_lang" class={styles.dropDownMenu} onChange={() => saveBenchmarkSettings()}>
               <option value="French">Select Language</option>
               <For each={shownLanguages()}>{(lang) =>
                 <option value={lang}>{lang}</option>
               }</For>
             </select> 
             <label for="tgt_lang">To: </label>
-            <select name="tgt_lang" id="tgt_lang" class={styles.dropDownMenu}>
+            <select name="tgt_lang" id="tgt_lang" class={styles.dropDownMenu} onChange={() => saveBenchmarkSettings()}>
               <option value="English">Select Language</option>
               <For each={shownLanguages()}>{(lang) =>
                 <option value={lang}>{lang}</option>
@@ -495,16 +663,16 @@ function ModelBenchmarking() {
 
             <div>
               <p>The options below determine whether the language selection boxes will show languages that all uploaded models have in common, or all models. If the former is selected, some models will fail to benchmark.</p>
-              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={adjustLanguageVisibility} checked />
+              <input type="radio" name="languagesVisibilityOption" id="unionLanguages" onChange={() => {adjustLanguageVisibility("unionLanguages"); saveBenchmarkSettings()}} />
               <label for="unionLanguages">Only show common languages.</label>
               <br />
-              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={adjustLanguageVisibility} />
+              <input type="radio" name="languagesVisibilityOption" id="allLanguages" onChange={() => {adjustLanguageVisibility("allLanguages"); saveBenchmarkSettings()}} />
               <label for="allLanguages">Show all languages.</label>
             </div>
           </div>
         </div>
 
-        <div id="tableContainer" class={styles.tableContainer} classList={{ hidden: selectedModels().length == 0}}>
+        <div id="tableContainer" class={styles.tableContainer} classList={{ hidden: selectedModels().length == 0 || tourProgress() >= 3}}>
 
           <For each={allowedModelTypes}>{(type) => {
             const filteredModels = createMemo(() =>
@@ -559,7 +727,61 @@ function ModelBenchmarking() {
           }}</For>
 
         </div>
-
+        <div id="tourTableContainer" class={styles.tableContainer} classList={{ hidden: tourProgress() < 3}}>
+          <For each={allowedModelTypes}>{(type) => {
+            return (
+              <div>
+                <br/><br/>
+                <h3><span>{type.charAt(0).toUpperCase() + type.slice(1)}</span> Models</h3>
+                <table id={`${type}-table`} class={styles.tableMMLU}>
+                  <colgroup>
+                    <col/>
+                    <col/>
+                    <col span="2" class={styles.tableColShrink} />
+                    <col/>
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>Model Name</th>
+                      <th>Avg Upload Time</th>
+                      <th>Avg Generation Time</th>
+                      <th>Sample Output</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                      <td>
+                        <span 
+                          class={styles.modelName} 
+                        >
+                          Model Name Here
+                        </span>
+                      </td>
+                      <Show when={tourProgress() == 4} fallback={
+                        <>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </>
+                      }>
+                      <td>1.5s</td>
+                      <td>3.1s</td>
+                      <td>Sample Output Example</td>
+                      </Show>
+                    </tr>
+                  </tbody>
+                </table>
+                <button 
+                  class={styles.inputButton + " " + styles.copyButton} 
+                >
+                  Copy table to clipboard 📋
+                </button>
+              </div>
+            )
+          }}</For>
+        </div>
+        <br />
+        <button class={styles.inputButton} id="redoTutorial" onClick={() => driverObj.drive()}>Redo tutorial</button>
       </div>
     </>
   );

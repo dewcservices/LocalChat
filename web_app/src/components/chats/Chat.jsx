@@ -11,6 +11,8 @@ import Summarize from './chat-functionalities/Summarize';
 import QuestionAnswer from './chat-functionalities/QuestionAnswer';
 import Translation from './chat-functionalities/Translation';
 
+import loadingGif from '../../assets/loading.gif';
+
 
 function Chat() {
 
@@ -149,11 +151,10 @@ function Chat() {
             <>
               {message.modelName != null ? <div class={styles.modelNameText}>{message.modelName}</div> : ""}
               <div 
-                class={`${message.sender == "userMessage" ? styles.userMessage + " " + styles.rightAlignedMessage : styles.chatbotMessage} 
-                        ${(message.content == "Generating Message...") ? styles.messageLoading : ""}`} 
+                class={`${message.sender == "userMessage" ? styles.userMessage + " " + styles.rightAlignedMessage : styles.chatbotMessage}`} 
                 title={new Date(message.date).toUTCString()}
               >
-                {message.content}
+                {message.content == "Generating Message" ? (<>{message.content}<img src={loadingGif} width="10px" /></>) : message.content}
               </div>
               <button class={`${
                 message.sender == "userMessage" ? styles.copyButton + " " + styles.rightAlignedMessage : styles.copyButton

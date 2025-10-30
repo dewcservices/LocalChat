@@ -4,7 +4,7 @@
     "messages"
     "input";
   grid-template-rows: 70% auto;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -18,6 +18,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  height:100%;
 }
 
 .messagesContainer div,
@@ -59,6 +60,7 @@
   padding: 3vh 5vw;
   border-top: 1px solid black;
   position: relative;
+  height:100%;
 }
 
 .fileUploadContainer {

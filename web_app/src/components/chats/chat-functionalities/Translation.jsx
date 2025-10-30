@@ -10,6 +10,8 @@ import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
 import { getDefaultModel } from '../../../utils/DefaultModels';
 
+import loadingGif from '../../../assets/loading.gif';
+
 
 function Translation() {
 
@@ -56,6 +58,15 @@ function Translation() {
         }
       },
       {
+        element: '#processorSelector',
+        popover: {
+          title: "Choosing a processor",
+          description: `
+            If you want to use a GPU, choose the button here if it isn't grayed out. This will require reprocessing any selected models, which may take several minutes.
+          `
+        }
+      },
+      {
         element: "#src_lang",
         popover: {
           title: "Source Language",
@@ -77,7 +88,7 @@ function Translation() {
         }
       },
       {
-        element: "#inputTextArea",
+        element: "#contentInput",
         popover: {
           title: "Text/File Input",
           description: `Upload some text or file(s).`
@@ -88,6 +99,14 @@ function Translation() {
         popover: {
           title: "Submit",
           description: `Use the submit button to translate the text.`
+        }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
         }
       }
     ]
@@ -104,10 +123,12 @@ function Translation() {
       setModelName(defaultModel);
     }
 
-    // tour activation
-    let chats = getChatHistories();
-    chats = chats.filter(c => c.chatType == 'translation');
-    if (chats.length <= 1) driverObj.drive();
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["translation"]) {
+      driverObj.drive();
+      tutorialSaves["translation"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
   });
 
   onCleanup(async () => {
@@ -179,6 +200,10 @@ function Translation() {
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     setAddModelBtnText("Creating pipeline");
+
+    let modelSelectionInput = document.getElementById("addModelBtn");
+    modelSelectionInput.innerHTML += `<img src="${loadingGif}" width=10px />`;
+
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
@@ -221,6 +246,7 @@ function Translation() {
       alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
     } finally {
       setAddModelBtnText("Add Model(s)");
+      modelSelectionInput.innerHTML = "Add Model(s)";
       document.getElementById("folderInput").disabled = false;
       document.getElementById("sendButton").disabled = false;
     }
@@ -258,6 +284,7 @@ function Translation() {
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // force a re-render by yielding control back to browser
+    await new Promise(requestAnimationFrame);
 
     try {
       let output = await translator(userMessage, {src_lang: srcLang(), tgt_lang: tgtLang()});
@@ -310,6 +337,7 @@ function Translation() {
 
     let messageDate = chatContext.addMessage("Generating Message", false, modelName());  // temporary message to indicate progress
     await new Promise(resolve => setTimeout(resolve, 0));  // forces a re-render again by yielding control back to the browser
+    await new Promise(requestAnimationFrame);
 
     try {
       let output = await translator(fileContent, {src_lang: srcLang(), tgt_lang: tgtLang()});
@@ -325,35 +353,27 @@ function Translation() {
       <div class={styles.inputContainer}>
 
         {/* Dynamic input UI */}
-        <Switch>
-          <Match when={tab() === "text"}>
-            <div class={styles.searchBarContainer}>
-              <textarea id="inputTextArea" 
-                placeholder='Enter text to translate here...'
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    translateTextInput();
-                  }
-                }}
-              ></textarea>
-            </div>
-          </Match>
-          <Match when={tab() === "file"}>
-            <div class={styles.fileUploadContainer}>
-              <label for="fileInput" class={styles.fileUploadLabel}>
-                Choose File
-              </label>
-              <input 
-                type="file" 
-                id="fileInput" 
-                accept=".txt, .html, .docx"
-                onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
-              />
-              <span class={styles.selectedFileName}>{selectedFileName()}</span>
-            </div>
-          </Match>
-        </Switch>
+        <div id="contentInput" class={styles.searchBarContainer}>
+          <textarea id="inputTextArea" 
+            classList={{ hidden: tab() != "text"}}
+            placeholder='Enter text to translate here...'
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  translateTextInput();
+                }
+              }}
+            ></textarea>
+          <label classList={{ hidden: tab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
+          <input 
+                  class="hidden"
+                  type="file" 
+                  id="fileInput" 
+                  accept=".txt, .html, .docx, .pdf"
+                  onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
+          />
+          <span class={styles.selectedFileName}>{selectedFileName()}</span>
+        </div>
 
         {/* Control buttons row - moved to bottom */}
         <div class={styles.controlsContainer}>
@@ -378,7 +398,13 @@ function Translation() {
           </div>
 
           <div class={styles.controlsRight}>
-            
+            <button
+              id="redoTutorial"
+              class={styles.addModelButton}
+              onClick={() => driverObj.drive()}
+            >
+              Redo tutorial
+            </button>
             <label for="src_lang">From: </label>
             <select 
               id="src_lang"
@@ -397,7 +423,7 @@ function Translation() {
               id="tgt_lang"
               name="tgt_lang" 
               class={styles.selection} 
-              style="margin-right: 4vh;"
+              style="margin-right: 2vh;"
               value={tgtLang()} 
               onChange={e => setTgtLang(e.currentTarget.value)}
             >

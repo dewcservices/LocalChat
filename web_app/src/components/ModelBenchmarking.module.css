@@ -248,6 +248,10 @@ input[type=number] {
     padding: 1em;
 }
 
+.defaultRecommendationMenu td {
+    padding: 0.5em 0em;
+}
+
 .benchmarkingButtons {
     display: flex;
     justify-content: space-between;

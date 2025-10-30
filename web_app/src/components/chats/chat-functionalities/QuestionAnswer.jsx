@@ -10,6 +10,7 @@ import { getCachedModelsNames, cacheModels } from '../../../utils/ModelCache';
 import { getChatHistories } from '../../../utils/ChatHistory';
 import { getDefaultModel } from '../../../utils/DefaultModels';
 
+import loadingGif from '../../../assets/loading.gif';
 
 function QuestionAnswer() {
   
@@ -50,6 +51,15 @@ function QuestionAnswer() {
         }
       },
       {
+        element: '#processorSelector',
+        popover: {
+          title: "Choosing a processor",
+          description: `
+            If you want to use a GPU, choose the button here if it isn't grayed out. This will require reprocessing any selected models, which may take several minutes.
+          `
+        }
+      },
+      {
         element: "#tabSwitcher",
         popover: {
           title: "Text or File Input",
@@ -57,7 +67,7 @@ function QuestionAnswer() {
         }
       },
       {
-        element: "#contextTextarea",
+        element: "#contentInput",
         popover: {
           title: "Context Input",
           description: `
@@ -79,6 +89,14 @@ function QuestionAnswer() {
           title: "Submit",
           description: `Use the submit button to process the question.`
         }
+      },
+      {
+        element: "#redoTutorial",
+        popover: {
+          title: "Re-open tutorial",
+          description: `That's the end of this tutorial. If you ever need it again, click this button here.`,
+          side: "right"
+        }
       }
     ]
   });
@@ -88,16 +106,18 @@ function QuestionAnswer() {
     const models = await getCachedModelsNames('question-answering');
     setAvailableModels(models);
 
+    let tutorialSaves = JSON.parse(localStorage.getItem("tutorials")) || {};
+    if (!tutorialSaves["question-answering"]) {
+      driverObj.drive();
+      tutorialSaves["question-answering"] = true;
+      localStorage.setItem("tutorials", JSON.stringify(tutorialSaves));
+    }
+    
     // auto-select the default model if one is set in the settings page
     const defaultModel = getDefaultModel('question-answering');
     if (defaultModel && models.includes(defaultModel)) {
       setModelName(defaultModel);
     }
-
-    // tour activation
-    let chats = getChatHistories();
-    chats = chats.filter(c => c.chatType == "question-answer");
-    if (chats.length <= 1) driverObj.drive();
   });
 
   onCleanup(async () => {
@@ -169,6 +189,10 @@ function QuestionAnswer() {
     // Change model button text to indicate a change in the procedure,
     // and request an animation frame to show this change.
     setAddModelBtnText("Creating pipeline");
+
+    let modelSelectionInput = document.getElementById("addModelBtn");
+    modelSelectionInput.innerHTML += `<img src="${loadingGif}" width=10px />`;
+
     await new Promise(requestAnimationFrame);
 
     // configure transformer js environment
@@ -197,6 +221,7 @@ function QuestionAnswer() {
       alert(`Failed to load model. Please try again, if issues persist try reloading page.`);
     } finally {
       setAddModelBtnText("Add Model(s)");
+      modelSelectionInput.innerHTML = "Add Model(s)";
       document.getElementById("folderInput").disabled = false;
       document.getElementById("sendButton").disabled = false;
     }
@@ -276,25 +301,23 @@ function QuestionAnswer() {
               Text Context
             </button>
           </div>
-          <Switch>
-            <Match when={contextTab() === "text"}>
-              <textarea id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
-            </Match>
-            <Match when={contextTab() === "file"}>
-              <div class={styles.fileUploadContainer}>
-                <label for="fileInput" class={styles.fileUploadLabel}>
-                  Choose File
-                </label>
-                <input 
+
+          <div id="contentInput">
+            <textarea classList={{ hidden: contextTab() != "text"}} id="contextTextarea" placeholder='Enter context here. Answer will be based on the context provided.'></textarea>
+            <div style="margin-top:2vh;position:absolute;">
+              <label classList={{ hidden: contextTab() != "file", [styles.fileUploadLabel]: true}} for="fileInput">Browse Files...</label>
+              <input 
+                  class="hidden"
                   type="file" 
                   id="fileInput" 
-                  accept=".txt, .html, .docx"
+                  accept=".txt, .html, .docx, .pdf"
                   onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
-                />
-                <span class={styles.selectedFileName}>{selectedFileName()}</span>
-              </div>
-            </Match>
-          </Switch>
+              />
+              <span class={styles.selectedFileName}>{selectedFileName()}</span>
+            </div>
+            
+          </div>
+        
         </div>
         
         <div class={styles.questionContainer}>
@@ -317,6 +340,13 @@ function QuestionAnswer() {
 
         <div class={styles.controlsLeft}></div>
         <div class={styles.controlsRight}>
+          <button
+            id="redoTutorial"
+            class={styles.addModelButton}
+            onClick={() => driverObj.drive()}
+          >
+            Redo tutorial
+          </button>
           <select 
             id="modelSelection"
             class={styles.modelSelection} 

@@ -1,12 +1,11 @@
 .inputContainer {
   grid-area: input;
   background-color: var(--background-primary);
-  padding: 1vh;
+  padding: 1vh 1vh 0vh 1vh;
   border-top: 1px solid black;
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
 }
 
 .addModelButton {
@@ -172,7 +171,6 @@
   justify-content: space-between; 
   padding: 2vh 0;
   border-top: 1px solid var(--button-border-colour);
-  border-bottom: 1px solid var(--button-border-colour);
   margin-top: auto; 
 }
 
@@ -193,4 +191,18 @@
 }
 .selection:hover {
   cursor: pointer;
+}
+
+.fileUploadLabel {
+  padding: 1vh;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--button-border-colour);
+  color: white;
+  border-radius: 10px;
+  width: 6em;
+}
+
+.fileUploadLabel:hover {
+  cursor: pointer;
+  background-color: var(--background-tertiary);
 }
