@@ -327,7 +327,7 @@ function Summarize() {
                 accept=".txt, .html, .docx, .pdf"
                 onChange={(e) => setSelectedFileName(e.target.files[0]?.name || "No file chosen")}
           />
-          <span class={styles.selectedFileName}>{selectedFileName()}</span>
+          <span classList={{ hidden: tab() != "file", [styles.selectedFileName]: true}}>{selectedFileName()}</span>
         </div>
 
         {/* control buttons row */}

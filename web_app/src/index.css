@@ -107,7 +107,7 @@ button:focus, .inputButton:focus {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 /* container size for collapse button and smoother transition */
